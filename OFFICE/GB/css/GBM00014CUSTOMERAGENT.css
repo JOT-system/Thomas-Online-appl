@@ -1,0 +1,293 @@
+﻿@charset "utf-8";
+
+/*ヘッダー*/
+#headerbox {
+    position:fixed;
+    top:36px; 
+    bottom:326.4px; 
+    left:0px; 
+    right:0px; 
+    overflow:hidden;
+    background-color: rgb(220,230,240); 
+}
+
+/*代理店名*/
+#Operation {
+    width: 250px;
+    min-width: 250px;
+    display: table-cell;
+}
+
+/*明細*/
+#detailbox {
+    height: 553px;
+    position:fixed; 
+    top:88px;
+    bottom: 20px;
+    left: 0px;
+    right: 0px;
+    overflow: hidden;
+    background-color: rgb(148,138,84);
+}
+
+#detailbox input[type=button]{
+    position:relative;
+    left:784px;
+    top:8px;
+    margin: 0px 0px 0px 3.2px;
+    width:80px;
+}
+
+#headerTitle {
+    position:fixed;
+    top:96px; 
+    bottom:35.8em;
+    left:1.0em;
+    margin:0px 0px 0px 0px;
+}
+
+#headerTitle td:nth-child(1) {
+    text-align:center;
+    height:1.3em;
+    width:17.5em;
+}
+/*顧客*/
+#lblCustomer {
+    height:1.1em;
+    width:17.5em;
+}
+
+#headerTitle td:nth-child(2) {
+    text-align: center;
+    height: 1.3em;
+    width: 10em;
+}
+
+/*使用有無*/
+#lblUse {
+    height: 1.1em;
+    width: 9.0em;
+}
+
+#headerTitle td:nth-child(3) {
+    text-align: center;
+    height: 1.3em;
+    width: 14em;
+}
+
+/*請求先*/
+#lblBill {
+    height: 1.1em;
+    width: 14.5em;
+}
+
+#headerTitle td:nth-child(4) {
+    text-align: center;
+    height: 1.3em;
+    width: 11em;
+}
+
+/*タイプ１*/
+#lblType1 {
+    height: 1.1em;
+    width: 8.5em;
+}
+
+#headerTitle td:nth-child(5) {
+    text-align: center;
+    height: 1.3em;
+    width: 11em;
+}
+
+/*タイプ２*/
+#lblType2 {
+    height: 1.1em;
+    width: 8.5em;
+}
+
+#headerTitle td:nth-child(6) {
+    text-align: center;
+    height: 1.3em;
+    width: 11em;
+}
+
+/*タイプ３*/
+#lblType3 {
+    height: 1.1em;
+    width: 8.5em;
+}
+
+#headerTitle td:nth-child(7) {
+    text-align: center;
+    height: 1.3em;
+    width: 11em;
+}
+
+/*タイプ４*/
+#lblType4 {
+    height: 1.1em;
+    width: 8.5em;
+}
+
+#headerTitle td:nth-child(8) {
+    text-align: center;
+    height: 1.3em;
+    width: 11em;
+}
+
+/*タイプ５*/
+#lblType5 {
+    height: 1.1em;
+    width: 8.5em;
+}
+
+.textCss {
+    color: black;
+    font-size: small;
+    vertical-align: middle;
+    text-align: left;
+    overflow: hidden;
+    ime-mode: inactive;
+    border: 1px solid black;
+}
+
+.textLeft{
+    color:black; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:left; 
+    overflow:hidden;
+    ime-mode:inactive;
+}
+
+.textLeftLabel{
+    color:blue; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:left; 
+    overflow:hidden;
+    ime-mode:active;
+}
+
+.textRight{
+    color:black; 
+    vertical-align:middle;
+    text-align:right; 
+    overflow:hidden;
+}
+
+.textCenter{
+    color:black; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:center; 
+    overflow:hidden;
+}
+
+.labelLeft{
+    color:black; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:left; 
+    overflow:hidden;
+    ime-mode:inactive;
+    background-color:rgb(148,138,84); 
+}
+
+#actionButtonsBox {
+    display: table;
+    width: calc(100% - 25px);
+    position: relative;
+    z-index: 16;
+}
+
+#actionButtonsBox a:nth-child(2) {
+    display: table-cell;
+    min-width: 500px;
+}
+
+#detailbox td, #detailbox th, #detailbox span {
+    white-space: nowrap; /* 折り返させない */
+    text-overflow: ellipsis; /* 領域越を点々表示 */
+}
+
+.rpDetail {
+    position:fixed;
+    top:124.8px; 
+    bottom:2em;
+    left:1.0em;
+    width:1340px;
+    overflow:auto;
+    background-color:white;
+    table-layout:fixed;
+}
+
+#detailTable {
+    border:solid;
+    border-width:1px;
+    margin:0px 0px 0px 0px;
+}
+
+#detailTable td:nth-child(1) {
+    height: 1.3em;
+    width: 2em;
+}
+
+#detailTable td:nth-child(2) {
+    height:1.3em;
+    width:14.5em;
+    white-space: nowrap;
+}
+
+#detailTable td:nth-child(3) {
+    height: 1.3em;
+    width: 9em;
+    white-space: nowrap;
+}
+
+#detailTable td:nth-child(4) {
+    height:1.3em;
+    width:14.5em;
+    white-space: nowrap;
+}
+
+#detailTable td:nth-child(5) {
+    height:1.3em;
+    width:8.5em;
+    white-space: nowrap;
+}
+
+#detailTable td:nth-child(6) {
+    height: 1.3em;
+    width: 8.5em;
+    white-space: nowrap;
+}
+
+#detailTable td:nth-child(7) {
+    height: 1.3em;
+    width: 8.5em;
+    white-space: nowrap;
+}
+
+#detailTable td:nth-child(8) {
+    height: 1.3em;
+    width: 8.5em;
+    white-space: nowrap;
+}
+
+#detailTable td:nth-child(9) {
+    height: 1.3em;
+    width: 8.5em;
+    white-space: nowrap;
+}
+#detailbox input[type="text"] {
+    border:1px solid;
+}
+span.rpDetail table,
+#headerTitle {
+    width: 1323px;
+}
+
+#divTitlebox {
+    z-index: 15;
+}

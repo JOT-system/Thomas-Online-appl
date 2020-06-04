@@ -1,0 +1,541 @@
+﻿/* リースブレーカー単票スタイル定義 */
+/* 上下＋中央タブ大枠のスタイル */
+/*#commonInfo {
+    background-color: #f0e6dd;
+    width:100%;
+}
+#headerBox {
+    background-color: #f0e6dd;
+    margin-left: -2px;
+    padding-left: 2px;
+    margin-top: -10px;
+    padding-top: 10px;
+    min-width: 1115px;
+    width: 100%;
+}
+
+#commonInfo,
+#actionButtonsBox,
+#tabsBox {
+    min-width: 1115px;
+}
+#actionButtonsBox {
+    background-color: #f0e6dd;
+    width: calc(100% - 20px);
+    margin-right: -10px;
+    min-width: 1090px;
+}
+.emptybox {
+    height:10px;
+}*/
+/* 見出しスタイル */
+ul {
+    list-style: none;
+    margin-left: 0px;
+}
+li {
+    list-style: none;
+    margin-left: 0px;
+}
+
+li .areaTitle {
+    display:inline-block;
+    font-weight: bold !important;
+    font-size: 15px !important;
+}
+/* 各エリアのテーブルスタイル */
+.itemTable {
+    table-layout: fixed;
+    width: 1270px;
+}
+/* 表レイアウト確認の為罫線出し */
+.itemTable td,
+.itemTable th {
+    /* border: 1px solid black; */
+}
+.itemTable td,
+.itemTable th
+{
+    padding: 2px;
+    word-break: normal;
+    overflow: hidden; /* 親幅を超えた要素を表示しない */
+    white-space: nowrap; /* 折り返しさせない */
+    text-overflow: ellipsis; /* オーバーした時の表示 */
+}
+
+.itemTable th:nth-child(1):not(.rowHeader) {
+    text-align: right;
+}
+.itemTable col:nth-child(1) {
+    width: 160px;
+}
+.itemTable col:nth-child(2) {
+    width: 120px;
+}
+.itemTable col:nth-child(3) {
+    width: 120px;
+}
+.itemTable col:nth-child(4) {
+    width: 150px;
+}
+.itemTable col:nth-child(5) {
+    width: 120px;
+}
+.itemTable col:nth-child(6) {
+    width: 120px;
+}
+.itemTable col:nth-child(7) {
+    width: 120px;
+}
+.itemTable col:nth-child(8) {
+    width: 120px;
+}
+.itemTable col:nth-child(9) {
+    width: 120px;
+}
+.itemTable col:nth-child(10) {
+    width: auto !important;
+}
+
+.itemTable .auto {
+    width: auto !important;
+}
+td.numHeader {
+    text-align:right;
+    font-weight:bold;
+    padding-right:15px;
+}
+.remarksMessage, #lblBrRemarkText, #lblApplyRemarks, #lblAppJotRemarks, #lblRemarks2 {
+    border: 1px solid rgb(100,100,100);
+    color: rgb(0,0,0) !important;
+    min-width: 10px;
+    min-height: 13.33px;
+    display: inline-block;
+    padding-left: 2px;
+    padding-right: 2px;
+    width: 98px;
+}
+
+input[type="text"] {
+    width: 100px;
+}
+
+th {
+    text-align: left;
+}
+
+#divContensbox span[id^="lbl"][id$="Text"] {
+    color: rgb(0,0,255);
+}
+#txtRemarks {
+    width:calc(100% - 100px);
+    min-height:80px;
+    resize:vertical;
+}
+.varticalTop {
+    vertical-align:top;
+}
+#divAttachmentArea {
+    margin-top: 2px;
+    width: calc(100% - 100px);
+    min-height: 80px;
+    border: 1px solid gray;
+    resize: vertical;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+/* *************************** */
+/* タブ風スタイル              */
+/* *************************** */
+#tabsBox {
+    overflow: hidden;
+    top: 32px;
+    width: calc(100% - 2px);
+    height: 25px;
+    background-color: gray;
+    font-size: 0;
+    z-index: 19;
+    white-space: nowrap;
+}
+
+#tabsBox div.tabLeftSide {
+    // width: calc(100% - 500px);
+    display: table-cell;
+    letter-spacing: -10px;
+}
+
+#tabsBox .tabRightSide {
+    min-width: 200px;
+    text-align: right;
+    font-size: small;
+    display: table-cell;
+}
+
+#spnShowCommonInfo {
+    padding-right: 10px;
+    color: white;
+}
+
+#spnShowCommonInfo:hover {
+    padding-right: 10px;
+    color: rgb(220, 230, 240);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#tabsBox div {
+    display: inline-block;
+}
+
+/* タブの基本スタイル */
+
+#tabsBox div.tabLeftSide div {
+    display: inline-block;
+    padding: 5px;
+    text-align: center;
+    border-top: 1px solid rgb(200, 200, 200);
+    border-right: 1px solid rgb(200, 200, 200);
+    border-left: 1px solid rgb(200, 200, 200);
+    border-bottom: 1px solid rgb(220, 230, 240);
+    height: 19px;
+    vertical-align: middle;
+    font-size: small;
+    font-weight: bold;
+    color: white;
+    min-width: 100px;
+    letter-spacing: normal;
+}
+
+#tabsBox div.tabLeftSide div:nth-child(1) {
+    margin-left: 0;
+}
+
+#tabsBox div.tabLeftSide div:hover:not(.selected) {
+    background-color: rgb(132, 139, 146);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+#tabsBox .tabLeftSide .selected {
+    color: black;
+    background-color: rgb(220, 230, 240);
+}
+/* タンク一覧表 */
+#tblTankInfoList {
+    margin-top:2px;
+    table-layout: fixed;
+    width:calc(100% - 10px);
+    border-collapse:collapse;
+}
+#tblTankInfoList th,
+#tblTankInfoList td{
+    border:1px solid gray;
+        
+}
+#tblTankInfoList th {
+    text-align : center;
+    background-color:rgb(22,54,92);
+    color:white;
+}
+#tblTankInfoList th.toOrder {
+    width: 50px;
+}
+#tblTankInfoList th.status {
+    width: 60px;
+}
+#tblTankInfoList th.delButtonCol {
+    /* width: 60px; */
+}
+.delButtonCol {
+    width:0;
+    display:none;
+}
+.lineCnt {
+    width: 0;
+    display: none;
+}
+#tblTankInfoList th.dateCol {
+    width: 80px;
+}
+#tblTankInfoList th.depoNameCol{
+    width:120px;
+}
+#tblTankInfoList th.remarks {
+    width:120px;
+}
+
+#tblTankInfoList tr:nth-child(n+2) {
+    background-color: white;
+}
+#tblTankInfoList tr:nth-child(2n+2) {
+    background-color:#C8C8E8;
+}
+
+#tblTankInfoList tr:nth-child(n + 2):hover {
+    background-color:#FFDADA;
+}
+#tblTankInfoList input[id^=btnDeleteRow] {
+    min-height: 15px;
+    width: 100%;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+#tblTankInfoList td:nth-child(1) {
+    text-align:center;
+}
+/* ************************* 
+    タンク入力
+*************************** */
+/* 削除確認ポップアップ */
+#divTankInputBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 32px;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 19;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+#divTankInputBox {
+    position: fixed;
+    top: 60px;
+    text-align: left;
+    min-width: 500px;
+    min-height: 300px;
+    left: calc(50% - 250px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+    border-radius: 2px;
+}
+#divTankInputBoxButtons {
+    display:inline-block;
+}
+#divTankInputBoxInputitle {
+    width: calc(100% - 20px);
+    font-weight: bold;
+    padding: 10px;
+    height: 20px;
+    background-color: #8BACCD;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+}
+
+#divTankInputBoxInputitle input[type=button] {
+    min-width: 70px;
+    margin-right: 2px;
+    margin-left:2px;
+    margin-top:0;
+}
+
+table.tankInput {
+    table-layout: fixed;
+    width: 500px;
+    margin: 5px;
+}
+table.tankInput td,
+table.tankInput th {
+    padding:2px;
+}
+table.tankInput th {
+    text-align:right;
+}
+table.tankInput col:nth-child(1) {
+    width: 145px;
+}
+table.tankInput col:nth-child(3) {
+    width: 115px;
+}
+table.tankInput col:nth-child(2),
+table.tankInput col:nth-child(4){
+    width:100px;
+}
+table.tankInput input {
+    height:16px;
+}
+table.tankInput textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+table.tankInput input,
+table.tankInput textarea
+{
+    width:100%;
+}
+th.textRight {
+    text-align:right;
+}
+td.chkArea {
+    text-align: left;
+}
+#chkCancel, #chkPayStDaily, #chkPayEndDaily {
+    width: auto;
+}
+table.tankInput th, table.tankInput td {
+    word-break: normal;
+    overflow: hidden; /* 親幅を超えた要素を表示しない */
+    white-space: nowrap; /* 折り返しさせない */
+    text-overflow: ellipsis; /* オーバーした時の表示 */
+}
+table.tankInput span[id^="lbl"][id$="Text"] {
+    color: rgb(0,0,255);
+}
+/* **************************
+    ダブルクリックのアンダーライン
+************************** */
+#lblCurrency, #lblStartDate, #lblEndDateSche,
+#lblEndDate, #lblDepoIn, #lblLeaseType, #lblPaymentMonth,
+#lblAutoExtend, #lblAutoExtendKind, #lblLeasePaymentKind, #lblTax {
+    text-decoration: underline;
+}
+
+#txtLeasePayments, #txtReLease, #txtTaxRate {
+    text-align: right;
+}
+/* **************************
+    添付ファイル関連
+************************** */
+.tblAttachmentHeader {
+    background-color: rgb(22,54,92);
+    color: white;
+}
+
+.tblAttachmentHeader, .tblAttachment {
+    width: 100%;
+    table-layout: fixed;
+}
+
+    .tblAttachment input[type="text"] {
+        width: calc(100% - 5px);
+    }
+
+    .tblAttachmentHeader tr:nth-child(1) th:last-child,
+    .tblAttachment td:last-child {
+        width: 45px;
+    }
+
+#divAttachmentArea .tblAttachmentHeader th {
+    vertical-align: bottom;
+    padding-bottom: 0;
+    padding-top: 0;
+    height: 12px;
+}
+
+#divAttachmentArea .tblAttachmentHeader tr:nth-child(1) th:first-child {
+    width: 80px;
+}
+
+#divAttachmentArea .tblAttachmentHeader tr:nth-child(1) th:first-child,
+#divAttachmentArea .tblAttachment td:first-child {
+    text-align: left;
+}
+
+#divAttachmentArea .tblAttachmentHeader tr:nth-child(1) th:nth-child(2),
+#divAttachmentArea .tblAttachmentHeader tr:nth-child(2) th:nth-child(1) {
+    text-align: center;
+}
+
+#divAttachmentArea .tblAttachment td:nth-child(1):hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+.remarksMessage, #lblApplyRemarks, #lblAppJotRemarks {
+    border: 1px solid rgb(100,100,100);
+    color: rgb(0,0,0) !important;
+    min-width: 10px;
+    min-height: 13.33px;
+    display: inline-block;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+#lblAppJotRemarks, #lblApplyRemarks {
+    width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#spnApplyRemarks span:nth-child(2),
+#spnAppJotRemarks span:nth-child(2){
+    display: none;
+}
+#spnApplyRemarks.aspNetDisabled *,
+#spnAppJotRemarks.aspNetDisabled *
+{
+    pointer-events: auto !important;
+}
+/* マルチラインテキスト入力ポップアップ */
+#divRemarkInputBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 9998;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+
+#divRemarkInputBox {
+    position: fixed;
+    top: 100px;
+    text-align: left;
+    min-width: 500px;
+    left: calc(50% - 250px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+}
+
+#divRemarkInputitle {
+    width: calc(100% - 20px);
+    font-weight: bold;
+    padding: 10px;
+    height: 15px;
+    background-color: #8BACCD;
+}
+
+#divRemarkInputButtons {
+    padding: 10px 10px 5px 5px;
+}
+
+#divRemarkInputButtons input[type=button] {
+    min-width: 70px;
+}
+
+#divRemarkTextArea {
+    padding: 10px 10px 5px 5px;
+}
+
+#divRemarkTextArea textarea {
+    width: 500px;
+    height: 300px;
+}
+
+.remarksMessage {
+    color: rgb(211,211,211) !important;
+    font-style: italic;
+    display: block;
+    width: 100px;
+}
+#lblApplyRemarks:before,
+#lblAppJotRemarks:before{
+    height: 12px;
+    width: 12px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url('../../Images/exclamation.png');
+    content: '';
+    display: inline-block;
+}
+#hdnUpload {
+    display: none;
+}
+#ddlOrderStart {
+    min-width: 110px;
+    min-height: 25px;
+}

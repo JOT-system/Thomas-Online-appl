@@ -1,0 +1,107 @@
+﻿#searchCondition {
+    padding: 10px;
+    min-width: 100px;
+    height:25px;
+}
+/* 文言表示部分 lblで始まりTextで終わるSpan */
+#divContensbox span[id^="lbl"][id$="Text"] {
+    color: rgb(0,0,255);
+}
+/* 共通関数で自動生成した表のスタイル */
+#WF_LISTAREA {
+    margin-left: 10px;
+    margin-right: 5px;
+    /*height: calc(100% - 83px);*/
+    min-height: 180px;
+    position: relative;
+}
+
+#actionButtonsBox {
+    min-width:720px;
+}
+/* マルチラインテキスト入力ポップアップ */
+#divRemarkInputBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 9998;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+
+#divRemarkInputBox {
+    position: fixed;
+    top: 100px;
+    text-align: left;
+    min-width: 500px;
+    left: calc(50% - 250px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+}
+
+#divRemarkInputitle {
+    width: calc(100% - 20px);
+    font-weight: bold;
+    padding: 10px;
+    height: 15px;
+    background-color: #8BACCD;
+}
+
+#divRemarkInputButtons {
+    padding: 10px 10px 5px 5px;
+}
+
+    #divRemarkInputButtons input[type=button] {
+        min-width: 70px;
+    }
+
+#divRemarkTextArea {
+    padding: 10px 10px 5px 5px;
+    border: 1px solid transparent;
+}
+
+    #divRemarkTextArea textarea {
+        width: 500px;
+        height: 300px;
+        min-width: 500px;
+        min-height: 300px;
+        padding: 5px;
+    }
+
+.remarksMessage {
+    color: rgb(211,211,211) !important;
+    font-style: italic;
+    display: block;
+    width: 100px;
+}
+
+#spnApprovalRemarks .remarksMessage,
+#spnAppJotRemarks .remarksMessage {
+    width: 100px;
+}
+
+#gvDetailInfo .remarksMessage {
+    width: calc(100% - 10px);
+}
+/* 申請内容テキストボックスのスタイル */
+#WF_LISTAREA_DR input[type="text"][id^="txtWF_LISTAREAAPPROVEDTEXT"] {
+    pointer-events: none;
+    text-overflow: ellipsis;
+    background-color: transparent;
+    border-width: 1px;
+    border-style: solid;
+}
+
+input[type='text'][id^='txtWF_LISTAREAAPPROVEDTEXT']:not([value='']) {
+    background-size: auto 14px;
+    background-repeat: no-repeat;
+    background-image: url('../../Images/exclamation.png');
+    background-position: 2px center;
+    padding-left: 21px !important;
+    width: 172px !important;
+}
+

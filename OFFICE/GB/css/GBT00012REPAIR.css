@@ -1,0 +1,784 @@
+﻿/* ブレーカー単票画面スタイル */
+.infoTable {
+    width: 1180px;
+    margin-left: 5px;
+    table-layout: fixed;
+}
+
+    /* 数字セル用の設定 */
+    .textRight {
+        text-align: right;
+    }
+
+/* *************************** */
+/* タブ風スタイル              */
+/* *************************** */
+#tabsBox {
+    overflow: hidden;
+    /* position:fixed; */
+    top: 32px;
+    min-width: 1200px;
+    width: 100%;
+    height: 25px;
+    background-color: gray;
+    font-size: 0;
+    z-index: 19;
+    white-space:nowrap;
+}
+
+    #tabsBox div.tabLeftSide {
+        width: calc(100% - 500px);
+        display: table-cell;
+        letter-spacing: -10px;
+    }
+
+    #tabsBox .tabRightSide {
+        min-width: 200px;
+        width: calc(-380px + 100vw);
+        text-align: right;
+        font-size: small;
+        display: table-cell;
+    }
+
+#spnShowCommonInfo {
+    padding-right: 10px;
+    color: white;
+}
+
+    #spnShowCommonInfo:hover {
+        padding-right: 10px;
+        color: rgb(220, 230, 240);
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+#tabsBox div {
+    display: inline-block; /* div要素を横並びに*/
+}
+    /* タブの基本スタイル */
+    #tabsBox div.tabLeftSide div {
+        display: inline-block; /* div要素を横並びに*/
+        /* border-top-left-radius: 15px; /* 左上をタブ風に角丸 */
+        /* border-top-right-radius: 15px; /* 左上をタブ風に角丸 */
+        padding: 5px;
+        text-align: center;
+        border-top: 1px solid rgb(200, 200, 200);
+        border-right: 1px solid rgb(200, 200, 200);
+        border-left: 1px solid rgb(200, 200, 200);
+        border-bottom: 1px solid rgb(220, 230, 240);
+        height: 19px;
+        vertical-align: middle;
+        font-size: small;
+        font-weight: bold;
+        color: white;
+        /* margin-left:2px; */
+        min-width: 100px;
+        letter-spacing: normal;
+    }
+
+        #tabsBox div.tabLeftSide div:nth-child(1) {
+            margin-left: 0;
+        }
+
+        #tabsBox div.tabLeftSide div:hover:not(.selected) {
+            background-color: rgb(132, 139, 146);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        #tabsBox .tabLeftSide .selected {
+            color: black;
+            background-color: rgb(220, 230, 240);
+        }
+/* 入力欄の表設定 */
+.infoTable.main colgroup col:nth-child(1), .infoTable.common colgroup col:nth-child(1) {
+    width: 30px;
+}
+
+.infoTable.main colgroup col:nth-child(2), .infoTable.common colgroup col:nth-child(2) {
+    width: 70px;
+}
+
+.infoTable.main colgroup col:nth-child(3), .infoTable.common colgroup col:nth-child(3) {
+    width: 35px;
+}
+
+.infoTable.main colgroup col:nth-child(4), .infoTable.common colgroup col:nth-child(4) {
+    width: 125px;
+}
+
+.infoTable.main colgroup col:nth-child(5), .infoTable.common colgroup col:nth-child(5) {
+    width: 125px;
+}
+
+.infoTable.main colgroup col:nth-child(6), .infoTable.common colgroup col:nth-child(6) {
+    width: 125px;
+}
+
+.infoTable.main colgroup col:nth-child(7), .infoTable.common colgroup col:nth-child(7) {
+    width: 125px;
+}
+
+.infoTable.main colgroup col:nth-child(8), .infoTable.common colgroup col:nth-child(8) {
+    width: 115px;
+}
+
+.infoTable.main colgroup col:nth-child(9), .infoTable.common colgroup col:nth-child(9) {
+    width: 103px;
+}
+
+.infoTable.main colgroup col:nth-child(10), .infoTable.common colgroup col:nth-child(10) {
+    width: 110px;
+}
+
+.infoTable.main colgroup col:nth-child(11), .infoTable.common colgroup col:nth-child(11) {
+    width: 90px;
+}
+
+.infoTable.main colgroup col:nth-child(12), .infoTable.common colgroup col:nth-child(12) {
+    width: 95px;
+}
+
+.infoTable.main colgroup col:nth-child(13), .infoTable.common colgroup col:nth-child(13) {
+    width: 1px;
+}
+
+.infoTable colgroup col:nth-child(14), .infoTable.common colgroup col:nth-child(14) {
+    width: 1px;
+}
+
+.infoTable.main colgroup col:nth-child(15), .infoTable.common colgroup col:nth-child(15) {
+    width: auto;
+}
+/* BRdetail-info表の幅 */
+.infoTable.brDetail colgroup col:nth-child(1) {
+    width: 30px;
+}
+.infoTable.brDetail colgroup col:nth-child(2) {
+    width: 131px;
+}
+
+.infoTable.brDetail colgroup col:nth-child(3) {
+    width: 207px;
+}
+
+.infoTable.brDetail colgroup col:nth-child(4) {
+    width: 124px;
+}
+
+.infoTable.brDetail colgroup col:nth-child(5) {
+    width: 100px;
+}
+
+.infoTable.brDetail colgroup col:nth-child(6) {
+    width: 605px;
+}
+
+.infoTable.brDetail colgroup col:nth-child(7) {
+    width: auto;
+}
+#divBrDetailInfo table:nth-child(1).infoTable.brDetail colgroup col:nth-child(6) {
+    width:71.5px;
+}
+#divBrDetailInfo table:nth-child(1).infoTable.brDetail colgroup col:nth-child(7) {
+    width: 119.3px;
+}
+#divBrDetailInfo table:nth-child(1).infoTable.brDetail colgroup col:nth-child(8) {
+    width: 138.7px;
+}
+#divBrDetailInfo table:nth-child(1).infoTable.brDetail colgroup col:nth-child(9) {
+    width: 94px;
+}
+#divBrDetailInfo table:nth-child(1).infoTable.brDetail colgroup col:nth-child(10) {
+    width: 133px;
+}
+.infoTable.brDetail #iptAgencySummaryUsd, .infoTable.brDetail #iptAgencySummaryLocal {
+    width: 82.57px;
+}
+/* 入力テーブル内のテキストボックスのサイズをいったん固定（個別に設定する場合は後に記載) */
+.infoTable input {
+    width: 91px;
+}
+
+#txtBreakerNo, #txtLastOrderNo {
+    width: 110px !important;
+    height: 16px !important;
+}
+
+#commonInfo input[type=text] {
+    width: 109px !important;
+}
+#commonInfo #txtTankUsage, #commonInfo #txtTwoAgoProduct {
+    width: 105px !important;
+}
+#txtTankUsage {
+    pointer-events: all !important;
+}
+/* 複数行テキストの設定 */
+.infoTable textarea {
+    width: 650px;
+    resize: vertical;
+    min-height: 60px;
+}
+/* 一覧全体設定 */
+.infoTable td {
+    font-size: small;
+}
+
+.infoTable .headerCell {
+    font-weight: bold;
+    font-size: medium;
+}
+
+.infoTable th,
+.infoTable td {
+    word-break: normal;
+    overflow: hidden; /* 親幅を超えた要素を表示しない */
+    white-space: nowrap; /* 折り返しさせない */
+    text-overflow: ellipsis; /* オーバーした時の表示 */
+    padding: 2px;
+}
+
+.infoTable .headerCell {
+    margin-top: 10px;
+}
+
+.infoTable .textRightCell {
+    text-align: right;
+}
+#btnAddCost {
+    min-height: 19px;
+    height: 19px;
+    padding: 1px;
+}
+/* ボタンエリア */
+#actionButtonsBox {
+    min-width:500px;
+}
+/* グリッド設定 */
+#gvDetailInfo {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: Separate;
+    /* border:1px solid black; */
+    border: 1px solid #f0f0dd;
+    border-spacing: 2px;
+}
+
+    #gvDetailInfo input[type=text] {
+        width: calc(100% - 10px);
+    }
+
+    #gvDetailInfo input[type=button] {
+        width: 100%;
+        min-height:19px;
+        height:19px;
+        padding:1px;
+    }
+    #gvDetailInfo input[type=button].aspNetDisabled {
+        cursor:default;
+    }
+    #gvDetailInfo td, #gvDetailInfo th {
+        padding:1px 1px 3px 3px; /* 上下左右 */
+        font-size: small;
+        border: 0;
+        border-spacing: 2px;
+    }
+
+    #gvDetailInfo th {
+        background-color: #0078F0;
+        border-radius: 2px;
+        color: white;
+    }
+
+    #gvDetailInfo td {
+        background-color: #F0F0DD;
+    }
+
+    /* BRdetail-infoのセル幅調整 */
+    /* 削除ボタン */
+    #gvDetailInfo th:nth-child(1) {
+        width: 50px;
+    }
+    /* コード */
+    #gvDetailInfo th:nth-child(2) {
+        width: 60px;
+    }
+    /* 名称1 */
+    #gvDetailInfo th:nth-child(3) {
+        width: 110px;
+    }
+    /* 名称2 */
+    /*#gvDetailInfo th:nth-child(4) {
+        width: 110px;
+    }*/
+    /* Remark */
+    #gvDetailInfo th:nth-child(4) {
+        width: 90px;
+    }
+    /* LOCAL */
+    #gvDetailInfo th:nth-child(5) {
+        width: 70px;
+    }
+    /* USD */
+    #gvDetailInfo th:nth-child(6) {
+        width: 70px;
+    }
+    /* リペアチェック */
+    #gvDetailInfo th:nth-child(7) {
+        width: 46px;
+    }
+    /* 承認USD金額 */
+    #gvDetailInfo th:nth-child(8) {
+        width: 70px;
+    }
+
+    /* グリッドが使用不可の場合はaction列を非表示 */
+    #gvDetailInfo.aspNetDisabled th:nth-child(1),
+    #gvDetailInfo.aspNetDisabled td:nth-child(1) {
+        display:none;
+    }
+    /* グリッドが使用不可の場合は費用列をaction列分拡張 */
+    /*#gvDetailInfo.aspNetDisabled th:nth-child(3) {
+        width: 255px;
+    }*/
+    /* 入力不可テキストボックスの補正 */
+    #gvDetailInfo.aspNetDisabled input[type="text"],
+    #gvDetailInfo.aspNetDisabled span[id^="spnCostRemarks"] span:nth-child(1),
+    #spnBrRemark.aspNetDisabled span:nth-child(1),
+    #spnApplyRemarks.aspNetDisabled span:nth-child(1),
+    #spnAppJotRemarks.aspNetDisabled span:nth-child(1),
+    #spnRemarks.aspNetDisabled span:nth-child(1) {
+        pointer-events: none;
+        background-color: rgb(239,239,239);
+        color: rgb(59,59,59);
+        border-color: rgb(188,188,188);
+        border-width: 1px;
+        border-style: solid;
+    }
+    /* CHROME EDGEの補正 */
+    @media screen and (-webkit-min-device-pixel-ratio:0) {
+        #gvDetailInfo.aspNetDisabled input[type="text"],
+        #gvDetailInfo.aspNetDisabled span[id^="spnCostRemarks"] span:nth-child(1),
+        #spnBrRemark.aspNetDisabled span:nth-child(1),
+        #spnApplyRemarks.aspNetDisabled span:nth-child(1),
+        #spnAppJotRemarks.aspNetDisabled span:nth-child(1) {
+            -webkit-appearance: textfield !important;
+            padding: 1px;
+        }
+    }
+/* 画面下部のコントロールとメッセージ欄の間隔調整 */
+.emptybox {
+    height: 20px;
+    width:5px;
+}
+
+#commonInfo {
+    background-color: #F0E6DD;
+    margin: 0;
+    padding: 0;
+    min-width: 1200px;
+    width: 100%;
+}
+#txtTankFillingCheck.clear {
+    color:rgb(0,0,255);
+}
+#txtTankFillingCheck.error {
+    color: rgb(255,0,0);
+}
+/* 送付先選択透明ボックス */
+#divSendConfirmBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 9998;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+#divSendConfirmBox {
+    position:fixed; 
+    top:100px;
+    text-align: left;
+    width: 300px;
+    left:calc(50% - 150px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+}
+#divSendConfirmTitle {
+    width: calc(100% - 20px);
+    font-weight:bold;
+    padding: 10px;
+    height: 15px;
+    background-color: #8BACCD;
+}
+#divSendConfirmButtons {
+    padding: 10px 10px 5px 5px;
+}
+#divSendConfirmButtons input[type=button]{
+    min-width:70px;
+}
+#divSendConfirmCheckBoxes {
+    padding: 10px 10px 5px 5px;
+}
+#divSendConfirmCheckBoxes li {
+    list-style-type:none;
+    vertical-align:middle;
+    margin-bottom:5px;
+}
+#divSendConfirmCheckBoxes li input {
+    padding-top:5px;
+    vertical-align:middle;
+    margin-bottom:2px;
+}
+#divSendConfirmCheckBoxes li label {
+    margin-left:5px;
+}
+/* 送信有無選択透明ボックス */
+#divEntryCostSendConfirmBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 9998;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+
+#divEntryCostSendConfirmBox {
+    position: fixed;
+    top: 100px;
+    text-align: left;
+    width: 300px;
+    left: calc(50% - 150px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+}
+
+#divEntryCostSendConfirmTitle {
+    width: calc(100% - 20px);
+    font-weight: bold;
+    padding: 10px;
+    height: 15px;
+    background-color: #8BACCD;
+}
+
+#divEntryCostSendConfirmButtons {
+    padding: 10px 10px 5px 5px;
+}
+
+#divEntryCostSendConfirmButtons input[type=button] {
+    min-width: 70px;
+}
+
+#divEntryCostSendConfirmCheckBoxes {
+    padding: 10px 10px 5px 5px;
+}
+
+#divEntryCostSendConfirmCheckBoxes li {
+    list-style-type: none;
+    vertical-align: middle;
+    margin-bottom: 5px;
+}
+
+#divEntryCostSendConfirmCheckBoxes li input {
+    padding-top: 5px;
+    vertical-align: middle;
+    margin-bottom: 2px;
+}
+
+#divEntryCostSendConfirmCheckBoxes li label {
+    margin-left: 5px;
+}
+/* マルチラインテキスト入力ポップアップ */
+#divRemarkInputBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 9998;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+
+#divRemarkInputBox {
+    position: fixed;
+    top: 100px;
+    text-align: left;
+    min-width: 500px;
+    left: calc(50% - 250px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+}
+
+#divRemarkInputitle {
+    width: calc(100% - 20px);
+    font-weight: bold;
+    padding: 10px;
+    height: 15px;
+    background-color: #8BACCD;
+}
+
+#divRemarkInputButtons {
+    padding: 10px 10px 5px 5px;
+}
+
+#divRemarkInputButtons input[type=button] {
+        min-width: 70px;
+}
+#divRemarkTextArea {
+    padding: 10px 10px 5px 5px;
+}
+#divRemarkTextArea textarea {
+    width:500px;
+    height:300px;
+}
+.remarksMessage {
+    color: rgb(211,211,211) !important;
+    font-style: italic;
+    display: block;
+    width: 100px;
+}
+#spnApplyRemarks .remarksMessage,
+#spnAppJotRemarks .remarksMessage,
+#spnRemarks .remarksMessage,
+#spnBrRemark .remarksMessage {
+    width: 513px;
+}
+#gvDetailInfo .remarksMessage,
+#gvDetailInfo span[id^=gvDetailInfo_lblCostRemarks] {
+    width: calc(100% - 10px);
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+#gvDetailInfo .remarksMessage + span[id^=gvDetailInfo_lblCostRemarks] {
+        display:none;
+}
+/* 文言表示部分 lblで始まりTextで終わるSpan */
+#divContensbox span[id^="lbl"][id$="Text"] {
+    color: rgb(0,0,255);
+}
+.remarksMessage, #lblBrRemarkText, #lblApplyRemarks, #lblAppJotRemarks, #lblRemarks, #lblRemarks2 {
+    border: 1px solid rgb(100,100,100);
+    color: rgb(0,0,0) !important;
+    min-width: 10px;
+    min-height: 13.33px;
+    display: inline-block;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+#lblApplyRemarks, #lblAppJotRemarks, #lblBrRemarkText, #lblRemarks, #lblRemarks2 {
+    width: 513px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#spnBrRemark span:nth-child(2),
+#spnApplyRemarks span:nth-child(2),
+#spnAppJotRemarks span:nth-child(2),
+#spnRemarks span:nth-child(2),
+#spnRemarks2 span:nth-child(2) {
+    display: none;
+}
+#lblBrTerm, #lblBrStYmd, #lblConsignee, #lblCarrier1, #lblCarrier2, #lblProduct, #lblAgentHeader,
+#lblEtd1, #lblEta1, #lblEtd2, #lblEta2, #gvDetailInfo th:nth-child(4), #lblLastProduct, #lblTwoAgoProduct {
+    text-decoration: underline;
+}
+input[id^='txtAgentPo']
+{
+    width:calc(100% - 5px);
+}
+
+#spnBrRemark.aspNetDisabled *,
+#spnApplyRemarks.aspNetDisabled *,
+#spnAppJotRemarks.aspNetDisabled *,
+#spnRemarks.aspNetDisabled *,
+#spnRemarks2.aspNetDisabled *,
+#gvDetailInfo span[id^="spnCostRemarks"].aspNetDisabled *,
+#gvDetailInfo.aspNetDisabled span[id^="spnCostRemarks"] * {
+    pointer-events: auto !important;
+}
+#gvDetailInfo span.aspNetDisabled.remarksMessage,
+span[id^=gvDetailInfo_lblCostRemarks].aspNetDisabled {
+    border: 1px solid rgb(100,100,100);
+    color: rgb(0,0,0) !important;
+    min-width: 10px;
+    min-height: 13.33px;
+    display: inline-block;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+#gvDetailInfo span[id^="spnCostRemarks"][data-disableflg="1"] span.aspNetDisabled.remarksMessage,
+#gvDetailInfo span[id^="spnCostRemarks"][data-disableflg="1"] span[id^=gvDetailInfo_lblCostRemarks].aspNetDisabled {
+    background-color: rgb(239,239,239);
+    border-color: rgb(188,188,188);
+    border-width: 1px;
+    border-style: solid;
+}
+
+#txtLocalRateRef {
+    width: 100px;
+}
+
+.textCenter {
+    color: black;
+    font-size: small;
+    vertical-align: middle;
+    text-align: center;
+    overflow: hidden;
+}
+
+#lblApplyRemarks:before,
+#lblBrRemarkText:before,
+#lblAppJotRemarks:before,
+#lblRemarks:before,
+span[id^="gvDetailInfo_lblCostRemarks_"]:before {
+    height: 12px;
+    width: 12px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url('../../Images/exclamation.png');
+    content: '';
+    display: inline-block;
+}
+
+#iptEstimatedSummary {
+    width: 125px !important;
+}
+
+#iptApprovedSummary {
+    width: 125px !important;
+}
+
+/* 送信有無選択透明ボックス */
+#divApplyMsgBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 9998;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+
+#divApplyMsgBox {
+    position: fixed;
+    top: 100px;
+    text-align: left;
+    width: 300px;
+    left: calc(50% - 150px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+}
+
+#divApplyMsgtitle {
+    width: calc(100% - 20px);
+    font-weight: bold;
+    padding: 10px;
+    height: 15px;
+    background-color: #8BACCD;
+}
+
+#divMsgButtons {
+    padding: 10px 10px 5px 5px;
+}
+
+#divMsgButtons input[type=button] {
+    min-width: 70px;
+}
+/* 添付ファイル関連 */
+.infoTable.fileup {
+    //width: 1180px;
+}
+#dViewRepArea, #dDoneViewRepArea {
+    display: block;
+    min-width: 900px;
+    width: 100%;
+}
+#divAttachmentHeaderArea, #divDoneAttachmentHeaderArea {
+    display: table;
+    height: 30px;
+    vertical-align: bottom;
+}
+#divAttachmentHeaderArea span,#divDoneAttachmentHeaderArea span {
+    display:table-cell; 
+    height:100%;
+    vertical-align:bottom;
+    text-align:center;
+}
+#divAttachmentHeaderArea span:nth-child(1),#divDoneAttachmentHeaderArea span:nth-child(1)
+{
+    min-width:150px;
+}
+#divAttachmentHeaderArea span:nth-child(2),#divDoneAttachmentHeaderArea span:nth-child(2)
+{
+    width:100%;
+}
+#divAttachmentHeaderArea span:nth-child(2):after,#divDoneAttachmentHeaderArea span:nth-child(2):after
+{
+    display:block;
+    content:"↓↓↓";
+}
+#divAttachmentHeaderArea span:nth-child(3),#divDoneAttachmentHeaderArea span:nth-child(3)
+{
+    min-width:150px;
+    text-align:center;
+    padding-left:5px;
+}
+#divRepAttachments, #divDoneRepAttachments {
+    display: block;
+    min-width: 900px;
+    width: 100%;
+    min-height: 330px;
+    max-height: 330px;
+    background-color: white;
+    border: 1px solid black;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.infoTable.fileup colgroup col:nth-child(1) {
+    width: 30px;
+}
+
+.infoTable.fileup colgroup col:nth-child(2) {
+    min-width: 1140px;
+    width:100%;
+}
+
+.infoTable.fileup colgroup col:nth-child(3) {
+    width: auto;
+}
+#divRepAttachments table td:nth-child(1),
+#divDoneRepAttachments table td:nth-child(1) {
+    padding-left: 15px;
+    min-width: 900px;
+    width: 100%;
+    max-width:954px;
+    overflow:hidden;
+}
+#divRepAttachments table td:nth-child(2),
+#divDoneRepAttachments table td:nth-child(2) {
+    min-width: 140px;
+    width: 140px;
+}
+#divRepAttachments table td:nth-child(2) input,
+#divDoneRepAttachments table td:nth-child(2) input {
+    width: calc(100% - 10px);
+}
+#divRepAttachments table td:nth-child(3),
+#divDoneRepAttachments table td:nth-child(3) {
+    display:none;
+}

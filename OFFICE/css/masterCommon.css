@@ -1,0 +1,398 @@
+﻿@charset "utf-8";
+/*ヘッダー*/
+#headerbox {
+    overflow: hidden;
+    background-color: rgb(220,230,240);
+    height: calc(100% - 300px);
+    line-height: 0px;
+    letter-spacing: -1em;
+    min-height: 135px; /* ボタン + データ一行目までの最低限の高さ*/
+    min-width:1010px;
+}
+#divListArea {
+    height: calc(100% - 45px);
+    min-width: 990px;
+}
+#divPnlListArea_HLShowHideDetailBox {
+    color:crimson;
+}
+#divPnlListArea_HLShowHideDetailBox:hover {
+    text-decoration:underline;
+    cursor:pointer;
+}
+#divPnlListArea_HLShowHideDetailBox.showDetail:before {
+    content: "SHOW INPUT";
+}
+#divPnlListArea_HLShowHideDetailBox.hideDetail:before {
+    content: "HIDE INPUT";
+}
+
+#headerbox div, #headerbox table td, #headerbox table th, #headerbox table span {
+    letter-spacing: normal;
+    line-height: normal;
+}
+#extractItem {
+    float: left;
+    margin-top:2px;
+    vertical-align: middle;
+}
+#extractItem span[id^="lbl"]{
+    font-weight:bold;
+}
+#lblOperationEx {
+    text-decoration: underline;
+}
+#extractItem input[type=text] {
+    width:112px;
+    height:17.6px;
+    ime-mode:inactive;
+}
+#buttonBox {
+    min-width: 990px; /* ボタンの増減によっては変更 */
+}
+/*明細*/
+#detailbox {
+    height: 275px;
+    min-height: 275px;
+    min-width: 1010px;
+    overflow: hidden;
+    background-color: rgb(148,138,84);
+    padding: 15px;
+    padding-top: 10px;
+}
+
+#detailbox input[type=button] {
+    margin: 0px 0px 0px 3.2px;
+    width: 80px;
+}
+
+/*操作*/
+#lblOperationEx {
+    top: 46.4px;
+    height: 24px;
+}
+/* ************************ */
+/* 上一覧表                 */
+/* ************************ */
+#pnlListArea {
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 100%;
+    position: relative;
+}
+
+#actionButtonsBox {
+    line-height: 0px;
+}
+
+#pnlListArea td, #pnlListArea th {
+    white-space: nowrap; /* 折り返させない */
+    text-overflow: ellipsis; /* 領域越を点々表示 */
+}
+
+#detailbox td, #detailbox th, #detailbox span {
+    white-space: nowrap; /* 折り返させない */
+    text-overflow: ellipsis; /* 領域越を点々表示 */
+}
+/* ************************ */
+/* 詳細エリアボタン行       */
+/* ************************ */
+/* 詳細のActionボックス ApplyId SelectNo ListUpdateボタンなど */
+#divDetailActionBox {
+    display: flex;
+    flex-wrap: nowrap;
+    height: 25px;
+    vertical-align: middle;
+    justify-content: flex-start;
+    margin-bottom: 2px;
+}
+/* divDetailActionBoxのaタグを1セルとする共通定義 */
+#divDetailActionBox a {
+    display: inline-block;
+    vertical-align: middle;
+    align-self: center;
+}
+/* ListUpdateボタンをくくるaタグ */
+#divDetailActionBox a:nth-child(1) {
+    margin-left:auto;
+    order: 3;
+}
+/* ClearButtonをくくるaタグ */
+#divDetailActionBox a:nth-child(2) {
+    order: 4;
+}
+
+/* LineCntをくくるaタグ */
+#stLineCnt {
+    order: 1;
+    width:320px;
+    min-width:320px;
+}
+/* AppliIdをくくるaタグ */
+#stApplyID {
+    order: 2;
+    width: 320px;
+    min-width: 320px;
+}
+#lblLineCnt {
+    margin-left:3.5px;
+}
+#lblLineCnt, #lblApplyID {
+    width: 95px;
+    font-weight: bold;
+    display:inline-block;
+}
+/* ************************ */
+/* タブ上部の詳細入力エリア */
+/* ************************ */
+.detailInputRow {
+    display: flex;
+    min-width: 1025px;
+}
+
+.detailInputRow a {
+    display: inline-block;
+    vertical-align: middle;
+    align-self: center;
+    margin: 3.5px;
+    white-space:nowrap;
+}
+.detailInputRow a:nth-child(1) {
+    width:640px;
+}
+
+.detailInputRow a:nth-child(2) {
+    width:350px;
+}
+/* セル内部の文言 */
+.detailInputRow a span:nth-child(1)  {
+    display:inline-block;
+    width:135px;
+    font-weight:bold;
+    text-decoration:underline;
+}
+/* 表示名称エリア文言
+*/
+.detailInputRow a:nth-child(1) span[id^=lbl][id$=Text]  {
+    display:inline-block;
+    width: 250px;
+}
+/* セル内部の文言アンダーラインを取り消し(ダブルクリックイベントなし) */
+#lblCarrierCode {
+    text-decoration:none;
+}
+/* 詳細タブ上のテキストボックスのサイズ */
+.detailInputRow input[type=text] {
+    width: 200px;
+    height: 15px;
+}
+/* ************************ */
+/* タブエリア               */
+/* ************************ */
+#detailbox a[onclick^="DtabChange('0')"] span[id^="lblDtab"] {
+    margin-left: 3.5px;
+}
+a[id^="stDtab"] {
+    letter-spacing: -1em;
+}
+a[id^="stDtab"] span[id^="lblDtab"] {
+    display: inline-block;
+    text-align:center;
+    vertical-align:middle;
+    margin-top: 5px;
+    padding: 2px;
+    padding-left: 15px;
+    padding-right: 15px;
+    cursor: pointer;
+    letter-spacing:normal;
+    width:auto !important;
+    height:auto !important;
+}
+a[id^="stDtab"] span[id^="lblDtab"]:hover {
+    text-decoration:underline;
+}
+/* ************************ */
+/* タブ下部の入力エリア     */
+/* ************************ */
+/* 詳細の一覧表 */
+span[class^="WF_DViewRep"][class$="_Area"] {
+    display: block;
+    height: 150px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: white;
+    border: 2px solid blue;
+    background-color: rgb(220,230,240);
+}
+/* 詳細一覧表内のテキストボックス */
+span[class^="WF_DViewRep"] table input[type=text] {
+    width: 107px;
+    height: 15px;
+    visibility:hidden;
+}
+
+span[class^="WF_DViewRep"] table {
+    margin-left:15px;
+    margin-top:5px;
+}
+span[class^="WF_DViewRep"] table td {
+
+    padding:1px;
+    padding-top:2px;
+    padding-bottom:2px;
+}
+span[class^="WF_DViewRep"] table td:nth-child(1){
+    display:none;
+}
+span[class^="WF_DViewRep"] table td:nth-child(2) span,
+span[class^="WF_DViewRep"] table td:nth-child(9) span,
+span[class^="WF_DViewRep"] table td:nth-child(16) span{
+    width:131px;
+    display:inline-block;
+}
+span[class^="WF_DViewRep"] table td:nth-child(3) span,
+span[class^="WF_DViewRep"] table td:nth-child(10) span,
+span[class^="WF_DViewRep"] table td:nth-child(17) span {
+    width: 10px;
+    display: inline-block;
+    color: blue;
+}
+span[class^="WF_DViewRep"] table td:nth-child(4),
+span[class^="WF_DViewRep"] table td:nth-child(11),
+span[class^="WF_DViewRep"] table td:nth-child(18){
+    display: none;
+}
+span[class^="WF_DViewRep"] table td:nth-child(6) span,
+span[class^="WF_DViewRep"] table td:nth-child(13) span,
+span[class^="WF_DViewRep"] table td:nth-child(20) span{
+    width:1px;
+    display:inline-block;
+}
+span[class^="WF_DViewRep"] table td:nth-child(7),
+span[class^="WF_DViewRep"] table td:nth-child(14),
+span[class^="WF_DViewRep"] table td:nth-child(21){
+    color:blue;
+}
+span[class^="WF_DViewRep"] table td:nth-child(7) span,
+span[class^="WF_DViewRep"] table td:nth-child(14) span,
+span[class^="WF_DViewRep"] table td:nth-child(21) span{
+    width: 135px;
+    display: inline-block;
+}
+span[class^="WF_DViewRep"] table td:nth-child(8) span,
+span[class^="WF_DViewRep"] table td:nth-child(15) span{
+    width:5px;
+    display:inline-block;
+}
+ .textCss{
+    color:black; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:left; 
+    overflow:hidden;
+    ime-mode:inactive;
+    border:1px solid black;
+}
+
+.textLeft{
+    color:black; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:left; 
+    overflow:hidden;
+    ime-mode:inactive;
+}
+
+.textLeftLabel{
+    color:blue; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:left; 
+    overflow:hidden;
+    ime-mode:active;
+}
+
+.textRight{
+    color:black; 
+    vertical-align:middle;
+    text-align:right; 
+    overflow:hidden;
+}
+
+.textCenter{
+    color:black; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:center; 
+    overflow:hidden;
+}
+
+.labelLeft{
+    color:black; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:left; 
+    overflow:hidden;
+    ime-mode:inactive;
+    background-color:rgb(148,138,84); 
+}
+
+#txtWarMsg {
+    color: red;
+    font-size: small;
+    vertical-align: middle;
+    text-align: left;
+    overflow: hidden;
+    ime-mode: inactive;
+    border: 1px solid black;
+}
+
+
+/* マルチラインテキスト入力ポップアップ */
+#divRemarkInputBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 9998;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+
+#divRemarkInputBox {
+    /*position: fixed;*/
+    top: 100px;
+    text-align: left;
+    min-width: 500px;
+    left: calc(50% - 250px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+}
+
+#divRemarkInputitle {
+    width: calc(100% - 20px);
+    font-weight: bold;
+    padding: 10px;
+    height: 15px;
+    background-color: #8BACCD;
+}
+
+#divRemarkInputButtons {
+    padding: 10px 10px 5px 5px;
+}
+
+    #divRemarkInputButtons input[type=button] {
+        min-width: 70px;
+    }
+
+#divRemarkTextArea {
+    padding: 10px 10px 5px 5px;
+}
+
+#divRemarkTextArea textarea {
+    width: 500px;
+    height: 300px;
+}

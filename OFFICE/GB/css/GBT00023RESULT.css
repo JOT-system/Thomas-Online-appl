@@ -1,0 +1,130 @@
+﻿#searchCondition {
+    padding: 10px;
+    min-width: 100px;
+    height:25px;
+}
+
+#tblSearchCondition {
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 1px;
+    border: 1px solid #999999;
+    min-width: 190px;
+}
+
+#tblSearchCondition th, #tblSearchCondition td {
+    text-align: left;
+    vertical-align: middle;
+    border: 1px solid #999999;
+    padding: 1px;
+    white-space: nowrap;
+}
+
+#tblSearchCondition th {
+    background-color: #8BACCD;
+}
+
+#tblSearchCondition col:nth-child(1) {
+    width: 100px;
+    min-width:100px;
+}
+
+#tblSearchCondition col:nth-child(2) {
+    width: 110px;
+    min-width: 110px;
+}
+#tblSearchCondition col:nth-child(3) {
+    width: 100px;
+    min-width: 100px;
+}
+
+#tblSearchCondition col:nth-child(4) {
+    width: 110px;
+    min-width: 110px;
+}
+
+#tblSearchCondition tr input[type=text] {
+    width: calc(100% - 10px);
+}
+
+/* 文言表示部分 lblで始まりTextで終わるSpan */
+#divContensbox span[id^="lbl"][id$="Text"] {
+    color: rgb(0,0,255);
+}
+/* 共通関数で自動生成した表のスタイル */
+#WF_LISTAREA {
+    margin-left: 10px;
+    margin-right:10px;
+    min-height: 180px;
+    position: relative;
+}
+
+#actionButtonsBox {
+    min-width:720px;
+}
+
+#lblDepartment {
+    text-decoration: underline;
+}
+
+/* PRINTボタンのスタイル */
+#WF_LISTAREA button[id^="btnWF_LISTAREAPRINT"],
+#WF_LISTAREA button[id^="btnWF_LISTAREADETAIL"] {
+    width: 60px;
+    height: 20px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+#WF_LISTAREA button[id^="btnWF_LISTAREAPRINT"]:after {
+    content: "PRINT";
+}
+
+#WF_LISTAREA[data-listitemtype="COUNTRY"] tr[data-istop="1"] button[id^="btnWF_LISTAREADETAIL"]:after {
+    content: "DETAIL";
+}
+
+#WF_LISTAREA[data-listitemtype="JOT"] tr[data-istop="1"] button[id^="btnWF_LISTAREADETAIL"]:after {
+    content: "BACK";
+}
+
+#WF_LISTAREA tr[data-istop="1"] input {
+    display:none;
+}
+#WF_LISTAREA tr[data-istop="1"] {
+    background-color:rgb(156, 216, 174)
+}
+#WF_LISTAREA button[disabled]:hover {
+    cursor:default;
+}
+#WF_LISTAREA div[id^=divWF_LISTAREACOUNTRYNAME] {
+    letter-spacing:0;
+    vertical-align:middle;
+    width:100%;
+}
+#WF_LISTAREA div[id^=divWF_LISTAREACOUNTRYNAME] span {
+    padding-right:5px;
+}
+#WF_LISTAREA[data-listitemtype=JOT] tr[data-istop="1"] button[id^="btnWF_LISTAREAPRINT"] {
+    display:none;
+}
+#WF_LISTAREA[data-listitemtype=JOT] tr[data-istop="1"] button[id^="btnWF_LISTAREADETAIL"] {
+    width:50px;
+}
+#WF_LISTAREA[data-listitemtype=JOT] [cellfiedlname="PRINT"] {
+    display:none;
+}
+#WF_LISTARE input[id^="txtWF_LISTAREADEPOSITADDMM"],
+#WF_LISTARE input[id^="txtWF_LISTAREAOVERDRAWADDMM"] {
+    text-align: right;
+}
+
+th[cellfiedlname="TORICODE"],
+th[cellfiedlname="ACCCURRENCYSEGMENT"],
+th[cellfiedlname="BOTHCLASS"],
+th[cellfiedlname="DEPOSITDAY"],
+th[cellfiedlname="OVERDRAWDAY"],
+th[cellfiedlname="HOLIDAYFLG"]{
+    text-decoration :underline;
+}

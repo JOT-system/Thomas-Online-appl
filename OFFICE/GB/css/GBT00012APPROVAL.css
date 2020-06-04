@@ -1,0 +1,42 @@
+﻿#searchCondition {
+    padding: 10px;
+    min-width: 100px;
+    height:25px;
+}
+/* 文言表示部分 lblで始まりTextで終わるSpan */
+#divContensbox span[id^="lbl"][id$="Text"] {
+    color: rgb(0,0,255);
+}
+/* 共通関数で自動生成した表のスタイル */
+#WF_LISTAREA {
+    margin-left: 10px;
+    margin-right: 10px;
+    min-height: 180px;
+    position: relative;
+}
+
+
+#WF_LISTAREA span[id^="lblWF_LISTAREASHOWTANK"] {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#WF_LISTAREA span[id^="lblWF_LISTAREASHOWTANK"]:hover {
+    color: orangered;
+}
+
+#actionButtonsBox {
+    min-width:720px;
+}
+#lblPortText {
+    margin-right:2px;
+}
+#lblApprovalLabel, #lblPortLabel, #lblApprovalObjLabel {
+    text-decoration: underline;
+}
+
+/* マイナス値の場合、赤色*/
+#WF_LISTAREA .minusDiscount {
+    color: rgb(0, 0, 255);
+}

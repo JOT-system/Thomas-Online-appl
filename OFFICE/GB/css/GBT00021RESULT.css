@@ -1,0 +1,155 @@
+﻿#tankSelectHeaderBox {
+    padding: 10px;
+    min-width: 100px;
+    height: 38px;
+}
+
+#tankSelectHeaderBox input[type="text"] {
+    height: 20px;
+    width: calc(100% - 10px);
+    margin: 3px;
+}
+
+#lblPOL, #lblPOD, #lblShipper, #lblConsignee, #lblProduct {
+    text-decoration: underline;
+}
+
+#searchCondition {
+    padding: 10px;
+    min-width: 100px;
+}
+
+#tblSearchCondition {
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 1px;
+    border: 1px solid #999999;
+    min-width: 828.6px;
+}
+
+#tblSearchCondition th, #tblSearchCondition td {
+    text-align: left;
+    vertical-align: middle;
+    border: 1px solid #999999;
+    padding: 1px;
+    white-space: nowrap;
+}
+
+#tblSearchCondition th {
+    background-color: #8BACCD;
+}
+
+#tblSearchCondition th:nth-child(1),
+#tblSearchCondition th:nth-child(3),
+#tblSearchCondition th:nth-child(5) {
+    width: 100px;
+    min-width: 100px;
+}
+#tblSearchCondition tr input[type=text] {
+    width: calc(100% - 10px);
+}
+/* 予定実績 */
+#tblSearchCondition ul li {
+    display: inline-block;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+#tblSearchCondition ul li input[type="radio"] {
+    margin-top: 1px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#tblSearchCondition ul li label {
+    display: inline-block;
+    margin-top: 1px;
+    margin-left: 2px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+/* 文言表示部分 lblで始まりTextで終わるSpan */
+#divContensbox span[id^="lbl"][id$="Text"] {
+    color: rgb(0,0,255);
+}
+/* 共通関数で自動生成した表のスタイル */
+#WF_LISTAREA {
+    margin-left: 10px;
+    margin-right: 10px;
+    /*height: calc(100% - 72px);*/
+    min-height: 180px;
+    position: relative;
+}
+/* 2列目COPYボタンのスタイル */
+#WF_LISTAREA button[id^="btnWF_LISTAREAACTION"] {
+    width: 60px;
+    height: 20px;
+    text-align:center;
+    vertical-align:middle;
+}
+#WF_LISTAREA tr:not([data-order-row]) button[id^="btnWF_LISTAREAACTION"]:after {
+        content:"★";
+        line-height:1px;
+}
+#WF_LISTAREA tr[data-order-row] button[id^="btnWF_LISTAREAACTION"]:after {
+    content: "DELETE";
+}
+#actionButtonsBox {
+    min-width:720px;
+} 
+#lblPortText {
+    margin-right:2px;
+} 
+#lblApprovalLabel, #lblPortLabel {
+    text-decoration:underline;
+} 
+#WF_LISTAREA_DL button{
+    cursor:pointer;
+} 
+#WF_LISTAREA_DL > table > tbody > tr[data-order-row] td:not([data-showcell]), #WF_LISTAREA_DR table tbody tr[data-order-row] td:not([data-showcell]) {
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+/* 削除確認ポップアップ */
+#divConfirmBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 9998;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+
+#divConfirmBox {
+    position: fixed;
+    top: 100px;
+    text-align: left;
+    min-width: 500px;
+    left: calc(50% - 250px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+}
+
+#divConfirmtitle {
+    width: calc(100% - 20px);
+    font-weight: bold;
+    padding: 10px;
+    height: 15px;
+    background-color: #8BACCD;
+}
+
+#divConfirmBoxButtons {
+    padding: 10px 10px 5px 5px;
+}
+
+#divConfirmBoxButtons input[type=button] {
+    min-width: 70px;
+}
+#divConfirmBoxMessageArea {
+    padding: 10px;
+}

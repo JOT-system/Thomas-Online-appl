@@ -1,0 +1,289 @@
+﻿body:before {
+    content: url('../../Images/delete.png') url('../../Images/delete.png');
+    display: none;
+}
+#orderHeaderBox {
+    padding: 10px;
+    min-width: 100px;
+    height:28px;
+}
+#orderHeaderBox input[type="text"] {
+    height:20px;
+    width:calc(100% - 10px);
+    margin:3px;
+}
+
+/* 文言表示部分 lblで始まりTextで終わるSpan */
+#divContensbox span[id^="lbl"][id$="Text"] {
+    color: rgb(0,0,255);
+}
+#lblVenderLabel {
+    text-decoration: underline;
+}
+/* 共通関数で自動生成した表のスタイル */
+#WF_LISTAREA {
+    margin-left: 10px;
+    margin-right: 10px;
+    min-height: 180px;
+    position: relative;
+}
+
+#WF_LISTAREA_DR td.hasTank span,
+#WF_LISTAREA_DR td.noTank span,
+#WF_LISTAREA_DL td.hasTank span,
+#WF_LISTAREA_DL td.noTank span {
+    display: inline-block;
+    vertical-align: middle;
+}
+#WF_LISTAREA_DR td.noTank span,
+#WF_LISTAREA_DL td.noTank span {
+    height: 100%;
+    width: 100%;
+}
+#WF_LISTAREA_DR td.hasTank span:nth-child(1),
+#WF_LISTAREA_DL td.hasTank span:nth-child(1) {
+    width: calc(100% - 20px);
+}
+#WF_LISTAREA_DR td.hasTank span.deleteTank,
+#WF_LISTAREA_DL td.hasTank span.deleteTank {
+    background-image: url('../../Images/delete.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 16px;
+    width: 16px;
+    /* 一旦非公開(本格対応はGBT00004ORDERより機能を削ること */
+    display: none;
+    pointer-events: none;
+}
+#WF_LISTAREA_DR td.hasTank span.deleteTank:hover,
+#WF_LISTAREA_DL td.hasTank span.deleteTank:hover{
+    cursor:pointer;
+}
+/* デマレージの場合は削除なし*/
+#WF_LISTAREA.GB_Demurrage #WF_LISTAREA_DR td.hasTank span.deleteTank,
+#WF_LISTAREA.GB_Demurrage #WF_LISTAREA_DL td.hasTank span.deleteTank {
+    display: none;
+    pointer-events: none;
+}
+#WF_LISTAREA.GB_Demurrage #WF_LISTAREA_DR td.hasTank,
+#WF_LISTAREA.GB_Demurrage #WF_LISTAREA_DR td.noTank,
+#WF_LISTAREA.GB_Demurrage #WF_LISTAREA_DL td.hasTank,
+#WF_LISTAREA.GB_Demurrage #WF_LISTAREA_DL td.noTank {
+    pointer-events: none;
+}
+/* 数字入力のテキストボックスの文字右寄せ */
+#WF_LISTAREA_DR input[type="text"][id^="txtWF_LISTAREAAMOUNTBR"] {
+    text-align: right;
+}
+/* 申請内容テキストボックスのスタイル */
+#WF_LISTAREA_DR input[type="text"][id^="txtWF_LISTAREAAPPLYTEXT"],
+#WF_LISTAREA_DR input[type="text"][id^="txtWF_LISTAREAREMARK"] {
+    pointer-events: none;
+    text-overflow: ellipsis;
+    background-color: transparent;
+    border-width: 1px;
+    border-style: solid;
+}
+#WF_LISTAREA_DR input[type="text"][id^="txtWF_LISTAREAAPPLYTEXT"].needsInput {
+    border-color:red;
+}
+
+input[type='text'][id^='txtWF_LISTAREAAPPLYTEXT']:not([value='']),
+input[type='text'][id^='txtWF_LISTAREAREMARK']:not([value='']) {
+    border-color: rgb(0, 0, 0) !important;
+    background-size: auto 14px;
+    background-repeat: no-repeat;
+    background-image: url('../../Images/exclamation.png');
+    background-position: 2px center;
+    padding-left: 21px !important;
+    width: 141px !important;
+}
+
+span[id^='lblWF_LISTAREADEMREPORTMONTH'].aspNetDisabled {
+    pointer-events: none;
+}
+/* ボタンエリアの最小幅 */
+#actionButtonsBox {
+    min-width: 705px;
+}
+/* アクション列のボタンスタイル*/
+#WF_LISTAREA_DL td:nth-child(4) input[type="button"],
+#WF_LISTAREA_DL td:nth-child(4) button {
+    padding-top: 1px;
+    vertical-align: middle;
+    min-height: 20px;
+    max-height: 20px;
+    height: 20px;
+    width: 70px;
+    display:none;
+}
+/* 費用比較の大小比較結果 */
+#WF_LISTAREA .lessThan {
+    color: rgb(0, 0, 255);
+}
+#WF_LISTAREA .greatherThan {
+    color: rgb(255, 0, 0);
+}
+/* #WF_LISTAREA.GB_SOA .greatherThan,
+#WF_LISTAREA.GB_SOA .lessThan {
+    color: rgb(0, 0, 0);
+} */
+
+/* デマレージにて付替したオフィスのスタイル */
+#WF_LISTAREA .swappedOffice {
+    color: rgb(255, 0, 0);
+}
+/* SOA警告行色付け */
+#WF_LISTAREA tr[data-isautoclose='-1'] {
+    background-color: rgb(192, 192, 192);
+}
+
+#WF_LISTAREA tr[data-isautoclose='1'] {
+    background-color:rgb(255, 252, 88);
+}
+#WF_LISTAREA tr[data-isautoclose='2'] {
+    /* background-color: rgb(206, 120, 120); */
+    background-color: rgb(250,20, 20);
+}
+
+/* 一覧のEnabledを切った場合のスタイル */
+#WF_LISTAREA.aspNetDisabled input[type="button"] {
+    display: none !important;
+}
+#WF_LISTAREA.aspNetDisabled input:not([id^=txtWF_LISTAREAAPPLYTEXT]) {
+    pointer-events: none;
+    background-color: rgb(239,239,239);
+    color: rgb(59,59,59);
+    border-color: rgb(188,188,188);
+    border-width: 1px;
+    border-style: solid;
+}
+#WF_LISTAREA.aspNetDisabled input:not([id^=txtWF_LISTAREAREMARK]) {
+    pointer-events: none;
+    background-color: rgb(239,239,239);
+    color: rgb(59,59,59);
+    border-color: rgb(188,188,188);
+    border-width: 1px;
+    border-style: solid;
+}
+#WF_LISTAREA.aspNetDisabled td[ondblclick^=swapOffice] {
+    pointer-events: none;
+}
+
+/* 費用追加ボタンエリア */
+#addCostArea {
+    padding: 0 10px 10px 10px;
+    min-width: 100px;
+}
+#btnAddCost {
+    width:80px;
+}
+#divLeftbox #ddlNo {
+    width: 415px;
+    border: 2px solid blue;
+    background-color: #ccffff;
+}
+
+#divLeftbox #rblPolPod td {
+    padding: 5px;
+    vertical-align: middle;
+}
+#divLeftbox #rblPolPod td input[type=radio] {
+    position:relative;
+    top:1px;
+    margin-right:2px;
+}
+#divLeftbox #rblPolPod td:nth-child(1) {
+    padding-left: 0;
+}
+/* マルチラインテキスト入力ポップアップ */
+#divRemarkInputBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 9998;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+
+#divRemarkInputBox {
+    position: fixed;
+    top: 100px;
+    text-align: left;
+    min-width: 500px;
+    left: calc(50% - 250px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+}
+
+#divRemarkInputitle {
+    width: calc(100% - 20px);
+    font-weight: bold;
+    padding: 10px;
+    height: 15px;
+    background-color: #8BACCD;
+}
+
+#divRemarkInputButtons {
+    padding: 10px 10px 5px 5px;
+}
+
+    #divRemarkInputButtons input[type=button] {
+        min-width: 70px;
+    }
+
+#divRemarkTextArea {
+    padding: 10px 10px 5px 5px;
+    border: 1px solid transparent;
+}
+
+#divRemarkTextArea textarea {
+    width: 500px;
+    height: 300px;
+    min-width:500px;
+    min-height:300px;
+    padding:5px;
+}
+
+.remarksMessage {
+    color: rgb(211,211,211) !important;
+    font-style: italic;
+    display: block;
+    width: 100px;
+}
+
+#spnApprovalRemarks .remarksMessage,
+#spnAppJotRemarks .remarksMessage {
+    width: 100px;
+}
+
+#gvDetailInfo .remarksMessage {
+    width: calc(100% - 10px);
+}
+/* ダブルクリック項目の文言にアンダーライン */
+#lblCostItemLabel, #lblActy, #lblBrVenderLabel,
+#lblEstimatedVenderLabel, th[cellfiedlname="TANKNO"],
+th[cellfiedlname="APPLYTEXT"], th[cellfiedlname="CONTRACTORODR"],
+th[cellfiedlname="CONTRACTORFIX"], th[cellfiedlname="SCHEDELDATE"],
+th[cellfiedlname="ACTUALDATE"], th[cellfiedlname="CURRENCYCODE"],
+th[cellfiedlname="ACCCURRENCYSEGMENT"] {
+    text-decoration: underline;
+}
+div.GB_Demurrage th[cellfiedlname="TANKNO"],
+div.GB_Demurrage th[cellfiedlname="CURRENCYCODE"],
+div.GB_Demurrage th[cellfiedlname="CONTRACTORFIX"],
+div.GB_NonBreaker th[cellfiedlname="TANKNO"],
+div.GB_CostUp th[cellfiedlname="TANKNO"],
+div.GB_TankActivity th[cellfiedlname="TANKNO"],
+div.GB_TankActivity th[cellfiedlname="CONTRACTORODR"],
+div.GB_TankActivity th[cellfiedlname="SCHEDELDATE"] {
+    text-decoration: none;
+}
+/* SOA一旦装飾なし */
+div.GB_SOA th {
+    text-decoration: none;
+}

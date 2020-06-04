@@ -1,0 +1,152 @@
+﻿#tankSelectHeaderBox {
+    padding: 10px;
+    min-width: 100px;
+    height: 38px;
+}
+
+#tankSelectHeaderBox input[type="text"] {
+    height: 20px;
+    width: calc(100% - 10px);
+    margin: 3px;
+}
+
+#lblTankNo, #lblCountry {
+    text-decoration: underline;
+}
+
+#searchCondition {
+    padding: 10px;
+    min-width: 100px;
+}
+
+#tblSearchCondition {
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 1px;
+    border: 1px solid #999999;
+    min-width: 828.6px;
+}
+
+#tblSearchCondition th, #tblSearchCondition td {
+    text-align: left;
+    vertical-align: middle;
+    border: 1px solid #999999;
+    padding: 1px;
+    white-space: nowrap;
+}
+
+#tblSearchCondition th {
+    background-color: #8BACCD;
+}
+
+#tblSearchCondition th:nth-child(1),
+#tblSearchCondition th:nth-child(3),
+#tblSearchCondition th:nth-child(5) {
+    width: 100px;
+    min-width: 100px;
+}
+#tblSearchCondition tr input[type=text] {
+    width: calc(100% - 10px);
+}
+
+/* 文言表示部分 lblで始まりTextで終わるSpan */
+#divContensbox span[id^="lbl"][id$="Text"] {
+    color: rgb(0,0,255);
+}
+/* 共通関数で自動生成した表のスタイル */
+#WF_LISTAREA_H {
+    margin-left: 10px;
+    margin-right: 10px;
+    /*height: calc(100% - 72px);*/
+    height: 192px;
+    position: relative;
+    z-index: 5;
+}
+    #WF_LISTAREA_H div[id$="_HR"] table {
+        width: 1100px !important;
+    }
+    #WF_LISTAREA_H div[id$="_HL"] th,
+    #WF_LISTAREA_H div[id$="_HR"] th {
+        text-align: left;
+        writing-mode: vertical-lr;
+        -ms-writing-mode: tb-rl;
+        -webkit-writing-mode: vertical-rl;
+        height: 194px;
+    }
+        #WF_LISTAREA_H div[id$="_HR"] th:nth-child(1) {
+            width: 148px !important;
+        }
+        #WF_LISTAREA_H div[id$="_HR"] th:nth-child(3),
+        #WF_LISTAREA_H div[id$="_HR"] th:nth-child(4),
+        #WF_LISTAREA_H div[id$="_HR"] th:nth-child(5),
+        #WF_LISTAREA_H div[id$="_HR"] th:nth-child(9),
+        #WF_LISTAREA_H div[id$="_HR"] th:nth-child(10),
+        #WF_LISTAREA_H div[id$="_HR"] th:nth-child(11),
+        #WF_LISTAREA_H div[id$="_HR"] th:nth-child(12) {
+            width: 98px !important;
+        }
+
+/* 共通関数で自動生成した表のスタイル */
+#WF_LISTAREA {
+    margin-left: 10px;
+    margin-right: 10px;
+    /*height: calc(100% - 72px);*/
+    min-height: 180px;
+    position: relative;
+    z-index: 6;
+    top:-18px;
+}
+
+#actionButtonsBox {
+    min-width:720px;
+} 
+#WF_LISTAREA_DL button{
+    cursor:pointer;
+} 
+#WF_LISTAREA_DL > table > tbody > tr[data-order-row] td:not([data-showcell]), #WF_LISTAREA_DR table tbody tr[data-order-row] td:not([data-showcell]) {
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+/* 削除確認ポップアップ */
+#divConfirmBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 9998;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+
+#divConfirmBox {
+    position: fixed;
+    top: 100px;
+    text-align: left;
+    min-width: 500px;
+    left: calc(50% - 250px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+}
+
+#divConfirmtitle {
+    width: calc(100% - 20px);
+    font-weight: bold;
+    padding: 10px;
+    height: 15px;
+    background-color: #8BACCD;
+}
+
+#divConfirmBoxButtons {
+    padding: 10px 10px 5px 5px;
+}
+
+#divConfirmBoxButtons input[type=button] {
+    min-width: 70px;
+}
+#divConfirmBoxMessageArea {
+    padding: 10px;
+}

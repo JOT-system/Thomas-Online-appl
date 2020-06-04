@@ -1,0 +1,980 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>
+    </SchemaVersion>
+    <ProjectGuid>{BC54F00A-414A-47F0-B9C6-7A979EE7603C}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>OFFICE</RootNamespace>
+    <AssemblyName>OFFICE</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <MyType>Custom</MyType>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <Use64BitIISExpress />
+    <UseGlobalApplicationHostFile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>OFFICE.xml</DocumentationFile>
+    <NoWarn>
+    </NoWarn>
+    <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>OFFICE.xml</DocumentationFile>
+    <NoWarn>
+    </NoWarn>
+    <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BASEDLL">
+      <HintPath>..\..\..\..\..\BIN\LIB\BASEDLL.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Collections.Specialized" />
+    <Import Include="System.Configuration" />
+    <Import Include="System.Text" />
+    <Import Include="System.Text.RegularExpressions" />
+    <Import Include="System.Web" />
+    <Import Include="System.Web.Caching" />
+    <Import Include="System.Web.SessionState" />
+    <Import Include="System.Web.Security" />
+    <Import Include="System.Web.Profile" />
+    <Import Include="System.Web.UI" />
+    <Import Include="System.Web.UI.WebControls" />
+    <Import Include="System.Web.UI.WebControls.WebParts" />
+    <Import Include="System.Web.UI.HtmlControls" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="BrowserWorning.html" />
+    <Content Include="COM00002MENU.aspx" />
+    <Content Include="COM00001LOGON.aspx" />
+    <Content Include="COM00003HELP.aspx" />
+    <Content Include="COM00005SELECT.aspx" />
+    <Content Include="COM00005USER.aspx" />
+    <Content Include="COM00006USERPASS.aspx" />
+    <Content Include="css\COM00005USER.css" />
+    <Content Include="css\commonStyle.css" />
+    <Content Include="css\masterCommon.css" />
+    <Content Include="GB\css\GBM00000APPROVAL.css" />
+    <Content Include="GB\css\GBM00006TANK.css" />
+    <Content Include="GB\css\GBM00008PRODUCT.css" />
+    <Content Include="GB\css\GBM00014CUSTOMERAGENT.css" />
+    <Content Include="GB\css\GBT00001BREAKER.css" />
+    <Content Include="GB\css\GBT00002RESULT.css" />
+    <Content Include="GB\css\GBT00003RESULT.css" />
+    <Content Include="GB\css\GBT00030DETAILEDLIST.css" />
+    <Content Include="GB\css\GBT00019APPROVAL.css" />
+    <Content Include="GB\css\GBT00020AGREEMENT.css" />
+    <Content Include="GB\css\GBT00020LEASE.css" />
+    <Content Include="GB\css\GBT00020RESULT.css" />
+    <Content Include="GB\css\GBT00021RESULT.css" />
+    <Content Include="GB\css\GBT00030RESULT.css" />
+    <Content Include="GB\css\GBT00022RESULT.css" />
+    <Content Include="GB\css\GBT00023RESULT.css" />
+    <Content Include="GB\css\GBT00024APPROVAL.css" />
+    <Content Include="GB\css\GBT00025LIST.css" />
+    <Content Include="GB\css\GBT00028INVOICEEDIT.css" />
+    <Content Include="GB\css\GBT00028RESULT.css" />
+    <Content Include="GB\GBM00021CLIENT.aspx" />
+    <Content Include="GB\GBM00021SELECT.aspx" />
+    <Content Include="GB\GBT00030DETAILEDLIST.aspx" />
+    <Content Include="GB\GBT00006RESULTTST.aspx" />
+    <Content Include="GB\GBT00013RESULT.aspx" />
+    <Content Include="GB\GBT00019APPROVAL.aspx" />
+    <Content Include="GB\GBT00019SELECT.aspx" />
+    <Content Include="GB\GBT00020AGREEMENT.aspx" />
+    <Content Include="GB\GBT00030SELECT.aspx" />
+    <Content Include="GB\GBT00030RESULT.aspx" />
+    <Content Include="GB\GBT00020LEASE.aspx" />
+    <Content Include="GB\GBT00020RESULT.aspx" />
+    <Content Include="GB\GBT00020SELECT.aspx" />
+    <Content Include="GB\GBT00021RESULT.aspx" />
+    <Content Include="GB\GBT00021SELECT.aspx" />
+    <Content Include="GB\GBT00022RESULT.aspx" />
+    <Content Include="GB\GBT00022SELECT.aspx" />
+    <Content Include="GB\GBT00023RESULT.aspx" />
+    <Content Include="GB\GBT00024APPROVAL.aspx" />
+    <Content Include="GB\GBT00024SELECT.aspx" />
+    <Content Include="GB\GBT00025LIST.aspx" />
+    <Content Include="GB\GBT00025SELECT.aspx" />
+    <Content Include="GB\GBT00026BLNOTRANSFER.aspx" />
+    <Content Include="GB\GBT00028INVOICEEDIT.aspx" />
+    <Content Include="GB\GBT00028RESULT.aspx" />
+    <Content Include="GB\GBT00028SELECT.aspx" />
+    <Content Include="GB\script\GBT00003RESULT.js" />
+    <Content Include="GB\css\GBT00004ORDER.css" />
+    <Content Include="GB\css\GBT00005APPROVAL.css" />
+    <Content Include="GB\css\GBT00006RESULT.css" />
+    <Content Include="GB\css\GBT00007RESULT.css" />
+    <Content Include="GB\css\GBT00010APPROVAL.css" />
+    <Content Include="GB\css\GBT00011RESULT.css" />
+    <Content Include="GB\css\GBT00012APPROVAL.css" />
+    <Content Include="GB\css\GBT00012REPAIR.css" />
+    <Content Include="GB\css\GBT00013RESULT.css" />
+    <Content Include="GB\css\GBT00014BL.css" />
+    <Content Include="GB\css\GBT00015RESULT.css" />
+    <Content Include="GB\css\GBT00017RESULT.css" />
+    <Content Include="GB\css\GBT00018APPROVAL.css" />
+    <Content Include="GB\GBM00000APPROVAL.aspx" />
+    <Content Include="GB\GBM00000SELECT.aspx" />
+    <Content Include="GB\GBM00001COUNTRY.aspx" />
+    <Content Include="GB\GBM00001SELECT.aspx" />
+    <Content Include="GB\GBM00002PORT.aspx" />
+    <Content Include="GB\GBM00002SELECT.aspx" />
+    <Content Include="GB\GBM00003DEPOT.aspx" />
+    <Content Include="GB\GBM00003SELECT.aspx" />
+    <Content Include="GB\GBM00004CUSTOMER.aspx" />
+    <Content Include="GB\GBM00004SELECT.aspx" />
+    <Content Include="GB\GBM00005SELECT.aspx" />
+    <Content Include="GB\GBM00005TRADER.aspx" />
+    <Content Include="GB\GBM00006SELECT.aspx" />
+    <Content Include="GB\GBM00006TANK.aspx" />
+    <Content Include="GB\GBM00007SELECT.aspx" />
+    <Content Include="GB\GBM00007UNNO.aspx" />
+    <Content Include="GB\GBM00008PRODUCT.aspx" />
+    <Content Include="GB\GBM00008SELECT.aspx" />
+    <Content Include="GB\GBM00010CHARGECODE.aspx" />
+    <Content Include="GB\GBM00010SELECT.aspx" />
+    <Content Include="GB\GBM00014CUSTOMERAGENT.aspx" />
+    <Content Include="GB\GBM00014SELECT.aspx" />
+    <Content Include="GB\GBM00020EXRATE.aspx" />
+    <Content Include="GB\GBM00020SELECT.aspx" />
+    <Content Include="GB\GBT00001BREAKER.aspx" />
+    <Content Include="GB\GBT00001NEWBREAKER.aspx" />
+    <Content Include="GB\GBT00002RESULT.aspx" />
+    <Content Include="GB\GBT00002SELECT.aspx" />
+    <Content Include="GB\GBT00003RESULT.aspx" />
+    <Content Include="GB\GBT00003SELECT.aspx" />
+    <Content Include="GB\GBT00004NEWORDER.aspx" />
+    <Content Include="GB\GBT00004ORDER.aspx" />
+    <Content Include="GB\GBT00004SELECT.aspx" />
+    <Content Include="GB\GBT00005APPROVAL.aspx" />
+    <Content Include="GB\GBT00005SELECT.aspx" />
+    <Content Include="GB\GBT00006RESULT.aspx" />
+    <Content Include="GB\GBT00007SELECT.aspx" />
+    <Content Include="GB\GBT00008SELECT.aspx" />
+    <Content Include="GB\GBT00009SELECT.aspx" />
+    <Content Include="GB\GBT00010APPROVAL.aspx" />
+    <Content Include="GB\GBT00010SELECT.aspx" />
+    <Content Include="GB\GBT00011RESULT.aspx" />
+    <Content Include="GB\GBT00011SELECT.aspx" />
+    <Content Include="GB\GBT00012APPROVAL.aspx" />
+    <Content Include="GB\GBT00012REPAIR.aspx" />
+    <Content Include="GB\GBT00012SELECT.aspx" />
+    <Content Include="GB\GBT00013SELECT.aspx" />
+    <Content Include="GB\GBT00014BL.aspx" />
+    <Content Include="GB\GBT00015RESULT.aspx" />
+    <Content Include="GB\GBT00015SELECT.aspx" />
+    <Content Include="GB\GBT00017RESULT.aspx" />
+    <Content Include="GB\GBT00018APPROVAL.aspx" />
+    <Content Include="GB\GBT00018SELECT.aspx" />
+    <Content Include="GB\script\GBT00001BREAKER.js" />
+    <Content Include="GB\script\GBT00011RESULT.js" />
+    <Content Include="GB\script\GBT00004ORDER.js" />
+    <Content Include="GB\script\GBT00007RESULT.js" />
+    <Content Include="GB\script\GBT00012REPAIR.js" />
+    <Content Include="GB\script\GBT00013RESULT.js" />
+    <Content Include="GB\script\GBT00014BL.js" />
+    <Content Include="GB\script\GBT00015RESULT.js" />
+    <Content Include="GB\script\GBT00017RESULT.js" />
+    <Content Include="GB\script\GBT00018APPROVAL.js" />
+    <Content Include="GB\script\GBT00020AGREEMENT.js" />
+    <Content Include="GB\script\GBT00020RESULT.js" />
+    <Content Include="GB\script\GBT00021RESULT.js" />
+    <Content Include="GB\script\GBT00030RESULT.js" />
+    <Content Include="GB\script\GBT00022RESULT.js" />
+    <Content Include="GB\script\GBT00023RESULT.js" />
+    <Content Include="GB\script\GBT00026BLNOTRANSFER.js" />
+    <Content Include="GB\script\GBT00028INVOICEEDIT.js" />
+    <Content Include="Images\ascending.png" />
+    <Content Include="Images\delete.png" />
+    <Content Include="Images\descending.png" />
+    <Content Include="Images\exclamation.png" />
+    <Content Include="Images\favicon.png" />
+    <Content Include="Images\help.jpg" />
+    <Content Include="Images\iconError.png" />
+    <Content Include="Images\iconInfo.png" />
+    <Content Include="Images\iconQues.png" />
+    <Content Include="Images\iconWarn.png" />
+    <Content Include="Images\Inspection.png" />
+    <Content Include="Images\leased.png" />
+    <Content Include="Images\orderArrow.png" />
+    <Content Include="Images\Repair.png" />
+    <Content Include="Images\RightBoxOpenIcon.png" />
+    <Content Include="Images\ヘルプ.jpg" />
+    <Content Include="Images\先頭頁.png" />
+    <Content Include="Images\前頁.png" />
+    <Content Include="Images\最終頁.png" />
+    <Content Include="Images\次頁.png" />
+    <Content Include="Images\矢印L.png" />
+    <Content Include="Images\矢印R.png" />
+    <Content Include="Images\透明R.png" />
+    <Content Include="script\calendar.js" />
+    <Content Include="script\common.js" />
+    <Content Include="script\masterCommon.js" />
+    <Content Include="THOMAS_MailTest2.aspx" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="classes\ApprovalProc.vb" />
+    <Compile Include="classes\CommonConst.vb" />
+    <Compile Include="classes\CommonFunctions.vb" />
+    <Compile Include="COH0001FILEUP.ashx.vb">
+      <DependentUpon>COH0001FILEUP.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="COM00002MENU.aspx.designer.vb">
+      <DependentUpon>COM00002MENU.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="COM00002MENU.aspx.vb">
+      <DependentUpon>COM00002MENU.aspx</DependentUpon>
+      <SubType>ASPXCodebehind</SubType>
+    </Compile>
+    <Compile Include="COM00001LOGON.aspx.designer.vb">
+      <DependentUpon>COM00001LOGON.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="COM00001LOGON.aspx.vb">
+      <DependentUpon>COM00001LOGON.aspx</DependentUpon>
+      <SubType>ASPXCodebehind</SubType>
+    </Compile>
+    <Compile Include="COM00003HELP.aspx.designer.vb">
+      <DependentUpon>COM00003HELP.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="COM00003HELP.aspx.vb">
+      <DependentUpon>COM00003HELP.aspx</DependentUpon>
+      <SubType>ASPXCodebehind</SubType>
+    </Compile>
+    <Compile Include="COM00005SELECT.aspx.designer.vb">
+      <DependentUpon>COM00005SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="COM00005SELECT.aspx.vb">
+      <DependentUpon>COM00005SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="COM00005USER.aspx.designer.vb">
+      <DependentUpon>COM00005USER.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="COM00005USER.aspx.vb">
+      <DependentUpon>COM00005USER.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="COM00006USERPASS.aspx.designer.vb">
+      <DependentUpon>COM00006USERPASS.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="COM00006USERPASS.aspx.vb">
+      <DependentUpon>COM00006USERPASS.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\classes\GBConst.vb" />
+    <Compile Include="GB\classes\GBCommon.vb" />
+    <Compile Include="GB\classes\GbPageCommon.vb">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00000APPROVAL.aspx.designer.vb">
+      <DependentUpon>GBM00000APPROVAL.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00000APPROVAL.aspx.vb">
+      <DependentUpon>GBM00000APPROVAL.aspx</DependentUpon>
+      <SubType>ASPXCodebehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00000SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00000SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00000SELECT.aspx.vb">
+      <DependentUpon>GBM00000SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00001COUNTRY.aspx.designer.vb">
+      <DependentUpon>GBM00001COUNTRY.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00001COUNTRY.aspx.vb">
+      <DependentUpon>GBM00001COUNTRY.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00001SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00001SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00001SELECT.aspx.vb">
+      <DependentUpon>GBM00001SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00002PORT.aspx.designer.vb">
+      <DependentUpon>GBM00002PORT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00002PORT.aspx.vb">
+      <DependentUpon>GBM00002PORT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00002SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00002SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00002SELECT.aspx.vb">
+      <DependentUpon>GBM00002SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00003DEPOT.aspx.designer.vb">
+      <DependentUpon>GBM00003DEPOT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00003DEPOT.aspx.vb">
+      <DependentUpon>GBM00003DEPOT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00003SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00003SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00003SELECT.aspx.vb">
+      <DependentUpon>GBM00003SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00004CUSTOMER.aspx.designer.vb">
+      <DependentUpon>GBM00004CUSTOMER.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00004CUSTOMER.aspx.vb">
+      <DependentUpon>GBM00004CUSTOMER.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00004SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00004SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00004SELECT.aspx.vb">
+      <DependentUpon>GBM00004SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00005SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00005SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00005SELECT.aspx.vb">
+      <DependentUpon>GBM00005SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00005TRADER.aspx.designer.vb">
+      <DependentUpon>GBM00005TRADER.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00005TRADER.aspx.vb">
+      <DependentUpon>GBM00005TRADER.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00006SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00006SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00006SELECT.aspx.vb">
+      <DependentUpon>GBM00006SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00006TANK.aspx.designer.vb">
+      <DependentUpon>GBM00006TANK.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00006TANK.aspx.vb">
+      <DependentUpon>GBM00006TANK.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00007SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00007SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00007SELECT.aspx.vb">
+      <DependentUpon>GBM00007SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00007UNNO.aspx.designer.vb">
+      <DependentUpon>GBM00007UNNO.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00007UNNO.aspx.vb">
+      <DependentUpon>GBM00007UNNO.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00008PRODUCT.aspx.designer.vb">
+      <DependentUpon>GBM00008PRODUCT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00008PRODUCT.aspx.vb">
+      <DependentUpon>GBM00008PRODUCT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00008SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00008SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00008SELECT.aspx.vb">
+      <DependentUpon>GBM00008SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00010CHARGECODE.aspx.designer.vb">
+      <DependentUpon>GBM00010CHARGECODE.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00010CHARGECODE.aspx.vb">
+      <DependentUpon>GBM00010CHARGECODE.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00010SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00010SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00010SELECT.aspx.vb">
+      <DependentUpon>GBM00010SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00014CUSTOMERAGENT.aspx.designer.vb">
+      <DependentUpon>GBM00014CUSTOMERAGENT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00014CUSTOMERAGENT.aspx.vb">
+      <DependentUpon>GBM00014CUSTOMERAGENT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00014SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00014SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00014SELECT.aspx.vb">
+      <DependentUpon>GBM00014SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00020EXRATE.aspx.designer.vb">
+      <DependentUpon>GBM00020EXRATE.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00020EXRATE.aspx.vb">
+      <DependentUpon>GBM00020EXRATE.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00020SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00020SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00020SELECT.aspx.vb">
+      <DependentUpon>GBM00020SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00021CLIENT.aspx.designer.vb">
+      <DependentUpon>GBM00021CLIENT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00021CLIENT.aspx.vb">
+      <DependentUpon>GBM00021CLIENT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00021SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00021SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00021SELECT.aspx.vb">
+      <DependentUpon>GBM00021SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00001BREAKER.aspx.designer.vb">
+      <DependentUpon>GBT00001BREAKER.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00001BREAKER.aspx.vb">
+      <DependentUpon>GBT00001BREAKER.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00001NEWBREAKER.aspx.designer.vb">
+      <DependentUpon>GBT00001NEWBREAKER.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00001NEWBREAKER.aspx.vb">
+      <DependentUpon>GBT00001NEWBREAKER.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00002RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00002RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00002RESULT.aspx.vb">
+      <DependentUpon>GBT00002RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00002SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00002SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00002SELECT.aspx.vb">
+      <DependentUpon>GBT00002SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00003RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00003RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00003RESULT.aspx.vb">
+      <DependentUpon>GBT00003RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00003SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00003SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00003SELECT.aspx.vb">
+      <DependentUpon>GBT00003SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00004NEWORDER.aspx.designer.vb">
+      <DependentUpon>GBT00004NEWORDER.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00004NEWORDER.aspx.vb">
+      <DependentUpon>GBT00004NEWORDER.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00004ORDER.aspx.designer.vb">
+      <DependentUpon>GBT00004ORDER.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00004ORDER.aspx.vb">
+      <DependentUpon>GBT00004ORDER.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00004SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00004SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00004SELECT.aspx.vb">
+      <DependentUpon>GBT00004SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00005APPROVAL.aspx.designer.vb">
+      <DependentUpon>GBT00005APPROVAL.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00005APPROVAL.aspx.vb">
+      <DependentUpon>GBT00005APPROVAL.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00005SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00005SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00005SELECT.aspx.vb">
+      <DependentUpon>GBT00005SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00030DETAILEDLIST.aspx.designer.vb">
+      <DependentUpon>GBT00030DETAILEDLIST.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00030DETAILEDLIST.aspx.vb">
+      <DependentUpon>GBT00030DETAILEDLIST.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00006RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00006RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00006RESULT.aspx.vb">
+      <DependentUpon>GBT00006RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00006RESULTTST.aspx.designer.vb">
+      <DependentUpon>GBT00006RESULTTST.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00006RESULTTST.aspx.vb">
+      <DependentUpon>GBT00006RESULTTST.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00007SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00007SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00007SELECT.aspx.vb">
+      <DependentUpon>GBT00007SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00008SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00008SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00008SELECT.aspx.vb">
+      <DependentUpon>GBT00008SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00009SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00009SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00009SELECT.aspx.vb">
+      <DependentUpon>GBT00009SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00010APPROVAL.aspx.designer.vb">
+      <DependentUpon>GBT00010APPROVAL.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00010APPROVAL.aspx.vb">
+      <DependentUpon>GBT00010APPROVAL.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00010SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00010SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00010SELECT.aspx.vb">
+      <DependentUpon>GBT00010SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00011RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00011RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00011RESULT.aspx.vb">
+      <DependentUpon>GBT00011RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00011SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00011SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00011SELECT.aspx.vb">
+      <DependentUpon>GBT00011SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00012APPROVAL.aspx.designer.vb">
+      <DependentUpon>GBT00012APPROVAL.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00012APPROVAL.aspx.vb">
+      <DependentUpon>GBT00012APPROVAL.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00012REPAIR.aspx.designer.vb">
+      <DependentUpon>GBT00012REPAIR.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00012REPAIR.aspx.vb">
+      <DependentUpon>GBT00012REPAIR.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00012SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00012SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00012SELECT.aspx.vb">
+      <DependentUpon>GBT00012SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00013RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00013RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00013RESULT.aspx.vb">
+      <DependentUpon>GBT00013RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00013SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00013SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00013SELECT.aspx.vb">
+      <DependentUpon>GBT00013SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00014BL.aspx.designer.vb">
+      <DependentUpon>GBT00014BL.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00014BL.aspx.vb">
+      <DependentUpon>GBT00014BL.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00015RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00015RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00015RESULT.aspx.vb">
+      <DependentUpon>GBT00015RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00015SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00015SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00015SELECT.aspx.vb">
+      <DependentUpon>GBT00015SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00017RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00017RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00017RESULT.aspx.vb">
+      <DependentUpon>GBT00017RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00018APPROVAL.aspx.designer.vb">
+      <DependentUpon>GBT00018APPROVAL.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00018APPROVAL.aspx.vb">
+      <DependentUpon>GBT00018APPROVAL.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00018SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00018SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00018SELECT.aspx.vb">
+      <DependentUpon>GBT00018SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00019APPROVAL.aspx.designer.vb">
+      <DependentUpon>GBT00019APPROVAL.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00019APPROVAL.aspx.vb">
+      <DependentUpon>GBT00019APPROVAL.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00019SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00019SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00019SELECT.aspx.vb">
+      <DependentUpon>GBT00019SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00020AGREEMENT.aspx.designer.vb">
+      <DependentUpon>GBT00020AGREEMENT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00020AGREEMENT.aspx.vb">
+      <DependentUpon>GBT00020AGREEMENT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00030SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00030SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00030SELECT.aspx.vb">
+      <DependentUpon>GBT00030SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00030RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00030RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00030RESULT.aspx.vb">
+      <DependentUpon>GBT00030RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00020LEASE.aspx.designer.vb">
+      <DependentUpon>GBT00020LEASE.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00020LEASE.aspx.vb">
+      <DependentUpon>GBT00020LEASE.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00020RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00020RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00020RESULT.aspx.vb">
+      <DependentUpon>GBT00020RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00020SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00020SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00020SELECT.aspx.vb">
+      <DependentUpon>GBT00020SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00021RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00021RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00021RESULT.aspx.vb">
+      <DependentUpon>GBT00021RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00021SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00021SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00021SELECT.aspx.vb">
+      <DependentUpon>GBT00021SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00022RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00022RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00022RESULT.aspx.vb">
+      <DependentUpon>GBT00022RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00022SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00022SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00022SELECT.aspx.vb">
+      <DependentUpon>GBT00022SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00023RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00023RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00023RESULT.aspx.vb">
+      <DependentUpon>GBT00023RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00024APPROVAL.aspx.designer.vb">
+      <DependentUpon>GBT00024APPROVAL.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00024APPROVAL.aspx.vb">
+      <DependentUpon>GBT00024APPROVAL.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00024SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00024SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00024SELECT.aspx.vb">
+      <DependentUpon>GBT00024SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00025LIST.aspx.designer.vb">
+      <DependentUpon>GBT00025LIST.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00025LIST.aspx.vb">
+      <DependentUpon>GBT00025LIST.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00025SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00025SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00025SELECT.aspx.vb">
+      <DependentUpon>GBT00025SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00026BLNOTRANSFER.aspx.designer.vb">
+      <DependentUpon>GBT00026BLNOTRANSFER.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00026BLNOTRANSFER.aspx.vb">
+      <DependentUpon>GBT00026BLNOTRANSFER.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00028INVOICEEDIT.aspx.designer.vb">
+      <DependentUpon>GBT00028INVOICEEDIT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00028INVOICEEDIT.aspx.vb">
+      <DependentUpon>GBT00028INVOICEEDIT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00028RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00028RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00028RESULT.aspx.vb">
+      <SubType>ASPXCodeBehind</SubType>
+      <DependentUpon>GBT00028RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00028SELECT.aspx.designer.vb">
+      <DependentUpon>GBT00028SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00028SELECT.aspx.vb">
+      <DependentUpon>GBT00028SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\MyExtensions\MyWebExtension.vb">
+      <VBMyExtensionTemplateID>Microsoft.VisualBasic.Web.MyExtension</VBMyExtensionTemplateID>
+      <VBMyExtensionTemplateVersion>1.0.0.0</VBMyExtensionTemplateVersion>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="THOMAS_MailTest2.aspx.designer.vb">
+      <DependentUpon>THOMAS_MailTest2.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="THOMAS_MailTest2.aspx.vb">
+      <DependentUpon>THOMAS_MailTest2.aspx</DependentUpon>
+      <SubType>ASPXCodebehind</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="COH0001FILEUP.ashx" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\PublishProfiles\FolderProfile.pubxml" />
+    <None Include="My Project\PublishProfiles\FolderProfile1.pubxml" />
+    <None Include="My Project\PublishProfiles\FolderProfile2.pubxml" />
+    <None Include="My Project\PublishProfiles\FolderProfile3.pubxml" />
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionExplicit>On</OptionExplicit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionCompare>Binary</OptionCompare>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionStrict>On</OptionStrict>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>49626</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:49607/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

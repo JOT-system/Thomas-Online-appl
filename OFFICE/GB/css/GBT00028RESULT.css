@@ -1,0 +1,194 @@
+﻿#invoiceInfo {
+    padding: 10px;
+    min-width: 100px;
+    height: 25px;
+}
+#txtCustomerName {
+    width: 200px;
+}
+/*#searchCondition {
+    padding: 10px;
+    min-width: 100px;
+    height:25px;
+}*/
+#divTemplateDownload {
+    display: inline-block;
+}
+#lblTemplateDownload {
+    display: inline-block;
+    color: blue;
+    font-size: 14px !important;
+    cursor: default;
+    border: solid 1px #ccc;
+    border-radius: 1px;
+    vertical-align: middle;
+    height: 20px;
+    padding-top: 4px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-bottom: 1px;
+    background-color: gainsboro;
+}
+#ulTemplateDownload {
+    left: 0;
+    top: 5px;
+    margin: 0;
+    padding: 0;
+}
+#ulTemplateDownload li {
+    margin:0; 
+    padding:0; 
+    list-style:none; 
+    float:left; 
+}
+#ulTemplateDownload div {
+    position: absolute;
+    margin: 0;
+    padding: 2px;
+    border: solid 1px #ccc;
+    z-index:23;
+    width:250px;
+    background-color:#DE9292;
+}
+#ulTemplateDownload div input {
+    position: relative;
+    display:block;
+    width:100%;
+    margin-bottom:2px;
+}
+/* 文言表示部分 lblで始まりTextで終わるSpan */
+#divContensbox span[id^="lbl"][id$="Text"] {
+    color: rgb(0,0,255);
+}
+/* 共通関数で自動生成した表のスタイル */
+#WF_LISTAREA {
+    margin-left: 10px;
+    margin-right: 10px;
+    /*height: calc(100% - 72px);*/
+    min-height: 180px;
+    position: relative;
+}
+/* 追加ボタンのスタイル */
+#WF_LISTAREA input[id^="btnWF_LISTAREAACTIONBTN"] {
+    min-height: 15px;
+    width: calc(100% - 10px);
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+/* 2列目COPYボタンのスタイル */
+#WF_LISTAREA button[id^="btnWF_LISTAREADELETEBTN"] {
+    width: 60px;
+    height: 20px;
+    text-align: center;
+    vertical-align: middle;
+}
+#WF_LISTAREA tr:not([data-order-row]) button[id^="btnWF_LISTAREADELETEBTN"]:after {
+    content: "DELETE";
+    line-height: 1px;
+}
+#actionButtonsBox {
+    min-width:720px;
+} 
+#lblPortText {
+    margin-right:2px;
+} 
+#lblApprovalLabel, #lblPortLabel {
+    text-decoration:underline;
+} 
+#WF_LISTAREA_DL button{
+    cursor:pointer;
+} 
+#WF_LISTAREA_DL > table > tbody > tr[data-order-row] td:not([data-showcell]), #WF_LISTAREA_DR table tbody tr[data-order-row] td:not([data-showcell]) {
+    font-size: 0 !important;
+    color: transparent !important;
+}
+/* 一覧表 ETD ETAの後ろに予定の印を付与（検索条件：予定） */
+/*#WF_LISTAREA.\30 1SCHE th[cellfiedlname="ETD1"]:after,
+#WF_LISTAREA.\30 1SCHE th[cellfiedlname="ETA1"]:after,
+#WF_LISTAREA.\30 1SCHE th[cellfiedlname="ETD2"]:after,
+#WF_LISTAREA.\30 1SCHE th[cellfiedlname="ETA2"]:after 
+{
+    content:'(SCHE)';
+}*/
+/* 一覧表 ETD ETAの後ろに実績の印を付与（検索条件：実績） */
+/*#WF_LISTAREA.\30 2FIX th[cellfiedlname="ETD1"]:after,
+#WF_LISTAREA.\30 2FIX th[cellfiedlname="ETA1"]:after,
+#WF_LISTAREA.\30 2FIX th[cellfiedlname="ETD2"]:after,
+#WF_LISTAREA.\30 2FIX th[cellfiedlname="ETA2"]:after {
+    content: '(FIX)';
+}*/
+/* 協定書行はNoを画像に置き換え */
+#WF_LISTAREA tr[data-rowtype="AGREEMENT"] th:nth-child(1) {
+    font-size: 0 !important;
+    color: transparent;
+}
+#WF_LISTAREA tr[data-rowtype="AGREEMENT"] th:nth-child(1):after {
+    height: 12px;
+    width: 32px;
+    content: '';
+    text-overflow: clip;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url('../../Images/orderArrow.png');
+    background-position: right;
+    line-height: 1px;
+    font-size: 16px;
+    color: black;
+    display: inline-block;
+}
+/* 他情報非表示 */
+tr[data-rowtype="AGREEMENT"] td[data-fieldname=BRID],
+tr[data-rowtype="AGREEMENT"] td[data-fieldname=SHIPPERNAME],
+tr[data-rowtype="AGREEMENT"] th[data-fieldname=BRID],
+tr[data-rowtype="AGREEMENT"] th[data-fieldname=SHIPPERNAME] {
+    font-size: 0 !important;
+    color: transparent;
+}
+/* 削除確認ポップアップ */
+#divConfirmBoxWrapper {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    opacity: 1;
+    z-index: 9998;
+    background-color: rgba(55, 55, 55, 0.6);
+    vertical-align: middle;
+    text-align: center;
+}
+
+#divConfirmBox {
+    position: fixed;
+    top: 100px;
+    text-align: left;
+    min-width: 500px;
+    left: calc(50% - 250px);
+    background-color: rgb(240,240,240);
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+#divConfirmtitle {
+    width: calc(100% - 20px);
+    font-weight: bold;
+    padding: 10px;
+    height: 15px;
+    background-color: #8BACCD;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+#divConfirmBoxButtons {
+    padding: 10px 10px 5px 5px;
+}
+
+#divConfirmBoxButtons input[type=button] {
+    min-width: 70px;
+}
+#divConfirmBoxMessageArea {
+    padding: 10px;
+}

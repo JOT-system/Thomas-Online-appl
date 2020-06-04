@@ -1,0 +1,223 @@
+﻿@charset "utf-8";
+
+/*ヘッダー*/
+#headerbox {
+    position:fixed;
+    top:34px; 
+    bottom:326.4px; 
+    left:0px; 
+    right:0px; 
+    overflow:hidden;
+    background-color: rgb(220,230,240); 
+}
+
+/*先頭ボタン*/
+#btnFIRST{
+    width:24px;
+    height:16px;
+}
+
+/*末尾ボタン*/
+#btnLAST{
+    width:24px;
+    height:16px;
+}
+
+/*絞り込み項目*/
+#extractItem {
+    width: 840px;
+    min-width: 840px;
+    display: table-cell;
+    text-align: left;
+}
+
+/*操作*/
+#lblOperationEx {
+    top: 46.4px;
+    height: 24px;
+}
+
+#txtOperationEx {
+    top: 44.8px;
+    height: 17.6px;
+    width: 112px;
+    color: black;
+    font-size: small;
+    vertical-align: middle;
+    text-align: left;
+    overflow: hidden;
+    ime-mode: inactive;
+    border: 1px solid black;
+}
+
+/*ユーザ名称*/
+#lblStaffNameEx 
+{
+    top: 46.4px;
+    left: 45px;
+    height: 24px;
+}
+#txtStaffNameEx 
+{
+    top: 44.8px;
+    left: 136px;
+    height: 17.6px;
+    width: 112px;
+    color: black;
+    font-size: small;
+    vertical-align: middle;
+    text-align: left;
+    overflow: hidden;
+    ime-mode: inactive;
+    border: 1px solid black;
+}
+
+/*明細*/
+#detailbox {
+    height:304px; 
+    position:fixed; 
+    bottom:20px; 
+    left:0px; 
+    right:0px; 
+    overflow:hidden;
+    background-color:rgb(148,138,84); 
+}
+
+#detailbox input[type=button]{
+    position:relative;
+    left:784px;
+    top:8px;
+    margin: 0px 0px 0px 3.2px;
+    width:80px;
+}
+
+.textCss{
+    color:black; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:left; 
+    overflow:hidden;
+    ime-mode:inactive;
+    border:1px solid black;
+}
+
+.textLeft{
+    color:black; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:left; 
+    overflow:hidden;
+    ime-mode:inactive;
+}
+
+.textLeftLabel{
+    color:blue; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:left; 
+    overflow:hidden;
+    ime-mode:active;
+}
+
+.textRight{
+    color:black; 
+    vertical-align:middle;
+    text-align:right; 
+    overflow:hidden;
+}
+
+.textCenter{
+    color:black; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:center; 
+    overflow:hidden;
+}
+
+.labelLeft{
+    color:black; 
+    font-size:small;
+    vertical-align:middle;
+    text-align:left; 
+    overflow:hidden;
+    ime-mode:inactive;
+    background-color:rgb(148,138,84); 
+}
+
+/*選択*/
+#stLineCnt{
+    position:fixed;
+    bottom:280px;
+    left:40px; 
+    width:320px;
+}
+
+/*申請ID*/
+#stApplyID{
+    position:fixed;
+    bottom:280px;
+    left:360px; 
+    width:320px;
+}
+
+/*ユーザーID*/
+#stUserID {
+    position: fixed;
+    bottom: 250px;
+    left: 40px;
+    width: 640px;
+}
+
+/*有効年月日*/
+#stYMD{
+    position:fixed;
+    bottom:220px;
+    left:40px; 
+    width:640px;
+}
+
+/*削除フラグ*/
+#stDelFlg{
+    position:fixed;
+    bottom:220px;
+    left:690px; 
+    width:640px;
+}
+
+/*ユーザータブ*/
+#stDtabUser {
+    position: fixed;
+    bottom: 183px;
+    left: 32px;
+    text-align: center;
+}
+
+#pnlListArea {
+    position: fixed;
+    top: 72px;
+    bottom: 336px;
+    left: 16px;
+    right: 16px;
+    background-color: #CCCCCC;
+    overflow: hidden;
+}
+
+#actionButtonsBox {
+    display: table;
+    width: calc(100% - 25px);
+}
+
+#actionButtonsBox a:nth-child(2) {
+    display: table-cell;
+    min-width: 500px;
+}
+
+#pnlListArea td, #pnlListArea th {
+    white-space: nowrap; /* 折り返させない */
+    text-overflow: ellipsis; /* 領域越を点々表示 */
+}
+
+#detailbox td, #detailbox th, #detailbox span {
+    white-space: nowrap; /* 折り返させない */
+    text-overflow: ellipsis; /* 領域越を点々表示 */
+}
