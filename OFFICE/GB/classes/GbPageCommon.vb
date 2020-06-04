@@ -375,6 +375,4 @@ Public Class GbPageCommon
         End Using
 
     End Function
-
-
 End Class

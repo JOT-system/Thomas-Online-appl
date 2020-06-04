@@ -15,6 +15,15 @@
     <style>
 
     </style>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-162522994-1');
+    </script>
     <%--共通利用するJavaScript --%>
     <script src='<%= ResolveUrl("~/script/common.js") %>' type="text/javascript" charset="utf-8"></script>
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
@@ -44,13 +53,17 @@
             displayLeftBox();
 
             /* 左ボックス表示ダブルクリックイベントのバインド */
+            var viewPOLCountry = '<%= Me.vLeftPOLCountry.ClientID  %>';
             var viewPOL = '<%= Me.vLeftPOL.ClientID  %>';
+            var viewPODCountry = '<%= Me.vLeftPODCountry.ClientID  %>';
             var viewPOD = '<%= Me.vLeftPOD.ClientID  %>';
             var viewShipper = '<%= Me.vLeftShipper.ClientID  %>';
             var viewConsignee = '<%= Me.vLeftConsignee.ClientID  %>';
             var viewProduct = '<%= Me.vLeftProduct.ClientID  %>';
             var viewApprovalId = '<%= Me.vLeftApproval.ClientID %>';            /* 承認 */
-            var dblClickObjects = [['<%= Me.txtPOL.ClientID %>', viewPOL],
+            var dblClickObjects = [['<%= Me.txtPOLCountry.ClientID %>', viewPOLCountry],
+                                   ['<%= Me.txtPOL.ClientID %>', viewPOL],
+                                   ['<%= Me.txtPODCountry.ClientID %>', viewPODCountry],
                                    ['<%= Me.txtPOD.ClientID %>', viewPOD],
                                    ['<%= Me.txtShipper.ClientID %>', viewShipper],
                                    ['<%= Me.txtConsignee.ClientID %>', viewConsignee],
@@ -66,7 +79,9 @@
             /* 拡張機能を紐づけるリスト及び機能のフラグの配列 
              * 2階層 1次元:コントロールのID,二次元:ソート機能フラグ(0,無し,1:名称のみ,2:コードのみ,3:両方),フィルタ機能フラグ(0,無し,1:設定)
              */ 
-            var leftListExtentionTarget = [['<%= Me.lbPOL.ClientID %>', '3', '1'],
+            var leftListExtentionTarget = [['<%= Me.lbPOLCountry.ClientID %>', '3', '1'],
+                                           ['<%= Me.lbPOL.ClientID %>', '3', '1'],
+                                           ['<%= Me.lbPODCountry.ClientID %>', '3', '1'],
                                            ['<%= Me.lbPOD.ClientID %>', '3', '1'],
                                            ['<%= Me.lbShipper.ClientID %>', '3', '1'],
                                            ['<%= Me.lbConsignee.ClientID %>', '3', '1'],
@@ -75,7 +90,9 @@
             addLeftBoxExtention(leftListExtentionTarget);
             
             /* 画面テキストボックス変更イベントのバインド(変更検知したいテキストボックスIDを指定 */
-            var targetOnchangeObjects = [['<%= Me.txtPOL.ClientID %>'],
+            var targetOnchangeObjects = [['<%= Me.txtPOLCountry.ClientID %>'],
+                                         ['<%= Me.txtPOL.ClientID %>'],
+                                         ['<%= Me.txtPODCountry.ClientID %>'],
                                          ['<%= Me.txtPOD.ClientID %>'],
                                          ['<%= Me.txtShipper.ClientID %>'],
                                          ['<%= Me.txtConsignee.ClientID %>'],
@@ -328,9 +345,19 @@
                             <asp:Label ID="lblProductText" runat="server" Text=""></asp:Label>
                         </span>
                         <span>
+                            <asp:Label ID="lblPOLCountry" runat="server" Text="POLCountry"></asp:Label>
+                            <asp:TextBox ID="txtPOLCountry" runat="server" Text=""></asp:TextBox>
+                            <asp:Label ID="lblPOLCountryText" runat="server" Text=""></asp:Label>
+                        </span> 
+                        <span>
                             <asp:Label ID="lblPOL" runat="server" Text="POL"></asp:Label>
                             <asp:TextBox ID="txtPOL" runat="server" Text=""></asp:TextBox>
                             <asp:Label ID="lblPOLText" runat="server" Text=""></asp:Label>
+                        </span> 
+                        <span>
+                            <asp:Label ID="lblPODCountry" runat="server" Text="PODCountry"></asp:Label>
+                            <asp:TextBox ID="txtPODCountry" runat="server" Text=""></asp:TextBox>
+                            <asp:Label ID="lblPODCountryText" runat="server" Text=""></asp:Label>
                         </span> 
                         <span>
                             <asp:Label ID="lblPOD" runat="server" Text="POD"></asp:Label>
@@ -435,12 +462,24 @@
                             </table>
                         </div>
                     </asp:View> <%-- END カレンダー VIEW　 --%>
+                    <%-- POLCountry VIEW　 --%>
+                    <asp:View ID="vLeftPOLCountry" runat="server">
+                        <div class="leftViewContents">
+                            <asp:ListBox ID="lbPOLCountry" runat="server" ></asp:ListBox>
+                        </div>
+                    </asp:View> <%-- END POLCountry VIEW　 --%>
                     <%-- POL VIEW　 --%>
                     <asp:View ID="vLeftPOL" runat="server">
                         <div class="leftViewContents">
                             <asp:ListBox ID="lbPOL" runat="server" ></asp:ListBox>
                         </div>
                     </asp:View> <%-- END POL VIEW　 --%>
+                    <%-- PODCountry VIEW　 --%>
+                    <asp:View ID="vLeftPODCountry" runat="server">
+                        <div class="leftViewContents">
+                            <asp:ListBox ID="lbPODCountry" runat="server" ></asp:ListBox>
+                        </div>
+                    </asp:View> <%-- END PODCountry VIEW　 --%>
                     <%-- POD VIEW --%>
                     <asp:View ID="vLeftPOD" runat="server">
                         <div class="leftViewContents">

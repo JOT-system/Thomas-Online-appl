@@ -154,7 +154,8 @@ Public Class GBT00018SELECT
                 '他のビューが存在する場合はViewIdでCaseを追加
                 '請求月ビュー表示切替
                 Case Me.vLeftBillingDate.ID
-                    SetBillingDateListItem(Me.txtBillingYmd.Text)
+                    'SetBillingDateListItem(Me.txtBillingYmd.Text)
+                    SetBillingDateListItem2(Me.txtBillingYmd.Text)
                 'カレンダビュー表示切替
                 Case Me.vLeftCal.ID
                     targetObject = FindControl(Me.hdnTextDbClickField.Value)
@@ -664,6 +665,84 @@ Public Class GBT00018SELECT
             COA0003LogFile.MESSAGENO = returnCode
             COA0003LogFile.COA0003WriteLog()
         End Try
+    End Sub
+
+    ''' <summary>
+    ''' 請求月リストアイテムを設定
+    ''' </summary>
+    Private Sub SetBillingDateListItem2(selectedValue As String)
+
+        'リストクリア
+        Me.lbBillingDate.Items.Clear()
+        Try
+
+            '検索SQL文
+            Dim initMonth As String = ""
+            Dim sqlStat As New StringBuilder
+            sqlStat.AppendLine("DECLARE @STARTDATE nvarchar(10);")
+            sqlStat.AppendLine("DECLARE @ENDDATE nvarchar(10);")
+            sqlStat.AppendLine("SELECT @STARTDATE =  DATEADD(M,1,CONVERT(date,MIN(CD.REPORTMONTH) + '/01'))")
+            sqlStat.AppendLine("FROM GBT0006_CLOSINGDAY CD")
+            sqlStat.AppendLine("WHERE  CD.DELFLG     <> @DELFLG;")
+            sqlStat.AppendLine("SELECT @ENDDATE =  DATEADD(M,2,CONVERT(date,MAX(CD.REPORTMONTH) + '/01'))")
+            sqlStat.AppendLine("FROM GBT0006_CLOSINGDAY CD")
+            sqlStat.AppendLine("WHERE  CD.DELFLG     <> @DELFLG;")
+
+            sqlStat.AppendLine("WITH DateTable(MyDate) AS ( ")
+            sqlStat.AppendLine("  SELECT")
+            sqlStat.AppendLine("    CONVERT(DATETIME, @STARTDATE)")
+            sqlStat.AppendLine("  UNION ALL ")
+            sqlStat.AppendLine("  SELECT")
+            sqlStat.AppendLine("    DATEADD(m, 1, MyDate) ")
+            sqlStat.AppendLine("  FROM")
+            sqlStat.AppendLine("    DateTable ")
+            sqlStat.AppendLine("  WHERE")
+            sqlStat.AppendLine("    MyDate < @ENDDATE")
+            sqlStat.AppendLine(") ")
+            sqlStat.AppendLine("SELECT CONVERT(CHAR(7),MyDate,111) as 'CODE', CONVERT(CHAR(7),MyDate,111) as 'NAME',")
+            sqlStat.AppendLine("       CONVERT(CHAR(7),MyDate,111) as 'DISPLAYNAME' FROM DateTable")
+            Dim retDt As New DataTable
+            Using SQLcon As New SqlConnection(COA0019Session.DBcon),
+                  SQLcmd = New SqlCommand(sqlStat.ToString, SQLcon)
+                'DataBase接続(Open)
+                SQLcon.Open()
+                With SQLcmd.Parameters
+                    .Add("@COMPCODE", System.Data.SqlDbType.NVarChar).Value = HttpContext.Current.Session("APSRVCamp")
+                    .Add("@DELFLG", System.Data.SqlDbType.NVarChar).Value = CONST_FLAG_YES
+                End With
+
+                Using sqlDa As New SqlDataAdapter(SQLcmd)
+                    sqlDa.Fill(retDt)
+                End Using 'sqlDa
+                If retDt IsNot Nothing Then
+                    With Me.lbBillingDate
+                        .DataValueField = "CODE"
+                        .DataTextField = "DISPLAYNAME"
+                        .DataSource = retDt
+                        .DataBind()
+                    End With
+                End If
+            End Using
+
+            '一応現在入力しているテキストと一致するものを選択状態
+            If Me.lbBillingDate.Items.Count > 0 Then
+                Dim findListItem = Me.lbBillingDate.Items.FindByValue(selectedValue)
+                If findListItem IsNot Nothing Then
+                    findListItem.Selected = True
+                End If
+            End If
+            '正常
+            returnCode = C_MESSAGENO.NORMAL
+
+        Catch ex As Exception
+            returnCode = C_MESSAGENO.EXCEPTION
+            COA0003LogFile.RUNKBN = C_RUNKBN.ONLINE
+            COA0003LogFile.NIWEA = C_NAEIW.ABNORMAL
+            COA0003LogFile.TEXT = ex.ToString()
+            COA0003LogFile.MESSAGENO = returnCode
+            COA0003LogFile.COA0003WriteLog()
+        End Try
+
     End Sub
 
 End Class

@@ -789,6 +789,8 @@ Public Class GBT00019APPROVAL
         sqlStat.AppendLine("        and OB.DELFLG <> @DELFLG")
         sqlStat.AppendLine("        inner join GBM0008_PRODUCT P")
         sqlStat.AppendLine("        on P.PRODUCTCODE = OB.PRODUCTCODE")
+        sqlStat.AppendLine("        and P.STYMD  <= OB.STYMD")
+        sqlStat.AppendLine("        and P.ENDYMD >= OB.STYMD")
         sqlStat.AppendLine("        and P.DELFLG <> @DELFLG")
         sqlStat.AppendLine("        where OV.ACTIONID = 'LOAD'")
         sqlStat.AppendLine("        and   OV.DELFLG <> @DELFLG")
@@ -1939,6 +1941,8 @@ Public Class GBT00019APPROVAL
         sqlStat.AppendLine("      FROM  GBT0005_ODR_VALUE    ")
         sqlStat.AppendLine("     WHERE ORDERNO  = @ORDERNO   ")
         sqlStat.AppendLine("       AND TANKSEQ  = @TANKSEQ ")
+        sqlStat.AppendLine("       AND ACTIONID  IN ('TKAL','TAED','TAEC')")
+        sqlStat.AppendLine("       AND ACTUALDATE = '1900/01/01'")
         sqlStat.AppendLine("       AND DELFLG   <> @DELFLG")
 
         sqlStat.AppendLine("UPDATE GBT0005_ODR_VALUE")
@@ -1948,6 +1952,8 @@ Public Class GBT00019APPROVAL
         sqlStat.AppendLine("      ,RECEIVEYMD = @RECEIVEYMD ")
         sqlStat.AppendLine(" WHERE ORDERNO    = @ORDERNO ")
         sqlStat.AppendLine("   AND TANKSEQ    = @TANKSEQ ")
+        sqlStat.AppendLine("   AND ACTIONID  IN ('TKAL','TAED','TAEC')")
+        sqlStat.AppendLine("   AND ACTUALDATE = '1900/01/01'")
         sqlStat.AppendLine("   AND DELFLG    <> @DELFLG")
         Using sqlCon As New SqlConnection(COA0019Session.DBcon),
             sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
@@ -1974,6 +1980,7 @@ Public Class GBT00019APPROVAL
         sqlStat.AppendLine(" WHERE ORDERNO    = @ORDERNO ")
         sqlStat.AppendLine("   AND TANKSEQ    = @TANKSEQ ")
         sqlStat.AppendLine("   AND ACTIONID  IN ('TKAL','TAED','TAEC')")
+        sqlStat.AppendLine("   AND ACTUALDATE = '1900/01/01'")
         sqlStat.AppendLine("   AND DELFLG    <> @DELFLG ")
 
         'DB接続

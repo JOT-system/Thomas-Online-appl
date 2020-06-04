@@ -305,13 +305,13 @@ Public Class GBT00003RESULT
             'フィルタ使用時の場合
             If isFillterOff = False Then
                 '条件に合致しない場合は非表示 HIDDENフィールドに1を立てる
-                If Not ((Me.txtShipper.Text.Trim = "" OrElse Convert.ToString(dr("SHIPPER")).Contains(Me.txtShipper.Text.Trim)) _
-                  AndAlso (Me.txtConsignee.Text.Trim = "" OrElse Convert.ToString(dr("CONSIGNEE")).Contains(Me.txtConsignee.Text.Trim)) _
-                  AndAlso (Me.txtProduct.Text.Trim = "" OrElse Convert.ToString(dr("PRODUCT")).Equals(Me.txtProduct.Text.Trim)) _
-                  AndAlso (Me.txtPol.Text.Trim = "" OrElse Convert.ToString(dr("POL1CODE")).Equals(Me.txtPol.Text.Trim)) _
-                  AndAlso (Me.txtPod.Text.Trim = "" OrElse Convert.ToString(dr("POD1CODE")).Equals(Me.txtPod.Text.Trim)) _
-                  AndAlso (Me.txtBreaker.Text.Trim = "" OrElse Convert.ToString(dr("BRID")).StartsWith(Me.txtBreaker.Text.Trim)) _
-                  AndAlso (Me.txtOrderId.Text.Trim = "" OrElse Convert.ToString(dr("ODID")).StartsWith(Me.txtOrderId.Text.Trim)) _
+                If Not ((Me.txtShipper.Text.Trim = "" OrElse Convert.ToString(dr("SHIPPER")).ToUpper.Contains(Me.txtShipper.Text.Trim.ToUpper)) _
+                  AndAlso (Me.txtConsignee.Text.Trim = "" OrElse Convert.ToString(dr("CONSIGNEE")).ToUpper.Contains(Me.txtConsignee.Text.Trim.ToUpper)) _
+                  AndAlso (Me.txtProduct.Text.Trim = "" OrElse Convert.ToString(dr("PRODUCT")).ToUpper.Equals(Me.txtProduct.Text.Trim.ToUpper)) _
+                  AndAlso (Me.txtPol.Text.Trim = "" OrElse Convert.ToString(dr("POL1CODE")).ToUpper.Equals(Me.txtPol.Text.Trim.ToUpper)) _
+                  AndAlso (Me.txtPod.Text.Trim = "" OrElse Convert.ToString(dr("POD1CODE")).ToUpper.Equals(Me.txtPod.Text.Trim.ToUpper)) _
+                  AndAlso (Me.txtBreaker.Text.Trim = "" OrElse Convert.ToString(dr("BRID")).ToUpper.StartsWith(Me.txtBreaker.Text.Trim.ToUpper)) _
+                  AndAlso (Me.txtOrderId.Text.Trim = "" OrElse Convert.ToString(dr("ODID")).ToUpper.StartsWith(Me.txtOrderId.Text.Trim.ToUpper)) _
                   AndAlso (Me.rblListViewType.SelectedValue = "ALL" OrElse Me.rblListViewType.SelectedValue = "BRONLY" AndAlso Convert.ToString(dr("BRODFLG")) = "1")) Then
                     dr.Item("HIDDEN") = 1
                 End If
@@ -673,16 +673,16 @@ Public Class GBT00003RESULT
         sqlStat.AppendLine("    ON  SP.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  SP.COUNTRYCODE  = OBS.LOADCOUNTRY1")
         sqlStat.AppendLine("   AND  SP.CUSTOMERCODE = OBS.SHIPPER")
-        sqlStat.AppendLine("   AND  SP.STYMD       <= OBS.ENDYMD")
-        sqlStat.AppendLine("   AND  SP.ENDYMD      >= OBS.STYMD")
+        sqlStat.AppendLine("   AND  SP.STYMD       <= OBS.VALIDITYTO")
+        sqlStat.AppendLine("   AND  SP.ENDYMD      >= OBS.VALIDITYTO")
         sqlStat.AppendLine("   AND  SP.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("   AND  SP.CUSTOMERTYPE IN('" & C_CUSTOMERTYPE.SHIPPER & "','" & C_CUSTOMERTYPE.COMMON & "')")
         sqlStat.AppendLine("  LEFT JOIN GBM0004_CUSTOMER CN") 'CONSIGNEE名称用JOIN
         sqlStat.AppendLine("    ON  CN.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  CN.COUNTRYCODE  = OBS.DELIVERYCOUNTRY1")
         sqlStat.AppendLine("   AND  CN.CUSTOMERCODE = OBS.CONSIGNEE")
-        sqlStat.AppendLine("   AND  CN.STYMD       <= OBS.ENDYMD")
-        sqlStat.AppendLine("   AND  CN.ENDYMD      >= OBS.STYMD")
+        sqlStat.AppendLine("   AND  CN.STYMD       <= OBS.VALIDITYTO")
+        sqlStat.AppendLine("   AND  CN.ENDYMD      >= OBS.VALIDITYTO")
         sqlStat.AppendLine("   AND  CN.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("   AND  CN.CUSTOMERTYPE IN('" & C_CUSTOMERTYPE.CONSIGNEE & "','" & C_CUSTOMERTYPE.COMMON & "')")
         sqlStat.AppendLine("  LEFT JOIN (SELECT OVS.ORDERNO,COUNT(DISTINCT OVS.TANKSEQ) AS NOOFORDER  ") 'オーダー数用JOIN
@@ -766,16 +766,16 @@ Public Class GBT00003RESULT
         sqlStat.AppendLine("    ON  SP.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  SP.COUNTRYCODE  = BS.LOADCOUNTRY1")
         sqlStat.AppendLine("   AND  SP.CUSTOMERCODE = BS.SHIPPER")
-        sqlStat.AppendLine("   AND  SP.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  SP.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  SP.STYMD       <= BS.VALIDITYTO")
+        sqlStat.AppendLine("   AND  SP.ENDYMD      >= BS.VALIDITYTO")
         sqlStat.AppendLine("   AND  SP.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("   AND  SP.CUSTOMERTYPE IN('" & C_CUSTOMERTYPE.SHIPPER & "','" & C_CUSTOMERTYPE.COMMON & "')")
         sqlStat.AppendLine("  LEFT JOIN GBM0004_CUSTOMER CN") 'CONSIGNEE名称用JOIN
         sqlStat.AppendLine("    ON  CN.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  CN.COUNTRYCODE  = BS.DELIVERYCOUNTRY1")
         sqlStat.AppendLine("   AND  CN.CUSTOMERCODE = BS.CONSIGNEE")
-        sqlStat.AppendLine("   AND  CN.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  CN.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  CN.STYMD       <= BS.VALIDITYTO")
+        sqlStat.AppendLine("   AND  CN.ENDYMD      >= BS.VALIDITYTO")
         sqlStat.AppendLine("   AND  CN.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("   AND  CN.CUSTOMERTYPE IN('" & C_CUSTOMERTYPE.CONSIGNEE & "','" & C_CUSTOMERTYPE.COMMON & "')")
         sqlStat.AppendLine("  LEFT JOIN GBM0008_PRODUCT PD") 'PRODUCT名称用JOIN
@@ -783,23 +783,23 @@ Public Class GBT00003RESULT
         'sqlStat.AppendLine("   AND  PD.CUSTOMERCODE = BS.SHIPPER")
         'sqlStat.AppendLine("   AND  PD.COUNTRYCODE  = BS.LOADCOUNTRY1")
         sqlStat.AppendLine("   AND  PD.PRODUCTCODE  = BS.PRODUCTCODE")
-        sqlStat.AppendLine("   AND  PD.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  PD.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  PD.STYMD       <= BS.VALIDITYTO")
+        sqlStat.AppendLine("   AND  PD.ENDYMD      >= BS.VALIDITYTO")
         sqlStat.AppendLine("   AND  PD.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("   AND  PD.ENABLED      = @ENABLED")
         sqlStat.AppendLine("  LEFT JOIN GBM0002_PORT POL") 'POL名称用JOIN
         sqlStat.AppendLine("    ON  POL.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  POL.COUNTRYCODE  = BS.LOADCOUNTRY1")
         sqlStat.AppendLine("   AND  POL.PORTCODE     = BS.LOADPORT1")
-        sqlStat.AppendLine("   AND  POL.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  POL.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  POL.STYMD       <= BS.VALIDITYTO")
+        sqlStat.AppendLine("   AND  POL.ENDYMD      >= BS.VALIDITYTO")
         sqlStat.AppendLine("   AND  POL.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN GBM0002_PORT POD") 'POD名称用JOIN
         sqlStat.AppendLine("    ON  POD.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  POD.COUNTRYCODE  = BS.DISCHARGECOUNTRY1")
         sqlStat.AppendLine("   AND  POD.PORTCODE     = BS.DISCHARGEPORT1")
-        sqlStat.AppendLine("   AND  POD.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  POD.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  POD.STYMD       <= BS.VALIDITYTO")
+        sqlStat.AppendLine("   AND  POD.ENDYMD      >= BS.VALIDITYTO")
         sqlStat.AppendLine("   AND  POD.DELFLG      <> @DELFLG")
         sqlStat.AppendLine(" WHERE BI.TYPE           = 'INFO'")
         sqlStat.AppendLine("   AND BI.BRTYPE        <> '" & C_BRTYPE.REPAIR & "'") 'リペアブレーカーは一覧より除く
@@ -861,12 +861,16 @@ Public Class GBT00003RESULT
                 .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                 .Add("@ENABLED", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                 If Me.hdnETDStYMD.Value <> "" Then
-                    .Add("@ETDST", SqlDbType.Date).Value = Date.ParseExact(Me.hdnETDStYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
-                    .Add("@ETDEND", SqlDbType.Date).Value = Date.ParseExact(Me.hdnETDEndYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                    '.Add("@ETDST", SqlDbType.Date).Value = Date.ParseExact(Me.hdnETDStYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                    '.Add("@ETDEND", SqlDbType.Date).Value = Date.ParseExact(Me.hdnETDEndYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                    .Add("@ETDST", SqlDbType.Date).Value = FormatDateYMD(Me.hdnETDStYMD.Value, GBA00003UserSetting.DATEFORMAT)
+                    .Add("@ETDEND", SqlDbType.Date).Value = FormatDateYMD(Me.hdnETDEndYMD.Value, GBA00003UserSetting.DATEFORMAT)
                 End If
                 If Me.hdnETAStYMD.Value <> "" Then
-                    .Add("@ETAST", SqlDbType.Date).Value = Date.ParseExact(Me.hdnETAStYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
-                    .Add("@ETAEND", SqlDbType.Date).Value = Date.ParseExact(Me.hdnETAEndYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                    '.Add("@ETAST", SqlDbType.Date).Value = Date.ParseExact(Me.hdnETAStYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                    '.Add("@ETAEND", SqlDbType.Date).Value = Date.ParseExact(Me.hdnETAEndYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                    .Add("@ETAST", SqlDbType.Date).Value = FormatDateYMD(Me.hdnETAStYMD.Value, GBA00003UserSetting.DATEFORMAT)
+                    .Add("@ETAEND", SqlDbType.Date).Value = FormatDateYMD(Me.hdnETAEndYMD.Value, GBA00003UserSetting.DATEFORMAT)
                 End If
                 If Me.hdnShipper.Value <> "" Then
                     .Add("@SHIPPER", SqlDbType.NVarChar).Value = Me.hdnShipper.Value

@@ -944,6 +944,9 @@ Public Class GBT00018APPROVAL
         sqlStat.AppendLine("      ,ISNULL(CL.LASTSTEP,'') AS LASTSTEP")
 
         sqlStat.AppendLine("      ,CASE WHEN ISNULL(CL.APPLYID,'') = '' THEN '' ELSE FORMAT(CL.UPDYMD,'yyyy/MM/dd HH:mm') END AS CLOSEDATE")
+        sqlStat.AppendLine("      ,ISNULL(CL.PAYABLE,0.0) AS PAYABLE")
+        sqlStat.AppendLine("      ,ISNULL(CL.RECEIVABLE,0.0) AS RECEIVABLE")
+        sqlStat.AppendLine("      ,ISNULL(CL.NETSETTLEMENTDUE,0.0) AS NETSETTLEMENTDUE")
 
         sqlStat.AppendLine("      ,(SELECT  MAX(REPORTMONTH) FROM GBT0006_CLOSINGDAY  PCL ")
         sqlStat.AppendLine("        INNER JOIN COT0002_APPROVALHIST APL ")
@@ -1102,6 +1105,7 @@ Public Class GBT00018APPROVAL
         Using sqlCon As New SqlConnection(COA0019Session.DBcon),
               sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
             sqlCon.Open() '接続オープン
+            sqlCmd.CommandTimeout = 180
             'SQLパラメータ設定
             With sqlCmd.Parameters
                 .Add("@COMPCODE", SqlDbType.NVarChar, 20).Value = HttpContext.Current.Session("APSRVCamp") '本来はセッション変数をラッピングした構造体で取得
@@ -1443,6 +1447,7 @@ Public Class GBT00018APPROVAL
                                                  "BILLINGYMD", "ISBILLINGCLOSED", "USDAMOUNT", "LOCALAMOUNT", "REPORTYMD",
                                                  "JOT", "ISAUTOCLOSE", "ISAUTOCLOSELONG", "DISPLAYCURRANCYCODE", "TAXATION", "TAXRATE", "TAXRATE_L", "SOARATE", "EXSHIPRATE_1", "EXSHIPRATE_2",
                                                  "REPORTMONTHH", "COUNTRYNAMEH", "OFFICENAMEH", "APPLYUSERH", "CURRENCYCODEH", "LOCALRATEH",
+                                                 "PAYABLE", "RECEIVABLE", "NETSETTLEMENTDUE",
                                                  "REPORTMONTHORG", "DATA", "JOTCODE", "ACCODE", "LOCALRATESOA", "AMOUNTPAYODR", "LOCALPAYODR",
                                                  "UAG_USD", "UAG_LOCAL", "USD_USD", "USD_LOCAL", "LOCAL_USD", "LOCAL_LOCAL",
                                                  "FINALREPORTNOH", "CLOSEDATEH", "PRINTDATEH", "REMARK"}
@@ -2735,6 +2740,7 @@ Public Class GBT00018APPROVAL
                 Using sqlCmd As New SqlCommand()
                     sqlCmd.Connection = sqlCon
                     sqlCmd.Transaction = tran
+                    sqlCmd.CommandTimeout = 180
                     With sqlCmd.Parameters
                         Dim procDate As Date = Date.Now
                         'パラメータ設定
@@ -3024,6 +3030,10 @@ Public Class GBT00018APPROVAL
         writeDr.Item("CLOSEDATEH") = Convert.ToString(selectedRow.Item("CLOSEDATE"))
         writeDr.Item("PRINTDATEH") = Date.Now.ToString("yyyy/MM/dd HH:mm")
 
+        writeDr.Item("PAYABLE") = Convert.ToString(selectedRow.Item("PAYABLE"))
+        writeDr.Item("RECEIVABLE") = Convert.ToString(selectedRow.Item("RECEIVABLE"))
+        writeDr.Item("NETSETTLEMENTDUE") = Convert.ToString(selectedRow.Item("NETSETTLEMENTDUE"))
+
         If JOTSOAflg Then
 
             If Me.hdnBillingYmd.Value.Trim = "" Then
@@ -3264,8 +3274,11 @@ Public Class GBT00018APPROVAL
         sqlStat.AppendLine("    cc.OFFDBACCOUNT as OFFDBACCOUNT,")
         sqlStat.AppendLine("    cc.OFFCRACCOUNTFORIGN as OFFCRACCOUNTFORIGN,")
         sqlStat.AppendLine("    cc.OFFDBACCOUNTFORIGN as OFFDBACCOUNTFORIGN,")
-        sqlStat.AppendLine("    cc.CRSEGMENT1 as CRSEGMENT1,")
-        sqlStat.AppendLine("    cc.DBSEGMENT1 as DBSEGMENT1,")
+        '計上用セグメント(リース契約)設定
+        'sqlStat.AppendLine("    cc.CRSEGMENT1 as CRSEGMENT1,")
+        'sqlStat.AppendLine("    cc.DBSEGMENT1 as DBSEGMENT1,")
+        sqlStat.AppendLine("    case when isnull(rlc.ACCSEGMENT,'') <> '' and cc.CRSEGMENT1 = '30301' then rlc.ACCSEGMENT else cc.CRSEGMENT1 end as CRSEGMENT1,")
+        sqlStat.AppendLine("    case when isnull(rlc.ACCSEGMENT,'') <> '' and cc.DBSEGMENT1 = '30301' then rlc.ACCSEGMENT else cc.DBSEGMENT1 end as DBSEGMENT1,")
         sqlStat.AppendLine("    cc.CRGENERALPURPOSE as CRGENERALPURPOSE,")
         'sqlStat.AppendLine("    case when cc.CRGENERALPURPOSE = '1' and (jv.UAG_USD * rt.EXRATE) < 100000.0 then '1'")
         'sqlStat.AppendLine("            when cc.CRGENERALPURPOSE = '1' and (jv.UAG_USD * rt.EXRATE) between 100000.0 and 199999.0 then '2'")
@@ -3357,6 +3370,8 @@ Public Class GBT00018APPROVAL
         sqlStat.AppendLine("                    case when cc.CLASS2 <> '' then '1' else '2' end as 'COSTTYPE'")
         sqlStat.AppendLine("                from GBM0010_CHARGECODE cc")
         sqlStat.AppendLine("                where cc.DELFLG <> 'Y'")
+        sqlStat.AppendLine("                and   cc.STYMD  <= getdate()")
+        sqlStat.AppendLine("                and   cc.ENDYMD >= getdate()")
         sqlStat.AppendLine("                and   cc.CRACCOUNT <> ''")
         sqlStat.AppendLine("                group by cc.COSTCODE,cc.CRACCOUNT,cc.DBACCOUNT,cc.CRACCOUNTFORIGN,cc.DBACCOUNTFORIGN,")
         sqlStat.AppendLine("                        cc.OFFCRACCOUNT,cc.OFFDBACCOUNT,cc.OFFCRACCOUNTFORIGN,cc.OFFDBACCOUNTFORIGN,")
@@ -3375,6 +3390,17 @@ Public Class GBT00018APPROVAL
         sqlStat.AppendLine("    and rt.CURRENCYCODE = 'JPY'")
         sqlStat.AppendLine("    and rt.TARGETYM = @TARGETYM")
         sqlStat.AppendLine("    and rt.DELFLG <> @DELFLG")
+        '計上用セグメント取得
+        sqlStat.AppendLine("left outer join GBT0012_RESRVLEASETANK rlt")
+        sqlStat.AppendLine("    on rlt.TANKNO = jv.TANKNO")
+        sqlStat.AppendLine("    and ( rlt.LEASEENDYMD = '1900/01/01' or rlt.LEASEENDYMD >= case when jv.ACTUALDATE <> '1900/01/01' then jv.ACTUALDATE else jv.SHIPDATE end ) ")
+        sqlStat.AppendLine("    and rlt.SEGSWSTYMD <= case when jv.ACTUALDATE <> '1900/01/01' then jv.ACTUALDATE else jv.SHIPDATE end ")
+        sqlStat.AppendLine("    and rlt.SEGSWENDYMD >= case when jv.ACTUALDATE <> '1900/01/01' then jv.ACTUALDATE else jv.SHIPDATE end ")
+        sqlStat.AppendLine("    and rlt.DELFLG <> @DELFLG")
+        sqlStat.AppendLine("left outer join GBT0010_LBR_CONTRACT rlc")
+        sqlStat.AppendLine("    on rlc.CONTRACTNO = rlt.CONTRACTNO")
+        sqlStat.AppendLine("    and rlc.DELFLG <> @DELFLG")
+
         sqlStat.AppendLine("where jv.CLOSINGMONTH = @CLOSINGMONTH")
         sqlStat.AppendLine("and   jv.CLOSINGGROUP = @CLOSINGGROUP")
         sqlStat.AppendLine("and   jv.DELFLG <> @DELFLG")
@@ -3482,6 +3508,7 @@ Public Class GBT00018APPROVAL
         Using sqlCon As New SqlConnection(COA0019Session.DBcon),
              sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
             sqlCon.Open() '接続オープン
+            sqlCmd.CommandTimeout = 180
             With sqlCmd.Parameters
                 .Add("@DELFLG", SqlDbType.NVarChar).Value = CONST_FLAG_YES
                 .Add("@ENTYMD", SqlDbType.DateTime).Value = Date.Now

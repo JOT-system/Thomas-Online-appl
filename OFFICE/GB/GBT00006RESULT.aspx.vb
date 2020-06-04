@@ -2369,6 +2369,7 @@ Public Class GBT00006RESULT
         sqlStat.AppendLine("   AND TANKSEQ   = @TANKSEQ")
         sqlStat.AppendLine("   AND DELFLG   <> @DELFLG")
 
+        ' TANK No.更新
         sqlStat.AppendLine("UPDATE GBT0005_ODR_VALUE")
         sqlStat.AppendLine("   SET TANKNO         = @TANKNO ")
         sqlStat.AppendLine("      ,SCHEDELDATE    = CASE WHEN ACTIONID = 'TKAL' THEN @SCHEDELDATE ELSE SCHEDELDATE END")
@@ -2381,6 +2382,7 @@ Public Class GBT00006RESULT
         sqlStat.AppendLine("   AND TANKNO   <> @TANKNO")
         sqlStat.AppendLine("   AND TANKSEQ   = @TANKSEQ")
         sqlStat.AppendLine("   AND DELFLG   <> @DELFLG")
+
 #Region "DATAID保持対応前"
         'sqlStat.AppendLine("INSERT INTO GBT0005_ODR_VALUE (")
         'sqlStat.AppendLine("      ORDERNO")

@@ -878,6 +878,24 @@ Partial Public Class GBT00020AGREEMENT
     Protected WithEvents hdnListHeaderDepoIn As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
+    '''hdnListHeaderSegSwStartDate コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnListHeaderSegSwStartDate As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
+    '''hdnListHeaderSegSwEndDate コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnListHeaderSegSwEndDate As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
     '''hdnListHeaderRemarks コントロール。
     '''</summary>
     '''<remarks>
@@ -1947,6 +1965,42 @@ Partial Public Class GBT00020AGREEMENT
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
     Protected WithEvents lblDepoInText As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''lblSegSwStartDate コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblSegSwStartDate As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtSegSwStartDate コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtSegSwStartDate As Global.System.Web.UI.WebControls.TextBox
+    
+    '''<summary>
+    '''lblSegSwEndDate コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblSegSwEndDate As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtSegSwEndDate コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtSegSwEndDate As Global.System.Web.UI.WebControls.TextBox
     
     '''<summary>
     '''divRemarkInputBoxWrapper コントロール。

@@ -15,45 +15,39 @@
     <link href="~/GB/css/GBT00028RESULT.css" rel="stylesheet" />
     <style>
     </style>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-162522994-1');
+    </script>
     <%--共通利用するJavaScript --%>
     <script src='<%= ResolveUrl("~/script/common.js") %>' type="text/javascript" charset="utf-8"></script>
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
     <script type="text/javascript" src='<%= ResolveUrl("~/script/calendar.js") %>'  charset="utf-8"></script>
     <%--個別のスクリプトは以下に記載 --%>
-    <script type="text/javascript" src='<%= ResolveUrl("~/GB/script/GBT00028RESULT.js") %>'  charset="utf-8"></script>
     <script type="text/javascript">
         // ○画面ロード時処理(すべてのレンダリングが終了後実行されます。)
         window.addEventListener('DOMContentLoaded', function () {
             screenLock();
             /* ボタンクリックイベントのバインド(適宜追加) */
-            var targetButtonObjects = ['<%= Me.btnBack.ClientId  %>', '<%= Me.btnLeftBoxButtonSel.ClientId  %>',
-                                       '<%= Me.btnLeftBoxButtonCan.ClientId  %>', 
+            var targetButtonObjects = ['<%= Me.btnBack.ClientId  %>',
                                        '<%= Me.btnExcelDownload.ClientID %>',
                                        '<%= Me.btnSave.ClientID %>',
+                                       '<%= Me.btnDel.ClientID %>',
                                        '<%= Me.btnInvoiceNew.ClientID %>'];
-            var templateDlButtons = document.getElementsByName('btnTemplateItem');
-            if (templateDlButtons !== null) {
-				for (let i = 0; i < templateDlButtons.length; i++) {
-                    let templateDlButton = templateDlButtons[i];
-                    targetButtonObjects.push(templateDlButton.id)
-				}
-            }
             bindButtonClickEvent(targetButtonObjects);
 
             /* 左ボックス表示/非表示制御(hdnIsLeftBoxOpenが'Open'の場合表示) */
             displayLeftBox();
 
             /* 左ボックス表示ダブルクリックイベントのバインド */
-            //var viewCalId = '';
-            //var viewBreakerType = '';
-            //var dblClickObjects = [['',viewCalId],
-            //                       ['', viewBreakerType]];
-
-            //bindLeftBoxShowEvent(dblClickObjects);
             /* 手入力変更時のイベント */
 
             /* 左ボックスのリストボックスダブルクリックイベントバインド */
-            //bindLeftListBoxDblClickEvent();
             
             /* 画面テキストボックス変更イベントのバインド(変更検知したいテキストボックスIDを指定 */
             //var targetOnchangeObjects = [''];
@@ -70,28 +64,12 @@
             openHelpPage(); /* hdnCanHelpOpenに"1"が立たない限り開きません。 */
 
             /* カレンダー描画処理 */
-            //var calValueObj = document.getElementById('');
-            //if (calValueObj !== null) {
-            //    /* 日付格納隠し項目がレンダリングされている場合のみ実行 */
-            //    carenda(0);
-            //    setAltMsg(firstAltYMD, firstAltMsg);
-            //}
 
             ///* グリッドのクリックイベント紐づけ */
-            //bindGridButtonClickEvent();
-            ///* ブレーカー単票画面の表示 */
-            //var breakerOpenFlg = document.getElementById('hdnBreakerViewOpen');
-            //if (breakerOpenFlg !== null) {
-            //    if (breakerOpenFlg.value === '1') {
-            //        breakerOpenFlg.value = '0';
-            //        openBreakerWindow();
-            //    }
-            //}
+
             /* 共通一覧のスクロールイベント紐づけ */
             bindListCommonEvents('<%= Me.WF_LISTAREA.ClientId %>', '<%= if(IsPostBack = True, "1", "0") %>', true);
             /* 検索ボックス生成 */
-            //commonCreateSearchArea('searchCondition');
-            //bindDisplayTemplateBtn();
             screenUnlock();
         });
 
@@ -154,32 +132,11 @@
                 <%--ご自由に！！(このコメントは消してください) --%>
                 <%-- ************************************** --%>
                 <div id="actionButtonsBox">
-<%--                    <div id="divTemplateDownload">
-                        <asp:Label ID="lblTemplateDownload" runat="server" Text="雛形ダウンロード"></asp:Label>
-                        <asp:Repeater ID="repTemplateDownload" runat="server">
-                            <HeaderTemplate>
-                                <ul id="ulTemplateDownload">
-                                    <li>
-                                        <div id="divTemplateItems" style="display:none;">
-                            </HeaderTemplate>
-                            <ItemTemplate>
-                                <input id="btnTemplateItem<%# GetDataItem().ToString() %>" name="btnTemplateItem" type="button" value="<%# GetDataItem().ToString() %>" />
-                            </ItemTemplate>
-                            <FooterTemplate>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </FooterTemplate>
-                        </asp:Repeater>                        
-                    </div>--%>
-
-                    <%--<input id="btnExtract" type="button" value="絞り込み"  runat="server"  />--%>
                     <input id="btnInvoiceNew" type="button" value="請求書作成"  runat="server"  />
+                    <input id="btnDel" type="button" value="削除"  runat="server"  />
                     <input id="btnSave" type="button" value="保存"  runat="server"  />
-                    <input id="btnExcelDownload" type="button" value="Excelダウンロード" visible="false" runat="server" />
+                    <input id="btnExcelDownload" type="button" value="台帳出力" runat="server" />
                     <input id="btnBack" type="button" value="戻る"  runat="server" />
-<%--                    <div id="btnFIRST" class="firstPage" runat="server"></div>
-                    <div id="btnLAST" class="lastPage" runat="server"></div>--%>
                 </div>
                 <div id="invoiceInfo">
                     <table class="itemTable">
@@ -191,19 +148,6 @@
                         </tr>
                     </table>
                 </div>
-<%--                <div id="searchCondition">
-                </div>
-                <div id="divSearchConditionBox">
-                    <asp:HiddenField ID="hdnSearchConditionDetailOpenFlg" runat="server" Value="" />
-                    <span>
-                        <asp:Label ID="lblShipperLabel" runat="server" Text=""></asp:Label>
-                        <asp:TextBox ID="txtShipper" runat="server" Text=""></asp:TextBox>
-                    </span>
-                    <span>
-                        <asp:Label ID="lblRemarkCond" runat="server" Text="Remarks"></asp:Label>
-                        <asp:TextBox ID="txtRemarkCont" runat="server" Text=""></asp:TextBox>
-                    </span>
-                </div>--%>
                 <asp:panel id="WF_LISTAREA" runat="server" >
                 </asp:panel>
                 <div id="divHidden">

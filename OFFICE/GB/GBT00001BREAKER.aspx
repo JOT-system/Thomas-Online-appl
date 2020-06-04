@@ -12,6 +12,15 @@
     <link href="~/css/commonStyle.css" rel="stylesheet" type="text/css" />
     <%--個別のスタイルは以下に記載 OR 外部ファイルに逃す --%>
     <link href="~/GB/css/GBT00001BREAKER.css?rd=20190527" rel="stylesheet" type="text/css" />
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-162522994-1');
+    </script>
     <%--共通利用するJavaScript --%>
     <script src='<%= ResolveUrl("~/script/common.js") %>' type="text/javascript" charset="utf-8"></script>
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
@@ -442,11 +451,20 @@
                             <td class="textRightCell">
                                 <asp:Label ID="lblBrRemark" runat="server" Text="BR注記" Font-Underline="true"></asp:Label>
                             </td>
-                            <td colspan="5">
+                            <%--<td colspan="5">--%>
+                            <td>
                                 <span id="spnBrRemark" <%= If(Me.lblBrRemarkText.Enabled, "", "class=""aspNetDisabled""") %>>
                                 <%= If(Me.lblBrRemarkText.Text = "", "<span class=""remarksMessage"" title=""" & Me.hdnRemarkEmptyMessage.Value & """>&nbsp;</span>", "") %>
                                 <asp:label ID="lblBrRemarkText" runat="server" Text=""></asp:label>
                                 </span>
+                            </td>
+                            <td class="textRightCell">
+                                <asp:Label ID="lblCopied" runat="server" Text=""></asp:Label>
+                                <%= IIf(Me.hdnOriginalCopyBrid.Value = "", "<span>(New)</span>", "<span>(Copy)</span>") %>
+                            </td>
+                            <td colspan="2">
+                                <asp:Label ID="lblCopiedFrom" runat="server" Text=""></asp:Label>
+                                <%= IIf(Me.hdnOriginalCopyBrid.Value = "", "", Me.hdnOriginalCopyBrid.Value) %>
                             </td>
                             <td>
                                 &nbsp;

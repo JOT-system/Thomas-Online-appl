@@ -822,6 +822,7 @@ Public Class GBM00006TANK
         Dim type As String = ""
         Dim date5 As String = ""
         Dim date2_5 As String = ""
+        Dim dateManu As String = ""
 
         For i As Integer = 0 To COA0029XlsTable.TBLDATA.Rows.Count - 1
 
@@ -868,6 +869,8 @@ Public Class GBM00006TANK
                         date5 = INProwWork(workColumn).ToString
                     ElseIf workColumn = "INSPECTDATE2P5" Then
                         date2_5 = INProwWork(workColumn).ToString
+                    ElseIf workColumn = "DATEOFMANUFACTURE" Then
+                        dateManu = INProwWork(workColumn).ToString
                     Else
                         'INProwWork(workColumn) = ""
                     End If
@@ -906,15 +909,17 @@ Public Class GBM00006TANK
                         End If
                     End If
                     If workColumn = "DATEOFMANUFACTURE" Then
+                        dateManu = ""
                         If IsDate(INProwWork(workColumn)) Then
                             INProwWork(workColumn) = Date.Parse(Convert.ToString(INProwWork(workColumn))).ToString("yyyy/MM/dd")
+                            dateManu = Date.Parse(Convert.ToString(INProwWork(workColumn))).ToString(GBA00003UserSetting.DATEFORMAT)
                         End If
                     End If
 
                 End If
             Next
             ' 次回点検自動算出 ここから
-            SetNextInspect(date2_5, date5, val, type)
+            SetNextInspect(date2_5, date5, dateManu, val, type)
             If val <> "" Then
                 val = BASEDLL.FormatDateYMD(val, GBA00003UserSetting.DATEFORMAT)
             End If
@@ -5306,6 +5311,15 @@ Public Class GBM00006TANK
     End Sub
 
     ''' <summary>
+    ''' 製造日変更時
+    ''' </summary>
+    Public Sub DATEOFMANUFACTURE_Change()
+
+        NextInspectConfig()
+
+    End Sub
+
+    ''' <summary>
     ''' 次回検査日設定名設定
     ''' </summary>
     Public Sub NextInspectConfig()
@@ -5314,6 +5328,7 @@ Public Class GBM00006TANK
         Dim ins5Date As Date = Nothing
         Dim ins2h As String = ""
         Dim ins2hDate As Date = Nothing
+        Dim manufac As String = ""
         Dim val As String = ""
         Dim type As String = ""
 
@@ -5332,10 +5347,15 @@ Public Class GBM00006TANK
                     ins2h = DirectCast(WF_DViewRep1.Items(i).FindControl("WF_Rep1_VALUE_1"),
                                                     System.Web.UI.WebControls.TextBox).Text
 
+                ElseIf DirectCast(WF_DViewRep1.Items(i).FindControl("WF_Rep1_FIELD_1"), System.Web.UI.WebControls.Label).Text = "DATEOFMANUFACTURE" Then
+
+                    manufac = DirectCast(WF_DViewRep1.Items(i).FindControl("WF_Rep1_VALUE_1"),
+                                                    System.Web.UI.WebControls.TextBox).Text
+
                 End If
             Next
 
-            SetNextInspect(ins2h, ins5, val, type)
+            SetNextInspect(ins2h, ins5, manufac, val, type)
 
             'リピーター次回検査日設定
             For i As Integer = 0 To WF_DViewRep1.Items.Count - 1
@@ -7286,31 +7306,41 @@ Public Class GBM00006TANK
     ''' <param name="date5">[IN]5年点検日</param>
     ''' <param name="nextVal">[OUT]次回点検日</param>
     ''' <param name="nextType">[OUT次回点検種類]</param>
-    Private Sub SetNextInspect(ByVal date2_5 As String, ByVal date5 As String, ByRef nextVal As String, ByRef nextType As String)
-        Dim ins5 As String = date5
-        Dim ins2h As String = date2_5
+    Private Sub SetNextInspect(ByVal date2_5 As String, ByVal date5 As String, ByVal dateManu As String, ByRef nextVal As String, ByRef nextType As String)
+        Dim ins5 As String = "1900/01/01"
+        Dim ins2h As String = "1900/01/01"
+        Dim manufact As String = "1900/01/01"
         Dim val As String = ""
         Dim type As String = ""
+        If date5 <> "" Then ins5 = date5
+        If date2_5 <> "" Then ins2h = date2_5
+        If dateManu <> "" Then manufact = dateManu
 
         Dim ins5Date As Date
         Dim ins2hDate As Date
+        Dim manufactDate As Date
         Dim cnv As String = GBA00003UserSetting.DATEFORMAT.Replace("dd", "01")
-        If Not (ins5 = "" OrElse ins2h = "") Then
+        'If Not (ins5 = "" OrElse ins2h = "") Then
+        If Not (manufact = "1900/01/01" AndAlso ins5 = "1900/01/01") Then
             ins5 = FormatDateYMD(ins5, GBA00003UserSetting.DATEFORMAT)
             ins2h = FormatDateYMD(ins2h, GBA00003UserSetting.DATEFORMAT)
-            If Date.TryParse(ins5, ins5Date) AndAlso Date.TryParse(ins2h, ins2hDate) Then
-                '「２．５年検査実施日」の方が小さい
+            manufact = FormatDateYMD(manufact, GBA00003UserSetting.DATEFORMAT)
+            ' 基準日
+            If Date.TryParse(ins5, ins5Date) AndAlso Date.TryParse(ins2h, ins2hDate) AndAlso Date.TryParse(manufact, manufactDate) Then
+                If ins5Date < manufactDate Then ins5Date = manufactDate
                 If ins5Date >= ins2hDate Then
-                    val = ins5Date.AddMonths(30).ToString(cnv)
+                    '「２．５年検査実施日」の方が小さい
                     type = "2.5"
-                    '「５年検査実施日」の方が小さい
+                    val = ins5Date.AddMonths(30).ToString(cnv)
                 ElseIf ins5Date < ins2hDate Then
+                    '「５年検査実施日」の方が小さい
                     type = "5"
-                    If ins5Date.AddMonths(27) >= ins2hDate Then
-                        val = ins2hDate.AddMonths(30).ToString(cnv)
-                    ElseIf ins5Date.AddMonths(27) < ins2hDate Then
-                        val = ins5Date.AddMonths(60).ToString(cnv)
-                    End If
+                    'If ins5Date.AddMonths(27) >= ins2hDate Then
+                    '    val = ins2hDate.AddMonths(30).ToString(cnv)
+                    'ElseIf ins5Date.AddMonths(27) < ins2hDate Then
+                    '    val = ins5Date.AddMonths(60).ToString(cnv)
+                    'End If
+                    val = ins5Date.AddMonths(60).ToString(cnv)
                 End If
             End If
         End If

@@ -752,6 +752,78 @@ Partial Public Class GBT00014BL
     Protected WithEvents txtMarksNumbers As Global.System.Web.UI.WebControls.TextBox
     
     '''<summary>
+    '''lblVsl2nd コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblVsl2nd As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtVsl2nd コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtVsl2nd As Global.System.Web.UI.WebControls.TextBox
+    
+    '''<summary>
+    '''lblVoy2nd コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblVoy2nd As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtVoy2nd コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtVoy2nd As Global.System.Web.UI.WebControls.TextBox
+    
+    '''<summary>
+    '''lblVsl3rd コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblVsl3rd As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtVsl3rd コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtVsl3rd As Global.System.Web.UI.WebControls.TextBox
+    
+    '''<summary>
+    '''lblVoy3rd コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblVoy3rd As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtVoy3rd コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtVoy3rd As Global.System.Web.UI.WebControls.TextBox
+    
+    '''<summary>
     '''divTankDetailInfo コントロール。
     '''</summary>
     '''<remarks>

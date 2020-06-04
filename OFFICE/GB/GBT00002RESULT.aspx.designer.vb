@@ -266,6 +266,33 @@ Partial Public Class GBT00002RESULT
     Protected WithEvents lblProductText As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
+    '''lblPOLCountry コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblPOLCountry As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtPOLCountry コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtPOLCountry As Global.System.Web.UI.WebControls.TextBox
+    
+    '''<summary>
+    '''lblPOLCountryText コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblPOLCountryText As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
     '''lblPOL コントロール。
     '''</summary>
     '''<remarks>
@@ -291,6 +318,33 @@ Partial Public Class GBT00002RESULT
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
     Protected WithEvents lblPOLText As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''lblPODCountry コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblPODCountry As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtPODCountry コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtPODCountry As Global.System.Web.UI.WebControls.TextBox
+    
+    '''<summary>
+    '''lblPODCountryText コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblPODCountryText As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
     '''lblPOD コントロール。
@@ -752,6 +806,24 @@ Partial Public Class GBT00002RESULT
     Protected WithEvents hdnCalendarValue As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
+    '''vLeftPOLCountry コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents vLeftPOLCountry As Global.System.Web.UI.WebControls.View
+    
+    '''<summary>
+    '''lbPOLCountry コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lbPOLCountry As Global.System.Web.UI.WebControls.ListBox
+    
+    '''<summary>
     '''vLeftPOL コントロール。
     '''</summary>
     '''<remarks>
@@ -768,6 +840,24 @@ Partial Public Class GBT00002RESULT
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
     Protected WithEvents lbPOL As Global.System.Web.UI.WebControls.ListBox
+    
+    '''<summary>
+    '''vLeftPODCountry コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents vLeftPODCountry As Global.System.Web.UI.WebControls.View
+    
+    '''<summary>
+    '''lbPODCountry コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lbPODCountry As Global.System.Web.UI.WebControls.ListBox
     
     '''<summary>
     '''vLeftPOD コントロール。

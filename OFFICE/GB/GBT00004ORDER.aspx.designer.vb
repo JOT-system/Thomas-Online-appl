@@ -518,6 +518,33 @@ Partial Public Class GBT00004ORDER
     Protected WithEvents ckhShowTotalInvoiceRelatedCost As Global.System.Web.UI.WebControls.CheckBox
     
     '''<summary>
+    '''spnHideNoAmount コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents spnHideNoAmount As Global.System.Web.UI.HtmlControls.HtmlGenericControl
+    
+    '''<summary>
+    '''lblHideNoAmount コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblHideNoAmount As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''chkHideNoAmount コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents chkHideNoAmount As Global.System.Web.UI.WebControls.CheckBox
+    
+    '''<summary>
     '''btnAddCost コントロール。
     '''</summary>
     '''<remarks>

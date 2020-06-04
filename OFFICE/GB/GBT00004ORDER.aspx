@@ -18,6 +18,15 @@
             content:"<%= Me.hdnListDeleteName.Value %>";
         }
     </style>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-162522994-1');
+    </script>
     <%--共通利用するJavaScript --%>
     <script src='<%= ResolveUrl("~/script/common.js") %>' type="text/javascript" charset="utf-8" ></script>
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
@@ -148,6 +157,7 @@
                 dragDropObj.addEventListener("drop", f_dragEvent, false);
             }
             /* 費用入力項目の同行の金額と比較し色を付ける*/
+            setCompareNumBackGroundColor('AMOUNTBR','AMOUNTFIX','S'); // OriginalとEstimated差異
             setCostPriceBackGroundColor(); // 変更時のイベントも同様に紐づけ
             bindCalcDemAgentComm();
             /* アップロードボタンの設定 */
@@ -158,6 +168,14 @@
             bindListCommonEvents('<%= Me.WF_LISTAREA.ClientId %>','<%= if(IsPostBack = True, "1", "0") %>',true);
             /* 検索ボックス生成 */
             commonCreateSearchArea('orderHeaderBox');
+
+            /* Remarkボックスの前画面操作抑止 */
+            var divRemarkInputBoxWrapperObj = document.getElementById('divRemarkInputBoxWrapper');
+            if (divRemarkInputBoxWrapperObj !== null) {
+                if (divRemarkInputBoxWrapperObj.style.display !== 'none') {
+                    commonDisableModalBg(divRemarkInputBoxWrapperObj.id);
+                }
+            }
 
             screenUnlock();
             var rblPolPodObj = document.getElementById('rblPolPod');
@@ -283,6 +301,10 @@
                     <span id="spnShowTotalInvoiceRelatedCost"  runat="server" visible="false" data-comment="SOAのTOTALINVOICEを表示するかのチェックボックス、一旦常に非表示(当条件項目の表示制御PGは入れていない、ある程度修正しやすいように画面項目として置いている)">
                         <asp:Label ID="lblShowTotalInvoiceRelatedCost" runat="server" Text=""></asp:Label>
                         <span><asp:CheckBox ID="ckhShowTotalInvoiceRelatedCost" runat="server" Checked="false" /></span>
+                    </span>
+                  　<span id="spnHideNoAmount"  runat="server" visible="false" data-comment="金額０を非表示とする">
+                        <asp:Label ID="lblHideNoAmount" runat="server" Text="Hide $0"></asp:Label>
+                        <span><asp:CheckBox ID="chkHideNoAmount" runat="server" Checked="true" /></span>
                     </span>
                 </div>
                 <!-- 追加ボタン -->

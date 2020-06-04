@@ -50,10 +50,6 @@ li .areaTitle {
 }
 /* 表レイアウト確認の為罫線出し */
 .itemTable td,
-.itemTable th {
-    /* border: 1px solid black; */
-}
-.itemTable td,
 .itemTable th
 {
     padding: 2px;
@@ -237,6 +233,9 @@ th {
     background-color:rgb(22,54,92);
     color:white;
 }
+#tblTankInfoList th.tankNoCol {
+    width: 100px;
+}
 #tblTankInfoList th.toOrder {
     width: 50px;
 }
@@ -244,7 +243,7 @@ th {
     width: 60px;
 }
 #tblTankInfoList th.delButtonCol {
-    /* width: 60px; */
+     width: 60px; 
 }
 .delButtonCol {
     width:0;
@@ -386,7 +385,7 @@ table.tankInput span[id^="lbl"][id$="Text"] {
 /* **************************
     ダブルクリックのアンダーライン
 ************************** */
-#lblCurrency, #lblStartDate, #lblEndDateSche,
+#lblCurrency, #lblStartDate, #lblEndDateSche, #lblSegSwStartDate, #lblSegSwEndDate,
 #lblEndDate, #lblDepoIn, #lblLeaseType, #lblPaymentMonth,
 #lblAutoExtend, #lblAutoExtendKind, #lblLeasePaymentKind, #lblTax {
     text-decoration: underline;

@@ -275,10 +275,11 @@ Public Class GBT00025LIST
             If Me.GBT00025SValues.SelectedListDt.Columns.Contains("SHEETID") Then
                 sheetName = Convert.ToString(selectedDr("SHEETID"))
             End If
-            COA0027ReportTable.MAPID = listMapId                             'PARAM01:画面ID
-            COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
-            COA0027ReportTable.FILETYPE = "XLSX"                               'PARAM03:出力ファイル形式
-            COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
+            COA0027ReportTable.MAPID = listMapId                                    'PARAM01:画面ID
+            COA0027ReportTable.REPORTID = reportId                                  'PARAM02:帳票ID
+            'COA0027ReportTable.FILETYPE = "XLSX"                                   'PARAM03:出力ファイル形式
+            COA0027ReportTable.FILETYPE = Convert.ToString(selectedDr("FILETYPE"))  'PARAM03:出力ファイル形式
+            COA0027ReportTable.TBLDATA = dt                                         'PARAM04:データ参照tabledata
             If sheetName <> "" Then
                 COA0027ReportTable.ADDSHEET = sheetName
             End If

@@ -4782,9 +4782,13 @@ Public Class GBT00012REPAIR
         sqlStat.AppendLine("   AND  TR.CLASS        = '" & C_TRADER.CLASS.AGENT & "' ")
         sqlStat.AppendLine("  LEFT JOIN COS0005_USER US1")
         sqlStat.AppendLine("    ON  US1.USERID      = AH.APPLICANTID")
+        sqlStat.AppendLine("   AND  US1.STYMD      <= AH.APPLYDATE")
+        sqlStat.AppendLine("   AND  US1.ENDYMD     >= AH.APPLYDATE")
         sqlStat.AppendLine("   AND  US1.DELFLG     <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN COS0005_USER US2")
         sqlStat.AppendLine("    ON  US2.USERID      = AH.APPROVERID")
+        sqlStat.AppendLine("   AND  US2.STYMD      <= AH.APPROVEDATE")
+        sqlStat.AppendLine("   AND  US2.ENDYMD     >= AH.APPROVEDATE")
         sqlStat.AppendLine("   AND  US2.DELFLG     <> @DELFLG")
 
         sqlStat.AppendLine("  LEFT JOIN GBM0008_PRODUCT PD2")
@@ -4991,7 +4995,10 @@ Public Class GBT00012REPAIR
         sqlStat.AppendLine("      + (SELECT VALUE1")
         sqlStat.AppendLine("           FROM COS0017_FIXVALUE")
         sqlStat.AppendLine("          WHERE CLASS   = @CLASS")
-        sqlStat.AppendLine("            AND KEYCODE = @KEYCODE)")
+        sqlStat.AppendLine("            AND KEYCODE = @KEYCODE")
+        sqlStat.AppendLine("            AND STYMD  <= @STYMD")
+        sqlStat.AppendLine("            AND ENDYMD >= @ENDYMD")
+        sqlStat.AppendLine("            AND DELFLG <> @DELFLG)")
         Try
             If sqlCon Is Nothing Then
                 sqlCon = New SqlConnection(COA0019Session.DBcon)
@@ -5004,6 +5011,9 @@ Public Class GBT00012REPAIR
                 With sqlCmd.Parameters
                     .Add("@CLASS", SqlDbType.NVarChar, 20).Value = "SERVERSEQ"
                     .Add("@KEYCODE", SqlDbType.NVarChar, 20).Value = COA0019Session.APSRVname
+                    .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                 End With
 
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -6800,7 +6810,10 @@ Public Class GBT00012REPAIR
             sqlStat.AppendLine("      + (SELECT VALUE1")
             sqlStat.AppendLine("           FROM COS0017_FIXVALUE")
             sqlStat.AppendLine("          WHERE CLASS   = @CLASS")
-            sqlStat.AppendLine("            AND KEYCODE = @KEYCODE)")
+            sqlStat.AppendLine("            AND KEYCODE = @KEYCODE")
+            sqlStat.AppendLine("            AND STYMD  <= @STYMD")
+            sqlStat.AppendLine("            AND ENDYMD >= @ENDYMD")
+            sqlStat.AppendLine("            AND DELFLG <> @DELFLG)")
             sqlStat.AppendLine("      + '-'")
             sqlStat.AppendLine("      + right('0000' + trim(convert(char,NEXT VALUE FOR GBQ0003_ORDER)),4)")
             Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
@@ -6808,6 +6821,9 @@ Public Class GBT00012REPAIR
                 With sqlCmd.Parameters
                     .Add("@CLASS", SqlDbType.NVarChar, 20).Value = "SERVERSEQ"
                     .Add("@KEYCODE", SqlDbType.NVarChar, 20).Value = HttpContext.Current.Session("APSRVname")
+                    .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                 End With
 
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -7073,6 +7089,8 @@ Public Class GBT00012REPAIR
 
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FV1") 'FIXVAL
         sqlStat.AppendLine("    ON FV1.CLASS       = 'DESCGOODS'")
+        sqlStat.AppendLine("   AND FV1.STYMD      <= getdate()")
+        sqlStat.AppendLine("   AND FV1.ENDYMD     >= getdate()")
         sqlStat.AppendLine("   AND FV1.DELFLG     <> @DELFLG")
 
         sqlStat.AppendLine("  LEFT JOIN GBM0020_EXRATE ER") 'ExRate

@@ -524,7 +524,7 @@ Public Class GBT00020AGREEMENT
         Next
         '一覧表
         Dim rightMessage As String = ""
-        Dim tankChkField As New List(Of String) From {"LEASESTYMD", "LEASEENDYMDSCR", "LEASEENDYMD", "REMARK"}
+        Dim tankChkField As New List(Of String) From {"LEASESTYMD", "LEASEENDYMDSCR", "LEASEENDYMD", "SEGSWSTYMD", "SEGSWENDYMD", "REMARK"}
         Dim keyField As New List(Of String) From {"TANKNO"}
         Dim tankListChkMessage As String = CheckSingle(CONST_MAPID, workDs.Tables(CONST_DT_NAME_TANKINFO), tankChkField, rightMessage, keyField)
         If tankListChkMessage <> C_MESSAGENO.NORMAL Then
@@ -615,6 +615,15 @@ Public Class GBT00020AGREEMENT
                 Return False
             End If
         Next chkObj
+        '******************************
+        '延長料入力チェック
+        '******************************
+        If Me.txtAutoExtend.Text = CONST_FLAG_YES AndAlso DecimalStringToDecimal(Me.txtReLease.Text) <= 0 Then
+            CommonFunctions.ShowMessage(C_MESSAGENO.REQUIREDVALUE, Me.lblFooterMessage, pageObject:=Me)
+            Me.txtReLease.Focus()
+            Return False
+        End If
+
         '****************************************
         '他ユーザー更新チェック
         '当画面遷移直後の情報と現在のDBの状態比較
@@ -1177,6 +1186,8 @@ Public Class GBT00020AGREEMENT
 
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FV1") 'FIXVAL
         sqlStat.AppendLine("    ON FV1.CLASS       = 'DESCGOODS'")
+        sqlStat.AppendLine("   AND FV1.STYMD      <= getdate()")
+        sqlStat.AppendLine("   AND FV1.ENDYMD     >= getdate()")
         sqlStat.AppendLine("   AND FV1.DELFLG     <> @DELFLG")
 
         sqlStat.AppendLine("  LEFT JOIN GBM0020_EXRATE ER") 'ExRate
@@ -1380,10 +1391,13 @@ Public Class GBT00020AGREEMENT
                 '動的パラメータはタンクNoのみ
                 Dim paramTankno = sqlCmd.Parameters.Add("@TANKNO", SqlDbType.NVarChar)
                 '登録対象のタンクNoをループ
-                For Each tankNo As String In dicTankNo.Keys
-                    paramTankno.Value = tankNo
+                'For Each tankNo As String In dicTankNo.Keys
+                For Each drOrderValue As DataRow In dtOrderValue.Rows
+                    'paramTankno.Value = tankNo
+                    paramTankno.Value = drOrderValue("TANKNO")
                     sqlCmd.ExecuteNonQuery()
-                Next tankNo
+                    'Next tankNo
+                Next
             End Using
 
             Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
@@ -1647,7 +1661,10 @@ Public Class GBT00020AGREEMENT
             sqlStat.AppendLine("      + (SELECT VALUE1")
             sqlStat.AppendLine("           FROM COS0017_FIXVALUE")
             sqlStat.AppendLine("          WHERE CLASS   = @CLASS")
-            sqlStat.AppendLine("            AND KEYCODE = @KEYCODE)")
+            sqlStat.AppendLine("            AND KEYCODE = @KEYCODE")
+            sqlStat.AppendLine("            AND STYMD  <= @STYMD")
+            sqlStat.AppendLine("            AND ENDYMD >= @ENDYMD")
+            sqlStat.AppendLine("            AND DELFLG <> @DELFLG)")
             sqlStat.AppendLine("      + '-'")
             sqlStat.AppendLine("      + right('0000' + trim(convert(char,NEXT VALUE FOR GBQ0003_ORDER)),4)")
             Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
@@ -1655,6 +1672,9 @@ Public Class GBT00020AGREEMENT
                 With sqlCmd.Parameters
                     .Add("@CLASS", SqlDbType.NVarChar, 20).Value = "SERVERSEQ"
                     .Add("@KEYCODE", SqlDbType.NVarChar, 20).Value = HttpContext.Current.Session("APSRVname")
+                    .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                 End With
 
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -1726,6 +1746,10 @@ Public Class GBT00020AGREEMENT
                             depotCode = Me.lbDepot.SelectedItem.Value
                         End If
                         SetDisplayDepot(targetTextBox, depotCode)
+                        'デポインコードが指定された場合、セグメント切替終了日を変更する
+                        If FormatDateYMD(Me.txtSegSwEndDate.Text, GBA00003UserSetting.DATEFORMAT) = "2099/12/31" Then
+                            Me.txtSegSwEndDate.Text = FormatDateContrySettings(Date.Now.ToString, GBA00003UserSetting.DATEFORMAT)
+                        End If
                     End If
 
                 Case Else
@@ -1816,6 +1840,9 @@ Public Class GBT00020AGREEMENT
         selectedRow.Item("LEASESTYMD") = FormatDateYMD(Me.txtStartDate.Text, GBA00003UserSetting.DATEFORMAT)
         selectedRow.Item("LEASEENDYMDSCR") = FormatDateYMD(Me.txtEndDateSche.Text, GBA00003UserSetting.DATEFORMAT)
         selectedRow.Item("LEASEENDYMD") = FormatDateYMD(Me.txtEndDate.Text, GBA00003UserSetting.DATEFORMAT)
+        selectedRow.Item("SEGSWSTYMD") = FormatDateYMD(Me.txtSegSwStartDate.Text, GBA00003UserSetting.DATEFORMAT)
+        selectedRow.Item("SEGSWENDYMD") = FormatDateYMD(Me.txtSegSwEndDate.Text, GBA00003UserSetting.DATEFORMAT)
+
         selectedRow.Item("REMARK") = Me.txtTankRemarks.Text
         Dim dicChkItem As New Dictionary(Of String, CheckBox) From {{"CANCELFLG", Me.chkCancel},
                                                                     {"PAYSTDAILY", Me.chkPayStDaily},
@@ -1881,6 +1908,8 @@ Public Class GBT00020AGREEMENT
         Me.txtStartDate.Text = FormatDateContrySettings(Convert.ToString(selectedRow.Item("LEASESTYMD")), GBA00003UserSetting.DATEFORMAT)
         Me.txtEndDateSche.Text = FormatDateContrySettings(Convert.ToString(selectedRow.Item("LEASEENDYMDSCR")), GBA00003UserSetting.DATEFORMAT)
         Me.txtEndDate.Text = FormatDateContrySettings(Convert.ToString(selectedRow.Item("LEASEENDYMD")), GBA00003UserSetting.DATEFORMAT)
+        Me.txtSegSwStartDate.Text = FormatDateContrySettings(Convert.ToString(selectedRow.Item("SEGSWSTYMD")), GBA00003UserSetting.DATEFORMAT)
+        Me.txtSegSwEndDate.Text = FormatDateContrySettings(Convert.ToString(selectedRow.Item("SEGSWENDYMD")), GBA00003UserSetting.DATEFORMAT)
         Me.txtTankRemarks.Text = Convert.ToString(selectedRow.Item("REMARK"))
         Dim dicChkItem As New Dictionary(Of String, CheckBox) From {{"CANCELFLG", Me.chkCancel},
                                                                     {"PAYSTDAILY", Me.chkPayStDaily},
@@ -2018,7 +2047,11 @@ Public Class GBT00020AGREEMENT
         Me.txtDepoIn.Text = depoCode
         Me.lblDepoInText.Text = ""
         If depoCode <> "" Then
-            SetDisplayProduct(Me.txtDepoIn, depoCode)
+            SetDisplayDepot(Me.txtDepoIn, depoCode)
+            'デポインコードが指定された場合、セグメント切替終了日を変更する
+            If FormatDateYMD(Me.txtSegSwEndDate.Text, GBA00003UserSetting.DATEFORMAT) = "2099/12/31" Then
+                Me.txtSegSwEndDate.Text = FormatDateContrySettings(Date.Now.ToString, GBA00003UserSetting.DATEFORMAT)
+            End If
         End If
     End Sub
     ''' <summary>
@@ -2401,6 +2434,8 @@ Public Class GBT00020AGREEMENT
             .Add("DEPOTINNAME", GetType(String)).DefaultValue = ""
             .Add("PAYSTDAILY", GetType(String)).DefaultValue = ""
             .Add("PAYENDDAILY", GetType(String)).DefaultValue = ""
+            .Add("SEGSWSTYMD", GetType(String)).DefaultValue = Date.Now.ToString("yyyy/MM/dd") 'デフォルトは引き当て日
+            .Add("SEGSWENDYMD", GetType(String)).DefaultValue = "2099/12/31" 'デフォルト値は最大値
             .Add("REMARK", GetType(String)).DefaultValue = ""
             .Add("DELFLG", GetType(String)).DefaultValue = ""
             .Add("INITYMD", GetType(String)).DefaultValue = ""
@@ -3058,6 +3093,8 @@ Public Class GBT00020AGREEMENT
             sqlStatTankSel.AppendLine("   ,TGT.DEPOTIN")
             sqlStatTankSel.AppendLine("   ,TGT.PAYSTDAILY")
             sqlStatTankSel.AppendLine("   ,TGT.PAYENDDAILY")
+            sqlStatTankSel.AppendLine("   ,CASE TGT.SEGSWSTYMD     WHEN '1900/01/01' THEN '' ELSE FORMAT(TGT.SEGSWSTYMD,   'yyyy/MM/dd')  END AS SEGSWSTYMD")
+            sqlStatTankSel.AppendLine("   ,CASE TGT.SEGSWENDYMD    WHEN '1900/01/01' THEN '' ELSE FORMAT(TGT.SEGSWENDYMD,   'yyyy/MM/dd')  END AS SEGSWENDYMD")
             sqlStatTankSel.AppendLine("   ,TGT.REMARK")
             sqlStatTankSel.AppendFormat("FROM {0} TGT ", CONST_TBL_TANK).AppendLine()
             sqlStatTankSel.AppendLine(" WHERE TGT.CONTRACTNO  = @CONTRACTNO")
@@ -3080,6 +3117,8 @@ Public Class GBT00020AGREEMENT
             sqlStatUpdate.AppendLine("  ,DEPOTIN")
             sqlStatUpdate.AppendLine("  ,PAYSTDAILY")
             sqlStatUpdate.AppendLine("  ,PAYENDDAILY")
+            sqlStatUpdate.AppendLine("  ,SEGSWSTYMD")
+            sqlStatUpdate.AppendLine("  ,SEGSWENDYMD")
             sqlStatUpdate.AppendLine("  ,REMARK")
             sqlStatUpdate.AppendLine("  ,DELFLG")
             sqlStatUpdate.AppendLine("  ,INITYMD")
@@ -3102,6 +3141,8 @@ Public Class GBT00020AGREEMENT
             sqlStatUpdate.AppendLine("     ,TGT.DEPOTIN")
             sqlStatUpdate.AppendLine("     ,TGT.PAYSTDAILY")
             sqlStatUpdate.AppendLine("     ,TGT.PAYENDDAILY")
+            sqlStatUpdate.AppendLine("     ,TGT.SEGSWSTYMD")
+            sqlStatUpdate.AppendLine("     ,TGT.SEGSWENDYMD")
             sqlStatUpdate.AppendLine("     ,TGT.REMARK")
             sqlStatUpdate.AppendLine("     ,@DELFLG_YES AS DELFLG")
             sqlStatUpdate.AppendLine("     ,@INITYMD    AS INITYMD")
@@ -3125,6 +3166,8 @@ Public Class GBT00020AGREEMENT
             sqlStatUpdate.AppendLine("     ,DEPOTIN        = @DEPOTIN")
             sqlStatUpdate.AppendLine("     ,PAYSTDAILY     = @PAYSTDAILY")
             sqlStatUpdate.AppendLine("     ,PAYENDDAILY    = @PAYENDDAILY")
+            sqlStatUpdate.AppendLine("     ,SEGSWSTYMD     = @SEGSWSTYMD")
+            sqlStatUpdate.AppendLine("     ,SEGSWENDYMD    = @SEGSWENDYMD")
             sqlStatUpdate.AppendLine("     ,REMARK         = @REMARK")
             sqlStatUpdate.AppendLine("     ,UPDYMD         = @UPDYMD")
             sqlStatUpdate.AppendLine("     ,UPDUSER        = @UPDUSER")
@@ -3149,6 +3192,8 @@ Public Class GBT00020AGREEMENT
             sqlStatInsert.AppendLine("  ,DEPOTIN")
             sqlStatInsert.AppendLine("  ,PAYSTDAILY")
             sqlStatInsert.AppendLine("  ,PAYENDDAILY")
+            sqlStatInsert.AppendLine("  ,SEGSWSTYMD")
+            sqlStatInsert.AppendLine("  ,SEGSWENDYMD")
             sqlStatInsert.AppendLine("  ,REMARK")
             sqlStatInsert.AppendLine("  ,DELFLG")
             sqlStatInsert.AppendLine("  ,INITYMD")
@@ -3170,6 +3215,8 @@ Public Class GBT00020AGREEMENT
             sqlStatInsert.AppendLine("     ,@DEPOTIN")
             sqlStatInsert.AppendLine("     ,@PAYSTDAILY")
             sqlStatInsert.AppendLine("     ,@PAYENDDAILY")
+            sqlStatInsert.AppendLine("     ,@SEGSWSTYMD")
+            sqlStatInsert.AppendLine("     ,@SEGSWENDYMD")
             sqlStatInsert.AppendLine("     ,@REMARK")
             sqlStatInsert.AppendLine("     ,@DELFLG")
             sqlStatInsert.AppendLine("     ,@INITYMD")
@@ -3195,6 +3242,9 @@ Public Class GBT00020AGREEMENT
 
                 Dim paramPayStDaily = sqlCmd.Parameters.Add("@PAYSTDAILY", SqlDbType.NVarChar)
                 Dim paramPayEndDaily = sqlCmd.Parameters.Add("@PAYENDDAILY", SqlDbType.NVarChar)
+
+                Dim paramSegSwStYmd = sqlCmd.Parameters.Add("@SEGSWSTYMD", SqlDbType.Date)
+                Dim paramSegSwEndYmd = sqlCmd.Parameters.Add("@SEGSWENDYMD", SqlDbType.Date)
 
                 Dim paramRemark = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar)
                 With sqlCmd.Parameters
@@ -3224,6 +3274,8 @@ Public Class GBT00020AGREEMENT
                     paramDepotIn.Value = drTankInfo.Item("DEPOTIN")
                     paramPayStDaily.Value = drTankInfo.Item("PAYSTDAILY")
                     paramPayEndDaily.Value = drTankInfo.Item("PAYENDDAILY")
+                    paramSegSwStYmd.Value = DateStringToDateTime(Convert.ToString(drTankInfo.Item("SEGSWSTYMD")))
+                    paramSegSwEndYmd.Value = DateStringToDateTime(Convert.ToString(drTankInfo.Item("SEGSWENDYMD")))
                     paramRemark.Value = drTankInfo.Item("REMARK")
                     '同一タンクNoの検索
                     sqlCmd.CommandText = sqlStatTankSel.ToString
@@ -3510,9 +3562,13 @@ Public Class GBT00020AGREEMENT
         sqlStat.AppendLine("   AND  AH.DELFLG     <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN COS0005_USER US1")
         sqlStat.AppendLine("    ON  US1.USERID      = AH.APPLICANTID")
+        sqlStat.AppendLine("   AND  US1.STYMD      <= AH.APPLYDATE")
+        sqlStat.AppendLine("   AND  US1.ENDYMD     >= AH.APPLYDATE")
         sqlStat.AppendLine("   AND  US1.DELFLG     <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN COS0005_USER US2")
         sqlStat.AppendLine("    ON  US2.USERID      = AH.APPROVERID")
+        sqlStat.AppendLine("   AND  US2.STYMD      <= AH.APPROVEDATE")
+        sqlStat.AppendLine("   AND  US2.ENDYMD     >= AH.APPROVEDATE")
         sqlStat.AppendLine("   AND  US2.DELFLG     <> @DELFLG")
         'sqlStat.AppendLine("  LEFT JOIN COS0005_USER US3")
         'sqlStat.AppendLine("    ON  US3.USERID      = BS.INITUSER")
@@ -3590,6 +3646,8 @@ Public Class GBT00020AGREEMENT
         sqlStat.AppendLine("     ,ISNULL(DPI.NAMES,'') AS DEPOTINNAME")
         sqlStat.AppendLine("     ,TKI.PAYSTDAILY")
         sqlStat.AppendLine("     ,TKI.PAYENDDAILY")
+        sqlStat.AppendLine("     ,CASE TKI.SEGSWSTYMD    WHEN '1900/01/01' THEN '' ELSE FORMAT(TKI.SEGSWSTYMD,  'yyyy/MM/dd')  END AS SEGSWSTYMD")
+        sqlStat.AppendLine("     ,CASE TKI.SEGSWENDYMD   WHEN '1900/01/01' THEN '' ELSE FORMAT(TKI.SEGSWENDYMD,  'yyyy/MM/dd')  END AS SEGSWENDYMD")
         sqlStat.AppendLine("     ,TKI.REMARK")
         sqlStat.AppendLine("     ,TKI.DELFLG")
         sqlStat.AppendLine("     ,ISNULL(CONVERT(nvarchar, TKI.INITYMD , 120),'') AS INITYMD")
@@ -3913,7 +3971,7 @@ Public Class GBT00020AGREEMENT
                 Dim prevDr = qPrevDr.FirstOrDefault
                 '設定値の比較
                 For Each fieldName As String In {"LEASESTYMD", "LEASEENDYMDSCR", "CANCELFLG",
-                                                 "LEASEENDYMD", "PAYSTDAILY", "PAYENDDAILY", "REMARK",
+                                                 "LEASEENDYMD", "PAYSTDAILY", "PAYENDDAILY", "SEGSWSTYMD", "SEGSWENDYMD", "REMARK",
                                                  "DEPOTIN"}
                     If Not dispDr(fieldName).Equals(prevDr(fieldName)) Then
                         Return True

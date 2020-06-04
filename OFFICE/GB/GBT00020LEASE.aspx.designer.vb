@@ -284,6 +284,24 @@ Partial Public Class GBT00020LEASE
     Protected WithEvents chkEnabled As Global.System.Web.UI.WebControls.CheckBox
     
     '''<summary>
+    '''lblAccSegment コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblAccSegment As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtAccSegment コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtAccSegment As Global.System.Web.UI.WebControls.TextBox
+    
+    '''<summary>
     '''lblLeasePaymentType コントロール。
     '''</summary>
     '''<remarks>

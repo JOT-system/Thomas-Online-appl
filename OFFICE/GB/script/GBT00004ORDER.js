@@ -1029,6 +1029,56 @@ function deleteTankNo(orderNo, tankSeq, dataId) {
         document.forms[0].submit();
     }
 }
+
+/* Original,Estimated 金額オーバーの一覧に色付け（ロード時） */
+function setCompareNumBackGroundColor(firstCol, secondCol, ColerCol) {
+    var fCostColumnObj = getTargetColumnNoTable(firstCol, 'WF_LISTAREA');
+    var sCostColumnObj = getTargetColumnNoTable(secondCol, 'WF_LISTAREA');
+    //比較対象のカラムが存在していない場合は実行不可能
+    if (fCostColumnObj !== null && sCostColumnObj !== null) {
+        let fColumnNo = fCostColumnObj.ColumnNo;
+        let fTable = fCostColumnObj.TargetTable;
+        let sColumnNo = sCostColumnObj.ColumnNo;
+        let sTable = sCostColumnObj.TargetTable;
+        // 第２項目のみテキストボックスに対応 //
+        let sIsTextObj = false;
+        if (sTable.rows.length !== 0) {
+            let checkCell = sTable.rows[0].cells[sColumnNo];
+            if (checkCell.querySelectorAll('input[type=text]').length === 1) {
+                sIsTextObj = true;
+            }
+            for (let i = 0; i < fTable.rows.length; i++) {
+                let fValueObj = fTable.rows[i].cells[fColumnNo];
+                let sValueObj;
+                let sValue;
+                if (sIsTextObj) {
+                    sValueObj = sTable.rows[i].cells[sColumnNo].querySelectorAll('input[type=text]')[0];
+                    sValue = sValueObj.value;
+                    sValueObj.onblur = (function (sValueObj, compareValue) {
+                        return function () {
+                            costValueChange(sValueObj, compareValue);
+                        };
+
+                    })(sValueObj, fValueObj.textContent);
+                } else {
+                    sValueObj = sTable.rows[i].cells[sColumnNo];
+                    sValue = sValueObj.textContent;
+                }
+                var fValue = fValueObj.textContent;
+                styleClass = compareCostValue(fValue, sValue);
+                if (styleClass !== '') {
+                    if (ColerCol === 'F' || ColerCol === 'B') {
+                        fValueObj.classList.add(styleClass);
+                    }
+                    if (ColerCol === 'S' || ColerCol === 'B') {
+                        sValueObj.classList.add(styleClass);
+                    }
+                }
+            }
+        }
+    }
+}
+
 /* 金額オーバーの一覧に色付け（ロード時） */
 function setCostPriceBackGroundColor() {
     /* BR予定額 vs オーダー予定額 */

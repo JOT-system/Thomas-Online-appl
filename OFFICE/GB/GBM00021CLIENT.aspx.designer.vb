@@ -23,13 +23,13 @@ Partial Public Class GBM00021CLIENT
     Protected WithEvents phCommonHeader As Global.System.Web.UI.WebControls.PlaceHolder
     
     '''<summary>
-    '''GBM00005 コントロール。
+    '''GBM00021 コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents GBM00005 As Global.System.Web.UI.HtmlControls.HtmlForm
+    Protected WithEvents GBM00021 As Global.System.Web.UI.HtmlControls.HtmlForm
     
     '''<summary>
     '''lblTitleId コントロール。

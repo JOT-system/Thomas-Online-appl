@@ -311,6 +311,23 @@ Public Class GBT00002RESULT
 
                         Me.mvLeft.Focus()
                     End If
+                'POLCountry
+                Case vLeftPOLCountry.ID
+                    Dim dt As DataTable = GetCountry()
+                    With Me.lbPOLCountry
+                        .DataSource = dt
+                        .DataTextField = "LISTBOXNAME"
+                        .DataValueField = "CODE"
+                        .DataBind()
+                        .Focus()
+                        '一応現在入力しているテキストと一致するものを選択状態
+                        If .Items.Count > 0 Then
+                            Dim findListItem = .Items.FindByValue(Me.txtPOLCountry.Text)
+                            If findListItem IsNot Nothing Then
+                                findListItem.Selected = True
+                            End If
+                        End If
+                    End With
                 'POL
                 Case vLeftPOL.ID
                     Dim dt As DataTable = GetPort()
@@ -328,7 +345,24 @@ Public Class GBT00002RESULT
                             End If
                         End If
                     End With
-                    'POD
+                'PODCountry
+                Case vLeftPODCountry.ID
+                    Dim dt As DataTable = GetCountry()
+                    With Me.lbPODCountry
+                        .DataSource = dt
+                        .DataTextField = "LISTBOXNAME"
+                        .DataValueField = "CODE"
+                        .DataBind()
+                        .Focus()
+                        '一応現在入力しているテキストと一致するものを選択状態
+                        If .Items.Count > 0 Then
+                            Dim findListItem = .Items.FindByValue(Me.txtPODCountry.Text)
+                            If findListItem IsNot Nothing Then
+                                findListItem.Selected = True
+                            End If
+                        End If
+                    End With
+                'POD
                 Case vLeftPOD.ID
                     Dim dt As DataTable = GetPort()
                     With Me.lbPOD
@@ -411,7 +445,9 @@ Public Class GBT00002RESULT
         Me.lbShipper.Items.Clear()
         Me.lbConsignee.Items.Clear()
         Me.lbProduct.Items.Clear()
+        Me.lbPOLCountry.Items.Clear()
         Me.lbPOL.Items.Clear()
+        Me.lbPODCountry.Items.Clear()
         Me.lbPOD.Items.Clear()
         Me.mvLeft.SetActiveView(Me.vLeftCal)
     End Sub
@@ -729,6 +765,26 @@ Public Class GBT00002RESULT
                         txtobj.Text = Me.hdnCalendarValue.Value
                         txtobj.Focus()
                     End If
+                Case vLeftPOLCountry.ID
+                    'POLCountry選択時
+                    Me.lblPOLCountryText.Text = ""
+                    targetObject = FindControl(Me.hdnTextDbClickField.Value)
+                    Dim txtObject As TextBox = DirectCast(targetObject, TextBox)
+                    If targetObject IsNot Nothing Then
+                        txtObject.Text = ""
+                    End If
+
+                    If Me.lbPOLCountry.SelectedItem IsNot Nothing Then
+                        Dim countryCode As String = Me.lbPOLCountry.SelectedItem.Value
+                        Dim dt As DataTable = GetCountry(countryCode)
+                        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+                            Dim dr As DataRow = dt.Rows(0)
+                            If targetObject IsNot Nothing Then
+                                txtObject.Text = Convert.ToString(dr.Item("CODE"))
+                            End If
+                            Me.lblPOLCountryText.Text = HttpUtility.HtmlEncode(dr.Item("NAME"))
+                        End If
+                    End If
                 Case vLeftPOL.ID
                     'POL選択時
                     Me.lblPOLText.Text = ""
@@ -747,6 +803,26 @@ Public Class GBT00002RESULT
                                 txtObject.Text = Convert.ToString(dr.Item("CODE"))
                             End If
                             Me.lblPOLText.Text = HttpUtility.HtmlEncode(dr.Item("NAME"))
+                        End If
+                    End If
+                Case vLeftPODCountry.ID
+                    'POD選択時
+                    Me.lblPODCountryText.Text = ""
+                    targetObject = FindControl(Me.hdnTextDbClickField.Value)
+                    Dim txtObject As TextBox = DirectCast(targetObject, TextBox)
+                    If targetObject IsNot Nothing Then
+                        txtObject.Text = ""
+                    End If
+
+                    If Me.lbPODCountry.SelectedItem IsNot Nothing Then
+                        Dim countryCode As String = Me.lbPODCountry.SelectedItem.Value
+                        Dim dt As DataTable = GetCountry(countryCode)
+                        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+                            Dim dr As DataRow = dt.Rows(0)
+                            If targetObject IsNot Nothing Then
+                                txtObject.Text = Convert.ToString(dr.Item("CODE"))
+                            End If
+                            Me.lblPODCountryText.Text = HttpUtility.HtmlEncode(dr.Item("NAME"))
                         End If
                     End If
                 Case vLeftPOD.ID
@@ -1571,7 +1647,10 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("      + (SELECT VALUE1")
         sqlStat.AppendLine("           FROM COS0017_FIXVALUE")
         sqlStat.AppendLine("          WHERE CLASS   = @CLASS")
-        sqlStat.AppendLine("            AND KEYCODE = @KEYCODE)")
+        sqlStat.AppendLine("            AND KEYCODE = @KEYCODE")
+        sqlStat.AppendLine("            AND STYMD  <= @STYMD")
+        sqlStat.AppendLine("            AND ENDYMD >= @ENDYMD")
+        sqlStat.AppendLine("            AND DELFLG <> @DELFLG)")
         Try
             If sqlCon Is Nothing Then
                 sqlCon = New SqlConnection(COA0019Session.DBcon)
@@ -1584,6 +1663,9 @@ Public Class GBT00002RESULT
                     'SQLパラメータ設定
                     .Add("@CLASS", SqlDbType.NVarChar, 20).Value = C_SERVERSEQ
                     .Add("@KEYCODE", SqlDbType.NVarChar, 20).Value = COA0019Session.APSRVname
+                    .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                 End With
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
                     Dim dt As New DataTable
@@ -1695,7 +1777,9 @@ Public Class GBT00002RESULT
         AddLangSetting(dicDisplayText, Me.lblShipper, "荷主", "Shipper")
         AddLangSetting(dicDisplayText, Me.lblConsignee, "荷受人", "Consignee")
         AddLangSetting(dicDisplayText, Me.lblProduct, "積載品", "Product")
+        AddLangSetting(dicDisplayText, Me.lblPOLCountry, "POL Country", "POL Country")
         AddLangSetting(dicDisplayText, Me.lblPOL, "POL", "POL")
+        AddLangSetting(dicDisplayText, Me.lblPODCountry, "POD Country", "POD Country")
         AddLangSetting(dicDisplayText, Me.lblPOD, "POD", "POD")
         AddLangSetting(dicDisplayText, Me.lblBreaker, "ブレーカーID", "Breaker ID")
         AddLangSetting(dicDisplayText, Me.lblApproval, "承認", "Status")
@@ -1757,8 +1841,10 @@ Public Class GBT00002RESULT
         sqlStat.AppendFormat("      ,ISNULL(SP.{0}, ISNULL(AGS.{1},'')) AS SHIPPER", textCustomerTblField, textTraderTblField).AppendLine()
         sqlStat.AppendFormat("      ,ISNULL(PD.{0},'') AS PRODUCTCODE", textProductTblField).AppendLine()
         sqlStat.AppendFormat("      ,ISNULL(CN.{0}, ISNULL(AGC.{1},'')) AS CONSIGNEE", textCustomerTblField, textTraderTblField).AppendLine()
+        sqlStat.AppendLine("      ,BS.LOADCOUNTRY1 AS POLCOUNTRY")
         sqlStat.AppendLine("      ,BS.LOADPORT1 AS POL")
         sqlStat.AppendLine("      ,ISNULL(PT.AREANAME,'')  AS POLNAME")
+        sqlStat.AppendLine("      ,BS.DELIVERYCOUNTRY1 AS PODCOUNTRY")
         sqlStat.AppendLine("      ,BS.DELIVERYPORT1 AS POD")
         sqlStat.AppendLine("      ,ISNULL(PT2.AREANAME,'')  AS PODNAME")
         sqlStat.AppendLine("      ,CASE WHEN BS.REMARK<>'' THEN '〇' ELSE '' END AS HASREMARK")
@@ -1838,6 +1924,8 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("      ,BS.CAPACITY AS CAPACITY")
         sqlStat.AppendLine("      ,ISNULL(PD.GRAVITY,'') AS GRAVITY")
         sqlStat.AppendLine("      ,ISNULL(PD.HAZARDCLASS,'') AS HAZARDCLASS")
+        sqlStat.AppendLine("      ,BS.ORIGINALCOPYBRID AS ORIGINALCOPYBRID")
+        sqlStat.AppendLine("      ,BS.INITUSER AS INITUSER")
         sqlStat.AppendLine("  FROM GBT0002_BR_BASE BS ")
         sqlStat.AppendLine("  LEFT JOIN GBT0001_BR_INFO BIL1") 'ブレーカー(関連付け)
         sqlStat.AppendLine("    ON  BIL1.BRID         = BS.BRID")
@@ -1853,6 +1941,8 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FVL1") 'STATUS用JOIN
         sqlStat.AppendLine("    ON  FVL1.CLASS        = 'APPROVAL'")
         sqlStat.AppendLine("   AND  FVL1.KEYCODE      = AHL1.STATUS")
+        sqlStat.AppendLine("   AND  FVL1.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  FVL1.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  FVL1.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN GBT0001_BR_INFO BID1") 'ブレーカー(関連付け)
         sqlStat.AppendLine("    ON  BID1.BRID         = BS.BRID")
@@ -1868,6 +1958,8 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FVD1") 'STATUS用JOIN
         sqlStat.AppendLine("    ON  FVD1.CLASS        = 'APPROVAL'")
         sqlStat.AppendLine("   AND  FVD1.KEYCODE      = AHD1.STATUS")
+        sqlStat.AppendLine("   AND  FVD1.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  FVD1.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  FVD1.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN GBT0001_BR_INFO BIL2") 'ブレーカー(関連付け)
         sqlStat.AppendLine("    ON  BIL2.BRID         = BS.BRID")
@@ -1883,6 +1975,8 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FVL2") 'STATUS用JOIN
         sqlStat.AppendLine("    ON  FVL2.CLASS        = 'APPROVAL'")
         sqlStat.AppendLine("   AND  FVL2.KEYCODE      = AHL2.STATUS")
+        sqlStat.AppendLine("   AND  FVL2.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  FVL2.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  FVL2.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN GBT0001_BR_INFO BID2") 'ブレーカー(関連付け)
         sqlStat.AppendLine("    ON  BID2.BRID         = BS.BRID")
@@ -1898,6 +1992,8 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FVD2") 'STATUS用JOIN
         sqlStat.AppendLine("    ON  FVD2.CLASS        = 'APPROVAL'")
         sqlStat.AppendLine("   AND  FVD2.KEYCODE      = AHD2.STATUS")
+        sqlStat.AppendLine("   AND  FVD2.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  FVD2.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  FVD2.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN GBT0001_BR_INFO BIIF") 'ブレーカー(関連付け)
         sqlStat.AppendLine("    ON  BIIF.BRID         = BS.BRID")
@@ -1913,21 +2009,23 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FVIF") 'STATUS用JOIN
         sqlStat.AppendLine("    ON  FVIF.CLASS        = 'APPROVAL'")
         sqlStat.AppendLine("   AND  FVIF.KEYCODE      = AHIF.STATUS")
+        sqlStat.AppendLine("   AND  FVIF.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  FVIF.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  FVIF.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN GBM0004_CUSTOMER SP") 'SHIPPER名称用JOIN
         sqlStat.AppendLine("    ON  SP.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  SP.COUNTRYCODE  = BS.LOADCOUNTRY1")
         sqlStat.AppendLine("   AND  SP.CUSTOMERCODE = BS.SHIPPER")
-        sqlStat.AppendLine("   AND  SP.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  SP.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  SP.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  SP.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  SP.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("   AND  SP.CUSTOMERTYPE IN('" & C_CUSTOMERTYPE.SHIPPER & "','" & C_CUSTOMERTYPE.COMMON & "')")
         sqlStat.AppendLine("  LEFT JOIN GBM0004_CUSTOMER CN") 'CONSIGNEE名称用JOIN
         sqlStat.AppendLine("    ON  CN.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  CN.COUNTRYCODE  = BS.DELIVERYCOUNTRY1")
         sqlStat.AppendLine("   AND  CN.CUSTOMERCODE = BS.CONSIGNEE")
-        sqlStat.AppendLine("   AND  CN.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  CN.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  CN.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  CN.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  CN.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("   AND  CN.CUSTOMERTYPE IN('" & C_CUSTOMERTYPE.CONSIGNEE & "','" & C_CUSTOMERTYPE.COMMON & "')")
 
@@ -1935,8 +2033,8 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("    ON  AGS.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  AGS.COUNTRYCODE  = BS.LOADCOUNTRY1")
         sqlStat.AppendLine("   AND  AGS.CARRIERCODE  = BS.SHIPPER")
-        sqlStat.AppendLine("   AND  AGS.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  AGS.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  AGS.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  AGS.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  AGS.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("   AND  AGS.CLASS        = '" & C_TRADER.CLASS.AGENT & "'")
 
@@ -1944,31 +2042,31 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("    ON  AGC.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  AGC.COUNTRYCODE  = BS.DELIVERYCOUNTRY1")
         sqlStat.AppendLine("   AND  AGC.CARRIERCODE  = BS.CONSIGNEE")
-        sqlStat.AppendLine("   AND  AGC.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  AGC.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  AGC.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  AGC.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  AGC.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("   AND  AGC.CLASS        = '" & C_TRADER.CLASS.AGENT & "'")
 
         sqlStat.AppendLine("  LEFT JOIN GBM0008_PRODUCT PD") 'PRODUCT名称用JOIN
         sqlStat.AppendLine("    ON  PD.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  PD.PRODUCTCODE  = BS.PRODUCTCODE")
-        sqlStat.AppendLine("   AND  PD.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  PD.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  PD.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  PD.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  PD.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("   AND  PD.ENABLED      = @ENABLED")
         sqlStat.AppendLine("  LEFT JOIN GBM0002_PORT PT") 'PORT名称用JOIN
         sqlStat.AppendLine("    ON  PT.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  PT.COUNTRYCODE  = BS.LOADCOUNTRY1")
         sqlStat.AppendLine("   AND  PT.PORTCODE     = BS.LOADPORT1")
-        sqlStat.AppendLine("   AND  PT.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  PT.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  PT.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  PT.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  PT.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN GBM0002_PORT PT2") 'PORT名称用JOIN
         sqlStat.AppendLine("    ON  PT2.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  PT2.COUNTRYCODE  = BS.DELIVERYCOUNTRY1")
         sqlStat.AppendLine("   AND  PT2.PORTCODE     = BS.DELIVERYPORT1")
-        sqlStat.AppendLine("   AND  PT2.STYMD       <= BS.ENDYMD")
-        sqlStat.AppendLine("   AND  PT2.ENDYMD      >= BS.STYMD")
+        sqlStat.AppendLine("   AND  PT2.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  PT2.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  PT2.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN ") '紐付ORDER数取得用JOIN
         sqlStat.AppendLine("  (SELECT COUNT(*) AS COUNT,BRID FROM GBT0004_ODR_BASE")
@@ -2031,6 +2129,7 @@ Public Class GBT00002RESULT
         Using sqlCon As New SqlConnection(COA0019Session.DBcon),
               sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
             sqlCon.Open() '接続オープン
+            sqlCmd.CommandTimeout = 60
             'SQLパラメータ設定
             Dim paramCompCode As SqlParameter = sqlCmd.Parameters.Add("@COMPCODE", SqlDbType.NVarChar, 20)
             Dim paramDelFlg As SqlParameter = sqlCmd.Parameters.Add("@DELFLG", SqlDbType.NVarChar, 1)
@@ -2056,13 +2155,15 @@ Public Class GBT00002RESULT
             If Me.hdnEndYMD.Value <> "" Then '検索条件のTOをFROMと突き合わせ
                 'VALIDITY FROM
                 paramValidityfrom = sqlCmd.Parameters.Add("@VALIDITYFROM", SqlDbType.Date)
-                paramValidityfrom.Value = Date.ParseExact(Me.hdnEndYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                'paramValidityfrom.Value = Date.ParseExact(Me.hdnEndYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                paramValidityfrom.Value = FormatDateYMD(Me.hdnEndYMD.Value, GBA00003UserSetting.DATEFORMAT)
             End If
 
             If Me.hdnStYMD.Value <> "" Then '検索条件のFROMをTOと突き合わせ
                 'VALIDITY TO
                 paramValidityto = sqlCmd.Parameters.Add("@VALIDITYTO", SqlDbType.Date)
-                paramValidityto.Value = Date.ParseExact(Me.hdnStYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                'paramValidityto.Value = Date.ParseExact(Me.hdnStYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                paramValidityto.Value = FormatDateYMD(Me.hdnStYMD.Value, GBA00003UserSetting.DATEFORMAT)
             End If
 
             If Me.hdnShipper.Value <> "" Then
@@ -2290,8 +2391,10 @@ Public Class GBT00002RESULT
             .Add("SHIPPER", GetType(String))
             .Add("PRODUCTCODE", GetType(String))
             .Add("CONSIGNEE", GetType(String))
+            .Add("POLCOUNTRY", GetType(String))
             .Add("POL", GetType(String))
             .Add("POLNAME", GetType(String))
+            .Add("PODCOUNTRY", GetType(String))
             .Add("POD", GetType(String))
             .Add("PODNAME", GetType(String))
             .Add("HASREMARK", GetType(String))
@@ -2442,6 +2545,7 @@ Public Class GBT00002RESULT
         Dim isFillterOff As Boolean = True
         If Me.txtBreaker.Text.Trim <> "" OrElse Me.txtPOL.Text.Trim <> "" OrElse
                 Me.txtPOD.Text.Trim <> "" OrElse Me.txtProduct.Text.Trim <> "" OrElse
+                Me.txtPOLCountry.Text.Trim <> "" OrElse Me.txtPODCountry.Text.Trim <> "" OrElse
                 Me.txtShipper.Text.Trim <> "" OrElse Me.txtConsignee.Text.Trim <> "" OrElse
                 Me.txtApproval.Text.Trim <> "" Then
             isFillterOff = False
@@ -2452,13 +2556,15 @@ Public Class GBT00002RESULT
             'フィルタ使用時の場合
             If isFillterOff = False Then
                 '条件に合致しない場合は非表示 HIDDENフィールドに1を立てる
-                If Not ((Me.txtBreaker.Text.Trim = "" OrElse Convert.ToString(dr("BRID")).StartsWith(Me.txtBreaker.Text.Trim)) _
-                  AndAlso (Me.txtPOL.Text.Trim = "" OrElse Convert.ToString(dr("POL")).Trim.Equals(Me.txtPOL.Text.Trim)) _
-                  AndAlso (Me.txtPOD.Text.Trim = "" OrElse Convert.ToString(dr("POD")).Trim.Equals(Me.txtPOD.Text.Trim)) _
-                  AndAlso (Me.txtShipper.Text.Trim = "" OrElse (Me.lblShipperText.Text.Trim <> "" AndAlso Convert.ToString(dr("SHIPPER")).Trim.Equals(Me.lblShipperText.Text.Trim))) _
-                  AndAlso (Me.txtConsignee.Text.Trim = "" OrElse (Me.lblConsigneeText.Text.Trim <> "" AndAlso Convert.ToString(dr("CONSIGNEE")).Trim.Equals(Me.lblConsigneeText.Text.Trim))) _
-                  AndAlso (Me.txtProduct.Text.Trim = "" OrElse (Me.lblProductText.Text.Trim <> "" AndAlso Convert.ToString(dr("PRODUCTCODE")).Trim.Equals(Me.lblProductText.Text.Trim))) _
-                  AndAlso (Me.txtApproval.Text.Trim = "" OrElse Convert.ToString(dr("STATUSIF")).Trim.Equals(Me.txtApproval.Text.Trim))
+                If Not ((Me.txtBreaker.Text.Trim = "" OrElse Convert.ToString(dr("BRID")).ToUpper.StartsWith(Me.txtBreaker.Text.Trim.ToUpper)) _
+                  AndAlso (Me.txtPOLCountry.Text.Trim = "" OrElse Convert.ToString(dr("POLCOUNTRY")).Trim.ToUpper.Equals(Me.txtPOLCountry.Text.Trim.ToUpper)) _
+                  AndAlso (Me.txtPOL.Text.Trim = "" OrElse Convert.ToString(dr("POL")).Trim.ToUpper.Equals(Me.txtPOL.Text.Trim.ToUpper)) _
+                  AndAlso (Me.txtPODCountry.Text.Trim = "" OrElse Convert.ToString(dr("PODCOUNTRY")).Trim.ToUpper.Equals(Me.txtPODCountry.Text.Trim.ToUpper)) _
+                  AndAlso (Me.txtPOD.Text.Trim = "" OrElse Convert.ToString(dr("POD")).Trim.ToUpper.Equals(Me.txtPOD.Text.Trim.ToUpper)) _
+                  AndAlso (Me.txtShipper.Text.Trim = "" OrElse (Me.lblShipperText.Text.Trim <> "" AndAlso Convert.ToString(dr("SHIPPER")).Trim.ToUpper.Equals(Me.lblShipperText.Text.Trim.ToUpper))) _
+                  AndAlso (Me.txtConsignee.Text.Trim = "" OrElse (Me.lblConsigneeText.Text.Trim <> "" AndAlso Convert.ToString(dr("CONSIGNEE")).Trim.ToUpper.Equals(Me.lblConsigneeText.Text.Trim.ToUpper))) _
+                  AndAlso (Me.txtProduct.Text.Trim = "" OrElse (Me.lblProductText.Text.Trim <> "" AndAlso Convert.ToString(dr("PRODUCTCODE")).Trim.ToUpper.Equals(Me.lblProductText.Text.Trim.ToUpper))) _
+                  AndAlso (Me.txtApproval.Text.Trim = "" OrElse Convert.ToString(dr("STATUSIF")).Trim.ToUpper.Equals(Me.txtApproval.Text.Trim.ToUpper))
                 ) Then
                     dr.Item("HIDDEN") = 1
                 End If
@@ -2592,6 +2698,48 @@ Public Class GBT00002RESULT
 
         End If
     End Sub
+
+    ''' <summary>
+    ''' Country一覧を取得
+    ''' </summary>
+    ''' <returns></returns>
+    Private Function GetCountry(Optional CountryCode As String = "") As DataTable
+        Dim retDt As New DataTable   '戻り値用のデータテーブル
+        'SQL文作成
+        Dim sqlStat As New StringBuilder
+        sqlStat.AppendLine("SELECT COUNTRYCODE AS CODE")
+        sqlStat.AppendLine("      ,NAMES AS NAME")
+        sqlStat.AppendLine("      ,COUNTRYCODE + ':' + NAMES AS LISTBOXNAME")
+        sqlStat.AppendLine("  FROM GBM0001_COUNTRY")
+        sqlStat.AppendLine(" WHERE COMPCODE    = @COMPCODE")
+        If CountryCode <> "" Then
+            sqlStat.AppendLine("   AND COUNTRYCODE    = @COUNTRYCODE")
+        End If
+        sqlStat.AppendLine("   AND STYMD       <= @STYMD")
+        sqlStat.AppendLine("   AND ENDYMD      >= @ENDYMD")
+        sqlStat.AppendLine("   AND DELFLG      <> @DELFLG")
+        sqlStat.AppendLine("ORDER BY COUNTRYCODE ")
+        'DB接続
+        Using sqlCon As New SqlConnection(COA0019Session.DBcon),
+              sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
+
+            sqlCon.Open() '接続オープン
+            With sqlCmd.Parameters
+                'SQLパラメータ設定
+                .Add("@COMPCODE", SqlDbType.NVarChar, 20).Value = HttpContext.Current.Session("APSRVCamp") '本来はセッション変数をラッピングした構造体で取得
+                .Add("@COUNTRYCODE", SqlDbType.NVarChar, 20).Value = CountryCode
+                .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
+                .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
+            End With
+            Using sqlDa As New SqlDataAdapter(sqlCmd)
+                sqlDa.Fill(retDt)
+            End Using
+        End Using
+        Return retDt
+
+    End Function
+
     ''' <summary>
     ''' POL一覧を取得
     ''' </summary>
@@ -2633,6 +2781,7 @@ Public Class GBT00002RESULT
         Return retDt
 
     End Function
+
     ''' <summary>
     ''' 荷主一覧取得
     ''' </summary>
@@ -2786,6 +2935,24 @@ Public Class GBT00002RESULT
     End Function
 
     ''' <summary>
+    ''' [絞り込み条件]POLCountryコード変更時イベント
+    ''' </summary>
+    Public Sub txtPOLCountry_Change()
+        Dim polcountry As String = Me.txtPOLCountry.Text.Trim
+        Me.lblPOLCountryText.Text = ""
+        If polcountry = "" Then
+            Return
+        End If
+
+        Dim dt As DataTable = GetCountry(polcountry)
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            Dim dr As DataRow = dt.Rows(0)
+            Me.txtPOLCountry.Text = Convert.ToString(dr.Item("CODE"))
+            Me.lblPOLCountryText.Text = HttpUtility.HtmlEncode(dr.Item("NAME"))
+        End If
+    End Sub
+
+    ''' <summary>
     ''' [絞り込み条件]POLコード変更時イベント
     ''' </summary>
     Public Sub txtPOL_Change()
@@ -2800,6 +2967,24 @@ Public Class GBT00002RESULT
             Dim dr As DataRow = dt.Rows(0)
             Me.txtPOL.Text = Convert.ToString(dr.Item("CODE"))
             Me.lblPOLText.Text = HttpUtility.HtmlEncode(dr.Item("NAME"))
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' [絞り込み条件]PODCountryコード変更時イベント
+    ''' </summary>
+    Public Sub txtPODCountry_Change()
+        Dim podcountry As String = Me.txtPODCountry.Text.Trim
+        Me.lblPODCountryText.Text = ""
+        If podcountry = "" Then
+            Return
+        End If
+
+        Dim dt As DataTable = GetCountry(podcountry)
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            Dim dr As DataRow = dt.Rows(0)
+            Me.txtPODCountry.Text = Convert.ToString(dr.Item("CODE"))
+            Me.lblPODCountryText.Text = HttpUtility.HtmlEncode(dr.Item("NAME"))
         End If
     End Sub
 
@@ -2825,7 +3010,7 @@ Public Class GBT00002RESULT
     ''' [絞り込み条件]Shipperコード変更時イベント
     ''' </summary>
     Public Sub txtShipper_Change()
-        Dim shipper As String = Me.txtShipper.Text.Trim
+        Dim shipper As String = Me.txtShipper.Text.Trim.ToUpper
         Me.lblShipperText.Text = ""
         If shipper = "" Then
             Return
@@ -2843,7 +3028,7 @@ Public Class GBT00002RESULT
     ''' [絞り込み条件]Consigneeコード変更時イベント
     ''' </summary>
     Public Sub txtConsignee_Change()
-        Dim consignee As String = Me.txtConsignee.Text.Trim
+        Dim consignee As String = Me.txtConsignee.Text.Trim.ToUpper
         Me.lblConsigneeText.Text = ""
         If consignee = "" Then
             Return
@@ -2861,7 +3046,7 @@ Public Class GBT00002RESULT
     ''' [絞り込み条件]Productコード変更時イベント
     ''' </summary>
     Public Sub txtProduct_Change()
-        Dim product As String = Me.txtProduct.Text.Trim
+        Dim product As String = Me.txtProduct.Text.Trim.ToUpper
         Me.lblProductText.Text = ""
         If product = "" Then
             Return
@@ -2972,6 +3157,9 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("           FROM COS0017_FIXVALUE")
         sqlStat.AppendLine("          WHERE CLASS   = @CLASS")
         sqlStat.AppendLine("            AND KEYCODE = @KEYCODE")
+        sqlStat.AppendLine("            AND STYMD  <= @STYMD")
+        sqlStat.AppendLine("            AND ENDYMD >= @ENDYMD")
+        sqlStat.AppendLine("            AND DELFLG <> @DELFLG")
         Try
             If sqlCon Is Nothing Then
                 sqlCon = New SqlConnection(COA0019Session.DBcon)
@@ -2984,6 +3172,9 @@ Public Class GBT00002RESULT
                 With sqlCmd.Parameters
                     .Add("@CLASS", SqlDbType.NVarChar, 20).Value = "APPROVAL"
                     .Add("@KEYCODE", SqlDbType.NVarChar, 20).Value = C_APP_STATUS.COMPLETE
+                    .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                 End With
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
                     Dim dt As New DataTable

@@ -14,6 +14,14 @@
     min-height: 180px;
     position: relative;
 }
+/* 費用比較の大小比較結果 */
+#WF_LISTAREA .lessThan {
+    color: rgb(0, 0, 255);
+}
+
+#WF_LISTAREA .greatherThan {
+    color: rgb(255, 0, 0);
+}
 
 #actionButtonsBox {
     min-width:720px;

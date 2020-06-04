@@ -917,10 +917,10 @@ Public Class COM00005USER
 
             'ユーザＩＤ　絞り込み判定
             If (Convert.ToString(BASEtbl.Rows(i)("HIDDEN")) = "0") AndAlso (txtUserIdEx.Text <> "") Then
-                Dim searchStr As String = Convert.ToString(BASEtbl.Rows(i)("USERID"))
+                Dim searchStr As String = Convert.ToString(BASEtbl.Rows(i)("USERID")).ToUpper
 
                 '検索用文字列（部分一致）
-                If Not searchStr.Contains(txtUserIdEx.Text) Then
+                If Not searchStr.Contains(txtUserIdEx.Text.ToUpper) Then
                     BASEtbl.Rows(i)("HIDDEN") = 1
                 End If
 
@@ -931,13 +931,13 @@ Public Class COM00005USER
                 Dim searchStr As String = Nothing
 
                 If (COA0019Session.LANGDISP = C_LANG.JA) Then
-                    searchStr = Convert.ToString(BASEtbl.Rows(i)("STAFFNAMES"))
+                    searchStr = Convert.ToString(BASEtbl.Rows(i)("STAFFNAMES")).ToUpper
                 Else
-                    searchStr = Convert.ToString(BASEtbl.Rows(i)("STAFFNAMES_EN"))
+                    searchStr = Convert.ToString(BASEtbl.Rows(i)("STAFFNAMES_EN")).ToUpper
                 End If
 
                 '検索用文字列（部分一致）
-                If Not searchStr.Contains(txtStaffNameEx.Text) Then
+                If Not searchStr.Contains(txtStaffNameEx.Text.ToUpper) Then
                     BASEtbl.Rows(i)("HIDDEN") = 1
                 End If
             End If

@@ -93,6 +93,15 @@
         }*/
 
     </style>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-162522994-1');
+    </script>
     <%--共通利用するJavaScript --%>
     <script src='<%= ResolveUrl("~/script/common.js") %>' type="text/javascript" charset="utf-8"></script>
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
@@ -167,13 +176,6 @@
             /* ヘルプ表示処理 */
             openHelpPage(); /* hdnCanHelpOpenに"1"が立たない限り開きません。 */
 
-            /* カレンダー描画処理 */
-            var calValueObj = document.getElementById('<%= Me.hdnCalendarValue.ClientID %>');
-            if (calValueObj !== null) {
-                /* 日付格納隠し項目がレンダリングされている場合のみ実行 */
-                carenda(0);
-                setAltMsg(firstAltYMD, firstAltMsg);
-            }
             screenUnlock();
             focusAfterChange();
         });
@@ -221,8 +223,6 @@
                 <div id="actionButtonsBox">
                     <input id="btnEnter" type="button" value="実行"  runat="server"  />
                     <input id="btnBack" type="button" value="終了"  runat="server"  />
-                    <div class="firstPage" id="btnFIRST" style="visibility: hidden;"></div>
-                    <div class="lastPage" id="btnLAST" style="visibility: hidden;"></div>
                 </div>
 
                 <table id="itemTable">
@@ -241,7 +241,7 @@
                     <%-- Customer --%>
 	                <tr>
                         <td colspan="2">
-                            <a><asp:Label ID="lblCustomer" runat="server" CssClass="requiredMark"></asp:Label></a>
+                            <a><asp:Label ID="lblCustomer" runat="server" ></asp:Label></a>
                         </td>
                         <td>
                             <a><asp:TextBox ID="txtCustomer" runat="server"></asp:TextBox></a>
@@ -348,31 +348,6 @@
                             <asp:ListBox ID="lbProduct" runat="server" CssProduct="leftViewContents"></asp:ListBox>
                         </div>
                     </asp:View> <%-- END Product VIEW --%>
-                    <%--  　カレンダー　 --%>
-                    <asp:View id="vLeftCal" runat="server" >
-                        <div class="leftViewContents">
-                            <asp:HiddenField ID="hdnCalendarValue" runat="server" />
-                            <input id="hdnDateValue" type="hidden" value="" />
-                            <table border="0">
-                                <tr>
-                                    <td>
-                                        <table border="1" >
-                                            <tr>
-                                                <td>
-                                                    <div id="carenda">
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td id="altMsg" style="background:white">
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </asp:View> <%-- END カレンダー VIEW　 --%>
                 </asp:MultiView>
             </div> <%-- END 左ボックス --%>
             <%-- 右ボックス --%>

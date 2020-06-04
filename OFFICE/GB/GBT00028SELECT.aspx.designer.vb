@@ -464,24 +464,6 @@ Partial Public Class GBT00028SELECT
     Protected WithEvents lbProduct As Global.System.Web.UI.WebControls.ListBox
     
     '''<summary>
-    '''vLeftCal コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents vLeftCal As Global.System.Web.UI.WebControls.View
-    
-    '''<summary>
-    '''hdnCalendarValue コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnCalendarValue As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
     '''divMessageType コントロール。
     '''</summary>
     '''<remarks>

@@ -14,6 +14,15 @@ Option Explicit On
 Partial Public Class GBT00009SELECT
     
     '''<summary>
+    '''phCommonHeader コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents phCommonHeader As Global.System.Web.UI.WebControls.PlaceHolder
+    
+    '''<summary>
     '''GBT00009S コントロール。
     '''</summary>
     '''<remarks>

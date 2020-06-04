@@ -27,10 +27,21 @@
             height:100%;
         }
     </style>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-162522994-1');
+    </script>
     <%--共通利用するJavaScript --%>
     <script src='<%= ResolveUrl("~/script/common.js") %>' type="text/javascript" charset="utf-8"></script>
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
     <script type="text/javascript" src='<%= ResolveUrl("~/script/calendar.js") %>'  charset="utf-8"></script>
+    <%-- パネル制御共通のスクリプト --%>
+    <script type="text/javascript" src='<%= ResolveUrl("~/GB/script/GBTcommonPanel.js") %>'  charset="utf-8"></script>
     <%--個別のスクリプトは以下に記載 --%>
     <script type="text/javascript">
         // 必要な場合適宜関数、処理を追加
@@ -133,6 +144,8 @@
                     openMasterWindow();
                 }
             }
+            /* 費用入力項目の同行の金額と比較し色を付ける*/
+            setCompareNumBackGroundColor('AMOUNTBR','AMOUNTFIX','S','WF_LISTAREA'); // OriginalとEstimated差異
             /* 共通一覧のスクロールイベント紐づけ */
             bindListCommonEvents('<%= Me.WF_LISTAREA.ClientId %>', '<%= if(IsPostBack = True, "1", "0") %>',true);
             /* 検索ボックス生成 */
@@ -142,7 +155,6 @@
             var listObj = document.getElementById('<%= Me.WF_LISTAREA.ClientId %>');
             var mousewheelevent = 'onwheel' in listObj ? 'wheel' : 'onmousewheel' in listObj ? 'mousewheel' : 'DOMMouseScroll';
             listObj.removeEventListener(mousewheelevent, commonListMouseWheel, true);
-
         });
         // ○一覧用処理
         function ListDbClick(obj, LineCnt) {

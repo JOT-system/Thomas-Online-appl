@@ -935,12 +935,12 @@ Public Class GBM00004CUSTOMER
                 Dim searchStr As String = ""
                 '検索用文字列（部分一致）
                 If (COA0019Session.LANGDISP = C_LANG.JA) Then
-                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMES"))
+                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMES")).ToUpper
                 Else
-                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMESEN"))
+                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMESEN")).ToUpper
                 End If
 
-                If Not searchStr.Contains(txtNamesenEx.Text) Then
+                If Not searchStr.Contains(txtNamesenEx.Text.ToUpper) Then
                     BASEtbl.Rows(i)("HIDDEN") = 1
                 End If
             End If
@@ -1706,6 +1706,16 @@ Public Class GBM00004CUSTOMER
 
         'DetailBoxをINPtblへ退避
         DetailBoxToINPtbl()
+
+        '新規作成用にCustomerCode補正
+        If INPtbl.Rows(0).Item("CUSTOMERCODE").ToString = "" Then
+            Dim maxCode As String = BASEtbl.Rows.Cast(Of DataRow) _
+            .Where(Function(row) Left(row("CUSTOMERCODE").ToString, 4) = INPtbl.Rows(0).Item("COUNTRYCODE").ToString & "C0") _
+            .Select(Function(row) row("CUSTOMERCODE").ToString).Max()
+            Dim codeNoString As String = maxCode.Replace(INPtbl.Rows(0).Item("COUNTRYCODE").ToString & "C", "")
+            Dim newCode As String = INPtbl.Rows(0).Item("COUNTRYCODE").ToString & "C" & Format(Integer.Parse(codeNoString) + 1, "00000")
+            INPtbl.Rows(0).Item("CUSTOMERCODE") = newCode
+        End If
 
         'INPtbl内容 チェック
         '　※チェックOKデータをUPDtblへ格納する

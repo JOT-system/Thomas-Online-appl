@@ -438,8 +438,12 @@ Public Class GBT00021RESULT
         COA0020ProfViewSort.PREFIX = "OV"
         COA0020ProfViewSort.COA0020getProfViewSort()
 
+        Dim sortStr As String
+        sortStr = COA0020ProfViewSort.SORTSTR.Replace("OV.DISPSEQ", "CONVERT(INT,OV.DISPSEQ)")
+
         'オーダー(当明細が含まれるブレーカーも対象（削除除く）)
-        sqlStat.AppendLine("SELECT ROW_NUMBER() OVER(ORDER BY " & COA0020ProfViewSort.SORTSTR & ") As LINECNT")
+        'sqlStat.AppendLine("SELECT ROW_NUMBER() OVER(ORDER BY " & COA0020ProfViewSort.SORTSTR & ") As LINECNT")
+        sqlStat.AppendLine("SELECT ROW_NUMBER() OVER(ORDER BY " & sortStr & ") As LINECNT")
         sqlStat.AppendLine("      ,'' AS OPERATION")
         sqlStat.AppendLine("      ,TIMSTP = cast(OB.UPDTIMSTP as bigint)")
         sqlStat.AppendLine("      ,'1' AS 'SELECT' ")
@@ -448,7 +452,7 @@ Public Class GBT00021RESULT
         sqlStat.AppendLine("      ,ISNULL(OV.ORDERNO,'') AS ORDERNO")
         sqlStat.AppendLine("      ,ISNULL(OB.BRID,'')    AS BRID")
         sqlStat.AppendLine("      ,ISNULL(OV.ACTIONID,'')  AS ACTIONID")
-        sqlStat.AppendLine("      ,ISNULL(OV.DISPSEQ,'')  AS DISPSEQ")
+        sqlStat.AppendLine("      ,ISNULL(CONVERT(INT,OV.DISPSEQ),0)  AS DISPSEQ")
         sqlStat.AppendLine("      ,ISNULL(OV.ACTUALDATE,'')  AS ACTUALDATE")
         sqlStat.AppendLine("      ,CASE WHEN OV.DTLPOLPOD LIKE 'POL1' THEN ISNULL(OB.RECIEPTPORT1,'') ")
         sqlStat.AppendLine("            WHEN OV.DTLPOLPOD LIKE 'POL2' THEN ISNULL(OB.RECIEPTPORT2,'') ")
@@ -667,7 +671,8 @@ Public Class GBT00021RESULT
 
         sqlStat.AppendLine(")")
         '共通関数は単一テーブル想定のため全体をサブクエリー化 
-        sqlStat.AppendLine(" ORDER BY " & COA0020ProfViewSort.SORTSTR)
+        'sqlStat.AppendLine(" ORDER BY " & COA0020ProfViewSort.SORTSTR)
+        sqlStat.AppendLine(" ORDER BY " & sortStr)
 
         'DB接続
         Using sqlCon As New SqlConnection(COA0019Session.DBcon),

@@ -1,0 +1,17 @@
+﻿#searchCondition {
+    padding: 10px;
+    min-width: 100px;
+    height:25px;
+}
+
+#actionButtonsBox {
+    min-width: 1345px;
+}
+
+#lblOrgLevelEx {
+    text-decoration: underline
+}
+
+#divListArea {
+    height: calc(100% - 90px)
+}

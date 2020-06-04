@@ -15,6 +15,15 @@
     <link href="~/GB/css/GBT00028INVOICEEDIT.css" rel="stylesheet" type="text/css" />
     <style>
     </style>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-162522994-1');
+    </script>
     <%--共通利用するJavaScript --%>
     <script src='<%= ResolveUrl("~/script/common.js") %>' type="text/javascript" charset="utf-8"></script>
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
@@ -30,10 +39,8 @@
             /* ボタンクリックイベントのバインド(適宜追加) */
 <%--                                       '<%= Me.btnDownloadFiles.ClientId %>',--%>
             var targetButtonObjects = ['<%= Me.btnBack.ClientId  %>', '<%= Me.btnLeftBoxButtonSel.ClientId  %>',
-                                       '<%= Me.btnLeftBoxButtonCan.ClientId  %>', '<%= Me.btnOutput.ClientId %>',
-                                       '<%= Me.btnSave.ClientId  %>',
-                                       '<%= Me.btnRemarkInputOk.ClientId  %>',
-                                       '<%= Me.btnRemarkInputCancel.ClientId  %>'];
+                                       '<%= Me.btnLeftBoxButtonCan.ClientId  %>', '<%= Me.btnOutputExcel.ClientId %>',
+                                       '<%= Me.btnOutput.ClientId %>', '<%= Me.btnSave.ClientId  %>'];
             bindButtonClickEvent(targetButtonObjects);
             /* 左ボックス表示/非表示制御(hdnIsLeftBoxOpenが'Open'の場合表示) */
             displayLeftBox();
@@ -53,10 +60,6 @@
                                    ['<%= Me.txtIssueDate.ClientID %>', viewCalId]
             ];
 
-            //var txtAttachmentDelFlgObjects = document.querySelectorAll('input[id^="repAttachment_txtDeleteFlg_"');
-            //for (let i = 0; i < txtAttachmentDelFlgObjects.length; i++) {
-            //    dblClickObjects.push([txtAttachmentDelFlgObjects[i].id, viewYesNo]);
-            //}
             bindLeftBoxShowEvent(dblClickObjects);
             /* 手入力変更時のイベント */
 
@@ -99,41 +102,9 @@
             //commonCreateSearchArea('selectHeaderBox',3);
             commonCreateSearchArea('searchCondition',3);
 
-            /* 備考欄のダブルクリックイベントバインド */
-            bindRemarkDblClick();
-            // D&Dイベント紐づけリスト(id:対象のオブジェクトID,kbn,許可拡張子配列(未指定時はすべて))
-<%--            var dragDropAreaObjectsList = [
-                { id: 'divAttachmentArea', kbn: 'FILE_UP'}
-            ];
-            var enableUpload = document.getElementById('<%= Me.hdnUpload.ClientID  %>');
-            if (enableUpload !== null) {
-                if (enableUpload.disabled) {
-                    dragDropAreaObjectsList = null;
-                }
-            }
-            bindCommonDragDropEvents(dragDropAreaObjectsList, '<%= ResolveUrl(OFFICE.CommonConst.C_UPLOAD_HANDLER_URL)  %>');--%>
-            /* アップロードボタンの設定 */
-<%--            addUploadExtention('<%= Me.hdnUpload.ClientID %>', 'AFTER', true, 'divAttachmentArea','Upload');
-
-
-
-            var scrollTop = document.getElementById("hdnBodyScrollTop");
-            if (scrollTop.value !== "") {
-                document.getElementById("divContensbox").scrollTop = scrollTop.value;
-                scrollTop.value = "";
-            }--%>
             /* テキストポップアップ表示設定 */
             setDisplayNameTip();
 
-            /* タンク入力項目の制御 */
-            var hdnTankInputAreaDisplayObj = document.getElementById('hdnTankInputAreaDisplay');
-            var divTankInputBoxWrapperObj = document.getElementById('divTankInputBoxWrapper');
-            if (hdnTankInputAreaDisplayObj !== null && divTankInputBoxWrapperObj !== null) {
-                divTankInputBoxWrapperObj.style.display = hdnTankInputAreaDisplayObj.value;
-                if (hdnTankInputAreaDisplayObj.value === 'block') {
-                    commonDisableModalBg(divTankInputBoxWrapperObj.id);
-                }
-            }
             /* 画面ロック解除 */
             screenUnlock();
             focusAfterChange();
@@ -146,7 +117,7 @@
     ※%付きのコメントはHTMLソース表示でもレンダリングされないものです --%>
 <body>
     <%--FormIDは適宜変更ください。 --%>
-    <form id="GBT00020A" runat="server">
+    <form id="GBT00028L" runat="server">
         <%--ヘッダーボックス --%>
         <div id="divContainer">
             <div id="divTitlebox">
@@ -185,6 +156,7 @@
                 <div id="actionButtonsBox" runat="server">
                     <span id="spnActButtonBox" runat="server" visible="true">
                         <input id="btnExtract" type="button" value="絞り込み"  runat="server"  />
+                        <input id="btnOutputExcel" type="button" value="Excel出力" runat="server" />
                         <input id="btnOutput" type="button" value="出力" runat="server" />
                         <input id="btnSave" type="button" value="保存" runat="server" />
                     </span>
@@ -201,16 +173,6 @@
                                     <col /><col /><col /><col /><col />
                                 </colgroup>
 
-<%--							    <tr>
-								    <th class="rowHeader"><asp:Label ID="lblInfo" runat="server" Text="請求書情報" CssClass="areaTitle"></asp:Label></th>
-								    <td class="numHeader"><asp:Label ID="lblInvoiceNo" runat="server" Text="請求書番号" CssClass="areaTitle"></asp:Label></td>
-								    <td><asp:TextBox ID="txtInvoiceNo" runat="server" Text="" Enabled="false"></asp:TextBox>
-								    </td>
-								    <th></th>
-								    <td></td>
-								    <td colspan="4"></td>
-                                    <td class="auto"></td>
-							    </tr>--%>
                                 <tr id="trInvoiceInfoRow1" runat="server">
                                     <th><asp:Label ID="lblInvoiceNo" runat="server" Text="請求書番号"></asp:Label></th>
 					    		    <td><asp:TextBox ID="txtInvoiceNo" runat="server" Text="" Enabled="false"></asp:TextBox></td>
@@ -262,8 +224,8 @@
                                     <td></td>
                                 </tr>
                                 <tr id="trInvoiceInfoRow5" runat="server">
-                                    <td></td>
-					    		    <td colspan="2"><asp:TextBox ID="txtInvoiceAddress3" runat="server" Text="" Enabled="false"></asp:TextBox></td>
+                                    <th><asp:Label ID="lblInvoiceName" runat="server" Text="請求先名称"></asp:Label></th>
+					    		    <td colspan="2"><asp:TextBox ID="txtInvoiceName1" runat="server" Text="" Enabled="false"></asp:TextBox></td>
                                     <th colspan="2" class="textRight"><asp:Label ID="lblAccountNo" runat="server" Text="口座番号"></asp:Label></th>
 					    		    <td><asp:TextBox ID="txtAccountNo" runat="server" Text="" Enabled="false"></asp:TextBox></td>
                                     <th class="textRight"><asp:Label ID="lblOutCntOriginal" runat="server" Text="本紙版出力数"></asp:Label></th>
@@ -274,8 +236,8 @@
                                     <td></td>
                                 </tr>
                                 <tr id="trInvoiceInfoRow6" runat="server">
-                                    <th><asp:Label ID="lblInvoiceName" runat="server" Text="請求先名称"></asp:Label></th>
-					    		    <td colspan="2"><asp:TextBox ID="txtInvoiceName1" runat="server" Text="" Enabled="false"></asp:TextBox></td>
+                                    <td></td>
+					    		    <td colspan="2"><asp:TextBox ID="txtInvoiceName2" runat="server" Text="" Enabled="false"></asp:TextBox></td>
                                     <th colspan="2" class="textRight"><asp:Label ID="lblAccountName" runat="server" Text="口座名"></asp:Label></th>
 					    		    <td><asp:TextBox ID="txtAccountName" runat="server" Text="" Enabled="false"></asp:TextBox></td>
                                     <td></td>
@@ -285,7 +247,7 @@
                                 </tr>
                                 <tr id="trInvoiceInfoRow7" runat="server">
                                     <td></td>
-					    		    <td colspan="2"><asp:TextBox ID="txtInvoiceName2" runat="server" Text="" Enabled="false"></asp:TextBox></td>
+					    		    <td colspan="2"><asp:TextBox ID="txtInvoiceName3" runat="server" Text="" Enabled="false"></asp:TextBox></td>
                                     <th colspan="2" class="textRight"><asp:Label ID="lblCurrency" runat="server" Text="通貨"></asp:Label></th>
 					    		    <td><asp:TextBox ID="txtCurrency" runat="server" Text="" Enabled="false"></asp:TextBox></td>
                                     <td></td>
@@ -293,65 +255,11 @@
                                     <td></td>
                                     <td></td>
                                 </tr>
-
-
-<%--							    <tr>
-								    <th class="rowHeader"><asp:Label ID="lblBrInfoHeader" runat="server" Text="BR-info" CssClass="areaTitle"></asp:Label></th>
-								    <td class="numHeader">NO</td>
-								    <td><asp:Label ID="lblAgreementNo" runat="server" Text=""></asp:Label>
-                                        <%= If(Me.lblAgreementNo.Text = "", "<span>(New)</span>", "") %>
-								    </td>
-								    <th></th>
-								    <td></td>
-								    <td colspan="4"></td>
-                                    <td class="auto"></td>
-							    </tr>--%>
 					    	    <tr id="trInvoiceRemarks" runat="server">
 					    		    <th class="varticalTop"><asp:Label ID="lblRemarks" runat="server" Text="Remarks"></asp:Label></th>
 					    		    <td colspan="8"><asp:TextBox ID="txtRemarks" runat="server" TextMode="MultiLine"></asp:TextBox></td>
                                     <td></td>
 					    	    </tr>
-<%--					    	    <tr>
-					    		    <th class="varticalTop"><asp:Label ID="lblAttachment" runat="server" Text="Attachment"></asp:Label></th>
-					    		    <td colspan="8">
-                                        <div>
-                                            <asp:Button ID="hdnUpload" runat="server" Text="Button" />
-                                            <input id="btnDownloadFiles" type="button" value="File Download"  runat="server"  />
-                                        </div>
-                                        <div id="divAttachmentArea">
-                                            <asp:HiddenField ID="hdnAttachmentHeaderFileName" runat="server" Value="FileName" />
-                                            <asp:HiddenField ID="hdnAttachmentHeaderText" runat="server" Value="To register attached documents, drop it here" />
-                                            <asp:HiddenField ID="hdnAttachmentHeaderDelete" runat="server" Value="Delete" />
-
-                                            <table class="tblAttachmentHeader">
-                                                <tr>
-                                                    <th rowspan="2"><%= Me.hdnAttachmentHeaderFileName.Value %></th>
-                                                    <th><%= Me.hdnAttachmentHeaderText.Value %></th>
-                                                    <th rowspan="2"><%= Me.hdnAttachmentHeaderDelete.Value %></th>
-                                                </tr>
-                                                <tr>
-                                                    <th>↓↓↓</th>
-                                                </tr>
-                                            </table>
-
-                                            <asp:Repeater ID="repAttachment" runat="server">
-                                                <HeaderTemplate>
-                                                    <table  class="tblAttachment">
-                                                </HeaderTemplate>
-                                                <ItemTemplate>
-                                                    <tr class="trAttachment" >
-                                                        <td ondblclick='dispAttachmentFile("<%# Eval("FILENAME") %>");'><asp:Label ID="lblFileName" runat="server" Text='<%# HttpUtility.HtmlEncode(Eval("FILENAME")) %>' CssClass="textLeft" Title='<%# Eval("FILENAME") %>'></asp:Label></td>
-                                                        <td><asp:TextBox ID="txtDeleteFlg" runat="server" CssClass="textCenter" Text='<%# Eval("DELFLG") %>' Enabled='<%# IF(Me.hdnUpload.Enabled, "True", "False") %>'></asp:TextBox></td>
-                                                    </tr>
-                                                </ItemTemplate>
-                                                <FooterTemplate>
-                                                    </table>
-                                                </FooterTemplate>
-                                            </asp:Repeater>
-                                        </div>
-					    		    </td>
-                                    <td></td>
-					    	    </tr>--%>
 					    	    <tr id="trBlank1" runat="server">
                                    <td>&nbsp;</td>
  					    	    </tr>
@@ -396,10 +304,8 @@
 					    		    <%--<th class="varticalTop"><asp:Label ID="lblTankList" runat="server" Text="TankList"></asp:Label></th>--%>
                                     <td></td>
  					    		    <td colspan="9" id="tdInvoiceTankList">
-                                        <%--<div><input id="btnAddNewTank" type="button" value="Allocate" runat="server" /></div>--%>
                                         <div id="divTankListArea">
                                             <asp:HiddenField ID="hdnListHeaderCheck" runat="server" Value="発行有無" />
-                                            <%--<asp:HiddenField ID="hdnListHeaderDelButton" runat="server" Value="Delete" />--%>
                                             <asp:HiddenField ID="hdnListHeaderNo" runat="server" Value="No" />
                                             <asp:HiddenField ID="hdnListHeaderOrder" runat="server" Value="ORDERNO" />
                                             <asp:HiddenField ID="hdnListHeaderTankNo" runat="server" Value="TANKNO" />
@@ -415,16 +321,19 @@
                                             <asp:HiddenField ID="hdnListHeaderArvdDate" runat="server" Value="ARVD" />
                                             <asp:HiddenField ID="hdnListHeaderAmount" runat="server" Value="AMOUNT FIX" />
                                             <asp:HiddenField ID="hdnListHeaderBRID" runat="server" Value="BRID" />
+                                            <asp:HiddenField ID="hdnListHeaderCustomer" runat="server" Value="CUSTOMER" />
                                             <asp:Repeater ID="repTankInfo" runat="server">
                                                 <HeaderTemplate>
                                                     <table id="tblTankInfoList">
                                                         <tr>
-                                                            <th class="shortCol"><%= Me.hdnListHeaderCheck.Value %></th>
+                                                            <th class="shortCol"><%= Me.hdnListHeaderCheck.Value %>
+                                                                <asp:CheckBox ID="chkAllSelect" Checked='<%# If(Convert.ToString(Me.hdnAllSelectCheckValue.Value) = "TRUE", True, False) %>' runat="server" Enabled='<%# If(Convert.ToString(Me.txtInvoiceNo.Text) = "", True, False) %>' onclick="f_checkAllSelectEvent(event)"/>
+                                                            </th>
                                                             <th class="shortCol"><%= Me.hdnListHeaderNo.Value %></th>
                                                             <th class="idCol"><%= Me.hdnListHeaderOrder.Value %></th>
                                                             <th class="idCol"><%= Me.hdnListHeaderTankNo.Value %></th>
                                                             <th class="idCol"><%= Me.hdnListHeaderBlId.Value %></th>
-                                                            <th class="dateCol"><%= Me.hdnListHeaderTermType.Value %></th>
+                                                            <th class="idCol"><%= Me.hdnListHeaderTermType.Value %></th>
                                                             <th class="shortCol"><%= Me.hdnListHeaderPOL.Value %></th>
                                                             <th class="shortCol"><%= Me.hdnListHeaderPOD.Value %></th>
                                                             <th class="nameCol"><%= Me.hdnListHeaderProduct.Value %></th>
@@ -434,12 +343,13 @@
                                                             <th class="dateCol"><%= Me.hdnListHeaderShipDate.Value %></th>
                                                             <th class="dateCol"><%= Me.hdnListHeaderArvdDate.Value %></th>
                                                             <th class="dateCol"><%= Me.hdnListHeaderAmount.Value %></th>
-                                                            <th class="bridCol"><%= Me.hdnListHeaderBRID.Value %></th>
+                                                            <th class="idCol"><%= Me.hdnListHeaderBRID.Value %></th>
+                                                            <th class="idCol"><%= Me.hdnListHeaderCustomer.Value %></th>
                                                             <th class="lineCnt">No.</th>
                                                         </tr>
                                                 </HeaderTemplate>
                                                 <ItemTemplate>
-                                                    <tr ondblclick="ListDbClick(this,'<%# Eval("LINECNT") %>');">
+                                                    <tr ondblclick="ListDbClick(this,'<%# Eval("ORDERNO") %>');">
                                                         <td><asp:CheckBox ID="chkToInvoice" Checked='<%# If(Convert.ToString(Eval("TOINVOICE")) = "1", True, False) %>' runat="server" Enabled='<%# If(Convert.ToString(Eval("INVOICENO")) = "", True, False) %>' onclick="f_checkEvent(this)"/>
                                                         </td>
                                                         <%--<td title=''>&nbsp;</td>--%>
@@ -458,6 +368,7 @@
                                                         <td title='<%# Eval("ARVDDATE") %>'     ><%# BASEDLL.FormatDateContrySettings(Eval("ARVDDATE"), OFFICE.GBA00003UserSetting.DATEFORMAT) %></td>
                                                         <td title='<%# Eval("AMOUNT") %>'   ><%# Eval("AMOUNT") %></td>
                                                         <td title='<%# Eval("BRID") %>'  ><%# Eval("BRID") %></td>
+                                                        <td title='<%# Eval("CUSTOMER") %>'  ><%# Eval("CUSTOMER") %></td>
                                                         <td class="lineCnt"><asp:Label ID="lblLineCnt" runat="server" Text='<%# Eval("LINECNT") %>'></asp:Label></td>
                                                     </tr>
                                                 </ItemTemplate>
@@ -496,48 +407,13 @@
                     <%-- 一覧表制御用 --%>
                     <asp:HiddenField ID="hdnXMLsaveFile" runat="server" Value="" Visible="False" />  <%--  退避した一覧データのファイル保存先 --%>
                     <asp:HiddenField ID="hdnListDBclick" runat="server" Value="" />  <%--  ダブルクリックした行番号を記録 --%>   
-                    <asp:HiddenField ID="hdnListCurrentRownum" runat="server" Value="" /> <%-- 一覧でボタンクリックイベントを発生させたRowNumを保持 --%>
-                    <asp:HiddenField ID="hdnCheckChange" runat="server" Value="" /> <%-- 一覧でチェックボックスクリックイベントを発生させたValueを保持 --%>
-                    <asp:HiddenField ID="hdnCheckUniqueIndex" runat="server" Value="" /> <%-- 一覧でチェックボックスクリックイベントを発生させたUniqueIndexを保持 --%>
+                    <asp:HiddenField ID="hdnAllSelectCheckValue" runat="server" Value="FALSE" /> <%-- 全チェック欄の値を保持 --%>
+                    <asp:HiddenField ID="hdnAllSelectCheckChange" runat="server" Value="FALSE" /> <%-- 全チェックのイベントを保持 --%>
 
                     <%-- 画面固有 --%>
-                    <asp:HiddenField ID="hdnSelectedTabId" runat="server" Value="" /> <%-- 選択中のタブ --%>
-                    <asp:HiddenField ID="hdnIsViewOnlyPopup" runat="server" Value="0" /> <%-- 参照のみのポップアップ表示か？ "1":ポップアップ表示,"0":それ以外 --%>
-
-                    <asp:HiddenField ID="hdnProductIsHazard" runat="server" Value="" /> <%-- 積載品は危険物か？ "1"=危険物 それ以外=非危険品 --%>
-                    <asp:HiddenField ID="hdnCanCalcHireageCommercialFactor" runat="server" Value="" Visible ="false" /> <%-- 売上総額よりJOT総額算出の自動計算を行うか1=行う それいがい=行わない、費用変更時→オーナータブ移動時に使用 --%>
-                    <asp:HiddenField ID="hdnPrevTotalInvoicedValue" runat="server" Value="" Visible="false" />
-                    <asp:HiddenField ID="hdnBackUrl" value="" runat="server" Visible="false" />
-                    <asp:HiddenField ID="hdnBodyScrollTop" value="" runat="server" />
-                    <%-- 費用用 --%>
-                    <asp:HiddenField ID="hdnDelteCostUniqueIndex" value="" runat="server" />
-                    <asp:HiddenField ID="hdnCurrentUnieuqIndex" value="" runat="server" />
-                    <%-- 備考欄ボックス --%>
-                    <asp:HiddenField ID="hdnRemarkboxOpen" value="" runat="server" />
-                    <asp:HiddenField ID="hdnRemarkboxField" value="" runat="server" />
-                    <asp:HiddenField ID="hdnRemarkboxFieldName" value="" runat="server" />
-                    <%-- RemarkEmptyMessage --%>
-                    <asp:HiddenField ID="hdnRemarkEmptyMessage" value="" runat="server" />
-                    <asp:HiddenField ID="hdnRightBoxRemarkField" value="" runat="server" />
-                    <asp:HiddenField ID="hdnRightBoxClose" value="" runat="server" />
-                    <%-- ドラッグアンドドロップ --%>
-                    <asp:HiddenField ID="hdnMAPpermitCode" Value="TRUE" runat="server" />
-                    <asp:HiddenField ID="hdnListUpload" Value="" runat="server" />
-                    <%-- 添付ファイル一覧のファイルダブルクリック時のファイル名保持 --%>
-                    <asp:HiddenField ID="hdnFileDisplay" Value="" runat="server" />
-                    <%-- ドラッグアンドドロップ(メッセージ 英語/日本語切替対応用) --%>
-                    <asp:HiddenField ID="hdnUploadMessage01" Value="ファイルアップロード開始" runat="server" />
-                    <asp:HiddenField ID="hdnUploadError01" Value="ファイルアップロードが失敗しました。" runat="server" />
-                    <asp:HiddenField ID="hdnUploadError02" Value="通信を中止しました。" runat="server" />
-                    <asp:HiddenField ID="hdnUploadError03" Value="タイムアウトエラーが発生しました。" runat="server" />
-                    <asp:HiddenField ID="hdnUploadError04" Value="更新権限がありません。" runat="server" />
-                    <asp:HiddenField ID="hdnUploadError05" Value="対応外のファイル形式です。" runat="server" />
+                    <asp:HiddenField ID="hdnPrintType" value="PDF" runat="server" />
                     <%-- 当画面の計算処理POST(設定した名称の関数を実行) --%>
-                    <asp:HiddenField ID="hdnCalcFunctionName" Value="" runat="server" />
                     <asp:HiddenField ID="hdnThisMapVariant" Value="" runat="server" />
-                    <asp:HiddenField ID="hdnTankInputAreaDisplay" Value="none" runat="server" />
-                    <%-- 当画面の申請ステータス状況 --%>
-                    <asp:HiddenField ID="hdnApplyStatus" Value="" runat="server" />
 
                 </div>
             </div>
@@ -677,21 +553,6 @@
             <div id="divFooterbox" >
                 <div><asp:Label ID="lblFooterMessage" runat="server" Text=""></asp:Label></div>
                 <div id="divShowHelp" ></div>
-            </div>
-            <%-- マルチラインテキスト入力ポップアップ --%>
-            <div id="divRemarkInputBoxWrapper" runat="server">
-                <div id="divRemarkInputBox">
-                    <div id="divRemarkInputitle">
-                        <%= Me.hdnRemarkboxFieldName.Value %>
-                    </div>
-                    <div id="divRemarkInputButtons">
-                        <input id="btnRemarkInputOk" type="button" value="OK" runat="server" />
-                        <input id="btnRemarkInputCancel" type="button" value="CANCEL" runat="server" />
-                    </div>
-                    <div id="divRemarkTextArea">
-                        <asp:TextBox ID="txtRemarkInput" runat="server" TextMode="MultiLine"></asp:TextBox>
-                    </div>
-                </div>
             </div>
         </div>
     </form>

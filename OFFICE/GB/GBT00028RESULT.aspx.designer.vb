@@ -86,6 +86,15 @@ Partial Public Class GBT00028RESULT
     Protected WithEvents btnInvoiceNew As Global.System.Web.UI.HtmlControls.HtmlInputButton
     
     '''<summary>
+    '''btnDel コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents btnDel As Global.System.Web.UI.HtmlControls.HtmlInputButton
+    
+    '''<summary>
     '''btnSave コントロール。
     '''</summary>
     '''<remarks>

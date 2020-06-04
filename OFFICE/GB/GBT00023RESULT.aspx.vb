@@ -604,9 +604,11 @@ Public Class GBT00023RESULT
         sqlStat.AppendFormat("      ,ISNULL(F_BCLS.{0},'') AS BOTHCLASSNAME ", fixDispTextField).AppendLine()
         sqlStat.AppendLine("      ,CT.TORICOMP AS TORICOMP ")
         sqlStat.AppendLine("      ,CT.INCTORICODE       AS INCTORICODE ")
-        sqlStat.AppendLine("      ,ISNULL(INCTORI.NAMES,'') AS INCTORICODENAME ")
+        'sqlStat.AppendLine("      ,ISNULL(INCTORI.NAMES,'') AS INCTORICODENAME ")
+        sqlStat.AppendLine("      ,ISNULL(INCTORI.NAMES1,'') AS INCTORICODENAME ")
         sqlStat.AppendLine("      ,CT.EXPTORICODE       AS EXPTORICODE ")
-        sqlStat.AppendLine("      ,ISNULL(EXPTORI.NAMES,'') AS EXPTORICODENAME ")
+        'sqlStat.AppendLine("      ,ISNULL(EXPTORI.NAMES,'') AS EXPTORICODENAME ")
+        sqlStat.AppendLine("      ,ISNULL(EXPTORI.NAMES1,'') AS EXPTORICODENAME ")
         sqlStat.AppendLine("      ,CT.DEPOSITDAY AS DEPOSITDAY")
         sqlStat.AppendFormat("      ,ISNULL(F_DD.{0},'') AS DEPOSITDAYNAME ", fixDispTextField).AppendLine()
         sqlStat.AppendLine("      ,CONVERT(nvarchar,CT.DEPOSITADDMM) AS DEPOSITADDMM")
@@ -768,9 +770,11 @@ Public Class GBT00023RESULT
         sqlStat.AppendFormat("      ,ISNULL(F_BCLS.{0},'') AS BOTHCLASSNAME ", fixDispTextField).AppendLine()
         sqlStat.AppendLine("      ,CT.TORICOMP AS TORICOMP ")
         sqlStat.AppendLine("      ,CT.INCTORICODE       AS INCTORICODE ")
-        sqlStat.AppendLine("      ,ISNULL(INCTORI.NAMES,'') AS INCTORICODENAME ")
+        'sqlStat.AppendLine("      ,ISNULL(INCTORI.NAMES,'') AS INCTORICODENAME ")
+        sqlStat.AppendLine("      ,ISNULL(INCTORI.NAMES1,'') AS INCTORICODENAME ")
         sqlStat.AppendLine("      ,CT.EXPTORICODE       AS EXPTORICODE ")
-        sqlStat.AppendLine("      ,ISNULL(EXPTORI.NAMES,'') AS EXPTORICODENAME ")
+        'sqlStat.AppendLine("      ,ISNULL(EXPTORI.NAMES,'') AS EXPTORICODENAME ")
+        sqlStat.AppendLine("      ,ISNULL(EXPTORI.NAMES1,'') AS EXPTORICODENAME ")
         sqlStat.AppendLine("      ,CT.DEPOSITDAY AS DEPOSITDAY")
         sqlStat.AppendFormat("      ,ISNULL(F_DD.{0},'') AS DEPOSITDAYNAME ", fixDispTextField).AppendLine()
         sqlStat.AppendLine("      ,CONVERT(nvarchar,CT.DEPOSITADDMM) AS DEPOSITADDMM")
@@ -2387,11 +2391,14 @@ Public Class GBT00023RESULT
         'リスト設定
         Dim sqlStat As New StringBuilder
         sqlStat.AppendFormat("SELECT {0} AS [CODE]", codeField).AppendLine()
-        sqlStat.AppendLine("      ,NAMES AS [NAME]")
+        'sqlStat.AppendLine("      ,NAMES AS [NAME]")
+        sqlStat.AppendLine("      ,NAMES1 AS [NAME]")
         sqlStat.AppendLine("  FROM GBM0025_TORI")
         sqlStat.AppendLine(" WHERE DELFLG <> @DELFLG ")
         sqlStat.AppendLine("   AND LEFT(TORICODE,5) = @TORICOMP")
         sqlStat.AppendLine("   AND TORIKBN          = @TORIKBN")
+        sqlStat.AppendLine("   AND STYMD           <= getdate()")
+        sqlStat.AppendLine("   AND ENDYMD          >= getdate()")
         'sqlStat.AppendFormat(" GROUP BY {0},REMARK", codeField).AppendLine()
 
 
@@ -3147,7 +3154,8 @@ Public Class GBT00023RESULT
         sqlStat.AppendLine("    @UPDUSER as 'AUTHOR',")
         'sqlStat.AppendLine("    '' as 'WORKC1',")
         If isJotPrint = True Then
-            sqlStat.AppendLine("    td.NAMES as WORKC1,")
+            'sqlStat.AppendLine("    td.NAMES as WORKC1,")
+            sqlStat.AppendLine("    td.NAMES1 as WORKC1,")
         Else
             sqlStat.AppendLine("    case when @ACCCURRENCYSEGMENT = 'F' then isnull(cty.NAMESJP,'') else '' end as WORKC1,")
         End If
@@ -4669,7 +4677,8 @@ Public Class GBT00023RESULT
         sqlStat.AppendLine("       ,aw.CLOSINGGROUP")
         sqlStat.AppendLine("       ,aw.INVOICEDBY")
         sqlStat.AppendLine("       ,aw.CONTRACTORFIX")
-        sqlStat.AppendLine("       ,isnull(tr.NAMES,'') as 'TORI'")
+        'sqlStat.AppendLine("       ,isnull(tr.NAMES,'') as 'TORI'")
+        sqlStat.AppendLine("       ,isnull(tr.NAMES1,'') as 'TORI'")
         sqlStat.AppendLine("       ,aw.ORDERNO")
         sqlStat.AppendLine("       ,aw.TANKNO")
         sqlStat.AppendLine("       ,aw.COSTCODE")
@@ -4763,12 +4772,18 @@ Public Class GBT00023RESULT
             '--- JOT取引先
             sqlStat.AppendLine("  LEFT OUTER JOIN GBM0004_CUSTOMER cm")
             sqlStat.AppendLine("     ON cm.CUSTOMERCODE  = aw.CONTRACTORFIX")
+            sqlStat.AppendLine("    AND cm.STYMD       <= @ENTYMD")
+            sqlStat.AppendLine("    AND cm.ENDYMD      >= @ENTYMD")
             sqlStat.AppendLine("    AND cm.DELFLG      <> @DELFLG")
             sqlStat.AppendLine("  LEFT OUTER JOIN GBM0005_TRADER tm")
             sqlStat.AppendLine("     ON tm.CARRIERCODE  = aw.CONTRACTORFIX")
+            sqlStat.AppendLine("    AND tm.STYMD       <= @ENTYMD")
+            sqlStat.AppendLine("    AND tm.ENDYMD      >= @ENTYMD")
             sqlStat.AppendLine("    AND tm.DELFLG      <> @DELFLG")
             sqlStat.AppendLine("  LEFT OUTER JOIN GBM0003_DEPOT dm")
             sqlStat.AppendLine("     ON dm.DEPOTCODE  = aw.CONTRACTORFIX")
+            sqlStat.AppendLine("    AND dm.STYMD       <= @ENTYMD")
+            sqlStat.AppendLine("    AND dm.ENDYMD      >= @ENTYMD")
             sqlStat.AppendLine("    AND dm.DELFLG      <> @DELFLG")
             sqlStat.AppendLine("  LEFT OUTER JOIN GBM0001_COUNTRY ct")
             sqlStat.AppendLine("     ON ct.COUNTRYCODE  = tm.COUNTRYCODE")
@@ -4783,6 +4798,8 @@ Public Class GBT00023RESULT
             sqlStat.AppendLine("        OR ")
             sqlStat.AppendLine("       (tr.TORICODE = isnull(tm.EXPTORICODE,isnull(dm.EXPTORICODE,isnull(ct.EXPTORICODE,''))) AND tr.TORIKBN = 'E' AND aw.COSTTYPE = '2' )")
             sqlStat.AppendLine("      )")
+            sqlStat.AppendLine("    AND tr.STYMD      <= @ENTYMD")
+            sqlStat.AppendLine("    AND tr.ENDYMD     >= @ENTYMD")
             sqlStat.AppendLine("    AND tr.DELFLG     <> @DELFLG")
 
         Else
@@ -4795,7 +4812,9 @@ Public Class GBT00023RESULT
             sqlStat.AppendLine("  LEFT OUTER JOIN GBM0025_TORI tr")
             sqlStat.AppendLine("     ON tr.TORICODE   = ct.EXPTORICODE")
             sqlStat.AppendLine("    AND tr.TORIKBN    = 'E'")
-            sqlStat.AppendLine("    AND tr.DELFLG     <> @DELFLG")
+            sqlStat.AppendLine("    AND tr.STYMD     <= @ENTYMD")
+            sqlStat.AppendLine("    AND tr.ENDYMD    >= @ENTYMD")
+            sqlStat.AppendLine("    AND tr.DELFLG    <> @DELFLG")
         End If
 
         sqlStat.AppendLine(" WHERE aw.CLOSINGMONTH  = @CLOSINGMONTH")

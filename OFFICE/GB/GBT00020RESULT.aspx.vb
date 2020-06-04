@@ -281,8 +281,8 @@ Public Class GBT00020RESULT
             'フィルタ使用時の場合
             If isFillterOff = False Then
                 '条件に合致しない場合は非表示 HIDDENフィールドに1を立てる
-                If Not ((Me.txtShipper.Text.Trim = "" OrElse Convert.ToString(dr("SHIPPERNAME")).Contains(Me.txtShipper.Text.Trim)) _
-                        AndAlso (Me.txtRemarkCont.Text.Trim = "" OrElse Convert.ToString(dr("REMARK")).Contains(Me.txtRemarkCont.Text.Trim))) Then
+                If Not ((Me.txtShipper.Text.Trim = "" OrElse Convert.ToString(dr("SHIPPERNAME")).ToUpper.Contains(Me.txtShipper.Text.Trim.ToUpper)) _
+                        AndAlso (Me.txtRemarkCont.Text.Trim = "" OrElse Convert.ToString(dr("REMARK")).ToUpper.Contains(Me.txtRemarkCont.Text.Trim.ToUpper))) Then
                     dr.Item("HIDDEN") = 1
                 End If
             End If
@@ -774,7 +774,7 @@ Public Class GBT00020RESULT
         '表示対象行カウント(絞り込み対象)
         '　※　絞込（Cells(4)： 0=表示対象 , 1=非表示対象)
         For i As Integer = 0 To dt.Rows.Count - 1
-            If Convert.ToString(dt.Rows(i)(4)) = "0" Then
+            If Convert.ToString(dt.Rows(i)(3)) = "0" Then
                 DataCnt = DataCnt + 1
                 '行（ラインカウント）を再設定する。既存項目（SELECT）を利用
                 dt.Rows(i)("SELECT") = DataCnt

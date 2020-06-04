@@ -828,7 +828,10 @@ Public Class GBT00011RESULT
         sqlStat.AppendLine("      + (SELECT VALUE1")
         sqlStat.AppendLine("           FROM COS0017_FIXVALUE")
         sqlStat.AppendLine("          WHERE CLASS   = @CLASS")
-        sqlStat.AppendLine("            AND KEYCODE = @KEYCODE)")
+        sqlStat.AppendLine("            AND KEYCODE = @KEYCODE")
+        sqlStat.AppendLine("            AND STYMD  <= @STYMD")
+        sqlStat.AppendLine("            AND ENDYMD >= @ENDYMD")
+        sqlStat.AppendLine("            AND DELFLG <> @DELFLG)")
         Try
             If sqlCon Is Nothing Then
                 sqlCon = New SqlConnection(COA0019Session.DBcon)
@@ -840,9 +843,16 @@ Public Class GBT00011RESULT
                 'SQLパラメータ設定
                 Dim paramClass As SqlParameter = sqlCmd.Parameters.Add("@CLASS", SqlDbType.NVarChar, 20)
                 Dim paramKeyCode As SqlParameter = sqlCmd.Parameters.Add("@KEYCODE", SqlDbType.NVarChar, 20)
+                Dim paramStYmd As SqlParameter = sqlCmd.Parameters.Add("@STYMD", SqlDbType.Date)
+                Dim paramEndYmd As SqlParameter = sqlCmd.Parameters.Add("@ENDYMD", SqlDbType.Date)
+                Dim paramDelFlg As SqlParameter = sqlCmd.Parameters.Add("@DELFLG", SqlDbType.NVarChar, 1)
+
                 'SQLパラメータ値セット
                 paramClass.Value = C_SERVERSEQ
                 paramKeyCode.Value = COA0019Session.APSRVname
+                paramStYmd.Value = Date.Now
+                paramEndYmd.Value = Date.Now
+                paramDelFlg.Value = CONST_FLAG_YES
                 'paramKeyCode.Value = "DESKTOP-D5IC4N5" '本当は動作させるホスト名
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
                     Dim dt As New DataTable
@@ -1029,11 +1039,13 @@ Public Class GBT00011RESULT
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FVIF") 'STATUS用JOIN
         sqlStat.AppendLine("    ON  FVIF.CLASS        = 'APPROVAL'")
         sqlStat.AppendLine("   AND  FVIF.KEYCODE      = AHIF.STATUS")
+        sqlStat.AppendLine("   AND  FVIF.STYMD       <= getdate()")
+        sqlStat.AppendLine("   AND  FVIF.ENDYMD      >= getdate()")
         sqlStat.AppendLine("   AND  FVIF.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN GBM0003_DEPOT DP") 'DEPOT名称用JOIN
         sqlStat.AppendLine("    ON  DP.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  DP.DEPOTCODE    = BS.DEPOTCODE")
-        sqlStat.AppendLine("   AND  DP.STYMD       <= BS.ENDYMD")
+        sqlStat.AppendLine("   AND  DP.STYMD       <= BS.STYMD")
         sqlStat.AppendLine("   AND  DP.ENDYMD      >= BS.STYMD")
         sqlStat.AppendLine("   AND  DP.DELFLG      <> @DELFLG")
         sqlStat.AppendLine(" WHERE BS.DELFLG   <> @DELFLG")
@@ -1080,13 +1092,15 @@ Public Class GBT00011RESULT
             If Me.hdnEndYMD.Value <> "" Then '検索条件のTOをFROMと突き合わせ
                 'StYmd
                 paramStYmd = sqlCmd.Parameters.Add("@STYMD", SqlDbType.Date)
-                paramStYmd.Value = Date.ParseExact(Me.hdnEndYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                'paramStYmd.Value = Date.ParseExact(Me.hdnEndYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                paramStYmd.Value = FormatDateYMD(Me.hdnEndYMD.Value, GBA00003UserSetting.DATEFORMAT)
             End If
 
             If Me.hdnStYMD.Value <> "" Then '検索条件のFROMをTOと突き合わせ
                 'EndYmd
                 paramEndYmd = sqlCmd.Parameters.Add("@ENDYMD", SqlDbType.Date)
-                paramEndYmd.Value = Date.ParseExact(Me.hdnStYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                'paramEndYmd.Value = Date.ParseExact(Me.hdnStYMD.Value, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+                paramEndYmd.Value = FormatDateYMD(Me.hdnStYMD.Value, GBA00003UserSetting.DATEFORMAT)
             End If
 
             If Me.hdnTankNo.Value <> "" Then

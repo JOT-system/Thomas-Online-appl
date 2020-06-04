@@ -4975,7 +4975,8 @@ Public Structure GBA00009MailSendSet
             COA0033Mail.I_SYSCODE = COA0019Session.SYSCODE
             COA0033Mail.I_EVENTCODE = EVENTCODE
             COA0033Mail.I_SUBCODE = MAILSUBCODE
-            COA0033Mail.I_ID = paraTable.Rows(0).Item("P_OD_ORDERNO").ToString
+            'COA0033Mail.I_ID = paraTable.Rows(0).Item("P_OD_ORDERNO").ToString
+            COA0033Mail.I_ID = paraTable.Rows(0).Item("P_OD_TANKNO").ToString
             COA0033Mail.I_TOADDRESS = dicAddress("TOADDRESS")
             COA0033Mail.I_CC = dicAddress("CC")
             COA0033Mail.I_BCC = dicAddress("BCC")
@@ -5996,7 +5997,7 @@ Public Structure GBA00012TankInfo
     ''' <returns></returns>
     Public Property LISTBOX_TANK As ListBox
     ''' <summary>
-    ''' [OUT]タンクステータ用ステーブル
+    ''' [OUT]タンクステータス用テーブル
     ''' </summary>
     ''' <returns>データテーブル</returns>
     ''' <remarks>タンク動静で使用するデータテーブル
@@ -6253,7 +6254,8 @@ Public Structure GBA00012TankInfo
             '直近ステータス
             sqlStat.AppendLine(",WITH_STATUS as (")
             sqlStat.AppendLine("    select")
-            sqlStat.AppendLine("        RANK() OVER(PARTITION BY OVSTAT.TANKNO ORDER BY (CASE WHEN OVSTAT.ACTUALDATE = @InitDate THEN '9999/12/12' else OVSTAT.ACTUALDATE END) desc, OVSTAT.DISPSEQ desc) as RECENT,")
+            'sqlStat.AppendLine("        RANK() OVER(PARTITION BY OVSTAT.TANKNO ORDER BY (CASE WHEN OVSTAT.ACTUALDATE = @InitDate THEN '9999/12/12' else OVSTAT.ACTUALDATE END) desc, OVSTAT.DISPSEQ desc) as RECENT,")
+            sqlStat.AppendLine("        RANK() OVER(PARTITION BY OVSTAT.TANKNO ORDER BY (CASE WHEN OVSTAT.ACTUALDATE = @InitDate THEN '9999/12/12' else OVSTAT.ACTUALDATE END) desc, convert(char(10),OVSTAT.INITYMD,111) desc, OVSTAT.DISPSEQ desc) as RECENT,")
             sqlStat.AppendLine("        OVSTAT.TANKNO, OVSTAT.ACTIONID,OVSTAT.ACTUALDATE,OVSTAT.DISPSEQ")
             sqlStat.AppendLine("    from GBT0005_ODR_VALUE as OVSTAT with(nolock) ")
             sqlStat.AppendLine("    where OVSTAT.DELFLG <> @DelFlg")
@@ -6417,7 +6419,9 @@ Public Structure GBA00012TankInfo
             sqlStat.AppendLine("       end as ALLOCATIONDATE,")
             sqlStat.AppendLine("       isnull(convert(char,DEPOTOUT.ACTUALDATE,111),'') as DEPOTOUT,")
             sqlStat.AppendLine("       isnull(convert(char,POLLOAD.ACTUALDATE,111),'') as LADENDATE,")
-            sqlStat.AppendLine("       isnull(POLLOAD_P.PRODUCTNAME,'') as NEXTPRODUCT,")
+            ' 速度改善
+            'sqlStat.AppendLine("       isnull(POLLOAD_P.PRODUCTNAME,'') as NEXTPRODUCT,")
+            sqlStat.AppendLine("       isnull(POLLOAD_B.PRODUCTNAME,'') as NEXTPRODUCT,")
             sqlStat.AppendLine("       B.POL_SCHEDELDATE as ETDDATE,")
             sqlStat.AppendLine("       isnull(convert(char,POLETA.SCHEDELDATE,111),'') as ETADATE,")
             sqlStat.AppendLine("       B.POL_POLCOUNTRY,")
@@ -6429,6 +6433,26 @@ Public Structure GBA00012TankInfo
             sqlStat.AppendLine("        as LEASETANK")
             'ベース
             sqlStat.AppendLine("from WITH_BASE as B")
+            '発地港
+            sqlStat.AppendLine("left outer join GBM0002_PORT as PORTPOD with(nolock)")
+            sqlStat.AppendLine("on PORTPOD.COMPCODE = '01'")
+            sqlStat.AppendLine("and PORTPOD.PORTCODE = B.POL_PODPORT")
+            sqlStat.AppendLine("and PORTPOD.COUNTRYCODE = B.POL_PODCOUNTRY")
+            sqlStat.AppendLine("and PORTPOD.DELFLG <> @DelFlg")
+            '発地予定
+            sqlStat.AppendLine("left outer join GBT0005_ODR_VALUE as POLETA with(nolock)")
+            sqlStat.AppendLine("on POLETA.ORDERNO = B.POL_ORDERNO")
+            sqlStat.AppendLine("and POLETA.TANKNO = B.TANKNO")
+            'and POLETA.DTLPOLPOD = B.POL_DTLPOLPOD
+            sqlStat.AppendLine("and POLETA.DATEFIELD = B.POL_ETADATAFIELD")
+            'and POLETA.ACTUALDATE <> @InitDate
+            sqlStat.AppendLine("and  POLETA.DELFLG <> @DelFlg")
+            '着地予定
+            sqlStat.AppendLine("left outer join GBT0005_ODR_VALUE as OVETA with(nolock)")
+            sqlStat.AppendLine("on OVETA.ORDERNO = B.POD_ORDERNO")
+            sqlStat.AppendLine("and OVETA.TANKNO = B.TANKNO")
+            sqlStat.AppendLine("and OVETA.DATEFIELD = B.POD_DATEFIELD")
+            sqlStat.AppendLine("and OVETA.DELFLG <> @DelFlg")
             '直近ステータス
             sqlStat.AppendLine("left outer join WITH_STATUS as ST")
             sqlStat.AppendLine("on  ST.TANKNO = B.TANKNO")
@@ -6436,12 +6460,6 @@ Public Structure GBA00012TankInfo
             '直近３積載品
             sqlStat.AppendLine("left outer join WITH_P3HIST as P3HIST")
             sqlStat.AppendLine("on P3HIST.TANKNO = B.TANKNO")
-            '着地予定
-            sqlStat.AppendLine("left outer join GBT0005_ODR_VALUE as OVETA with(nolock)")
-            sqlStat.AppendLine("on OVETA.ORDERNO = B.POD_ORDERNO")
-            sqlStat.AppendLine("and OVETA.TANKNO = B.TANKNO")
-            sqlStat.AppendLine("and OVETA.DATEFIELD = B.POD_DATEFIELD")
-            sqlStat.AppendLine("and OVETA.DELFLG <> @DelFlg")
             'DISCHARGE
             sqlStat.AppendLine("left outer join GBT0005_ODR_VALUE as OVDISC with(nolock)")
             sqlStat.AppendLine("on OVDISC.ORDERNO = B.POD_ORDERNO")
@@ -6502,27 +6520,24 @@ Public Structure GBA00012TankInfo
             sqlStat.AppendLine("and POLLOAD.ACTIONID = 'LOAD'")
             sqlStat.AppendLine("and POLLOAD.ACTUALDATE <> @InitDate")
             sqlStat.AppendLine("and POLLOAD.DELFLG <> @DelFlg")
-            sqlStat.AppendLine("left outer join GBT0004_ODR_BASE as POLLOAD_B with(nolock)")
-            sqlStat.AppendLine("  on POLLOAD_B.ORDERNO = POLLOAD.ORDERNO")
-            sqlStat.AppendLine(" and POLLOAD_B.DELFLG <> @DelFlg")
-            sqlStat.AppendLine("left outer join GBM0008_PRODUCT as POLLOAD_P with(nolock)")
-            sqlStat.AppendLine("  on POLLOAD_P.COMPCODE = '01'")
-            sqlStat.AppendLine(" and POLLOAD_P.PRODUCTCODE = POLLOAD_B.PRODUCTCODE")
-            sqlStat.AppendLine(" and POLLOAD_P.DELFLG <> @DelFlg")
-            '発地予定
-            sqlStat.AppendLine("left outer join GBT0005_ODR_VALUE as POLETA with(nolock)")
-            sqlStat.AppendLine("on POLETA.ORDERNO = B.POL_ORDERNO")
-            sqlStat.AppendLine("and POLETA.TANKNO = B.TANKNO")
-            'and POLETA.DTLPOLPOD = B.POL_DTLPOLPOD
-            sqlStat.AppendLine("and POLETA.DATEFIELD = B.POL_ETADATAFIELD")
-            'and POLETA.ACTUALDATE <> @InitDate
-            sqlStat.AppendLine("and  POLETA.DELFLG <> @DelFlg")
-            '発地港
-            sqlStat.AppendLine("left outer join GBM0002_PORT as PORTPOD with(nolock)")
-            sqlStat.AppendLine("on PORTPOD.COMPCODE = '01'")
-            sqlStat.AppendLine("and PORTPOD.PORTCODE = B.POL_PODPORT")
-            sqlStat.AppendLine("and PORTPOD.COUNTRYCODE = B.POL_PODCOUNTRY")
-            sqlStat.AppendLine("and PORTPOD.DELFLG <> @DelFlg")
+            '速度改善
+            'sqlStat.AppendLine("left outer join GBT0004_ODR_BASE as POLLOAD_B with(nolock)")
+            'sqlStat.AppendLine("  on POLLOAD_B.ORDERNO = POLLOAD.ORDERNO")
+            'sqlStat.AppendLine(" and POLLOAD_B.DELFLG <> @DelFlg")
+            'sqlStat.AppendLine("left outer join GBM0008_PRODUCT as POLLOAD_P with(nolock)")
+            'sqlStat.AppendLine("  on POLLOAD_P.COMPCODE = '01'")
+            'sqlStat.AppendLine(" and POLLOAD_P.PRODUCTCODE = POLLOAD_B.PRODUCTCODE")
+            'sqlStat.AppendLine(" and POLLOAD_P.DELFLG <> @DelFlg")
+            sqlStat.AppendLine("left outer join ( ")
+            sqlStat.AppendLine("    select wb.ORDERNO,wp.PRODUCTNAME ")
+            sqlStat.AppendLine("    from GBT0004_ODR_BASE as wb with(nolock) ")
+            sqlStat.AppendLine("      left outer join GBM0008_PRODUCT wp with(nolock) ")
+            sqlStat.AppendLine("        on wp.COMPCODE = '01' ")
+            sqlStat.AppendLine("       and wp.PRODUCTCODE = wb.PRODUCTCODE ")
+            sqlStat.AppendLine("       and wp.DELFLG <> @DelFlg")
+            sqlStat.AppendLine("    where wb.DELFLG <> @DelFlg")
+            sqlStat.AppendLine("    ) as POLLOAD_B ")
+            sqlStat.AppendLine("    on POLLOAD_B.ORDERNO = POLLOAD.ORDERNO")
             '直近のリースアウト
             sqlStat.AppendLine("left outer join (")
             sqlStat.AppendLine("  select OVLESD.TANKNO, max(OVLESD.ACTUALDATE) as ACTUALDATE")
@@ -6728,9 +6743,9 @@ Public Structure GBA00012TankInfo
                     .Add("@AllocActionId1", SqlDbType.NVarChar).Value = "ETYD"
                     .Add("@AllocActionId2", SqlDbType.NVarChar).Value = "ETYC"
                     '引当時の自身のオーダーの際に表示するALLOCATEのACTIONID
-                    .Add("@AllocActionId3", SqlDbType.NVarChar).Value = "TKAL"
-                    .Add("@AllocActionId4", SqlDbType.NVarChar).Value = "TAEC"
-                    .Add("@AllocActionId5", SqlDbType.NVarChar).Value = "TAED"
+                    '.Add("@AllocActionId3", SqlDbType.NVarChar).Value = "TKAL"
+                    '.Add("@AllocActionId4", SqlDbType.NVarChar).Value = "TAEC"
+                    '.Add("@AllocActionId5", SqlDbType.NVarChar).Value = "TAED"
 
                     '引当対象のオーダーNo
                     .Add("@AllocateOrderNo", SqlDbType.NVarChar).Value = Me.ALLOCATEORDERNO
@@ -6741,7 +6756,7 @@ Public Structure GBA00012TankInfo
                     .Add("@AllocActionIdLeaseOut", SqlDbType.NVarChar).Value = "LESD"
                 End With
                 sqlConn.Open()
-                sqlCmd.CommandTimeout = 60
+                sqlCmd.CommandTimeout = 180
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
                     sqlDa.Fill(Me.TANKSTATUS_TABLE)
                 End Using
@@ -7569,6 +7584,41 @@ Public Structure GBA00013SoaInfo
                 sqlStat.AppendLine("  AND VL.ACTUALDATE BETWEEN @ACTUALDATEFROM AND @ACTUALDATETO ")
             End If
             sqlStat.AppendLine("  ) TBLSUB")
+
+            '締め月のレート
+            sqlStat.AppendLine("  LEFT JOIN GBM0020_EXRATE SOARATE with(nolock)")
+            sqlStat.AppendLine("         ON SOARATE.COMPCODE      = @COMPCODE")
+            sqlStat.AppendLine("        And SOARATE.COUNTRYCODE   = @COUNTRY")
+            sqlStat.AppendLine("        And SOARATE.TARGETYM      = DateAdd(Day, 1 - DatePart(Day, @TARGETYM), @TARGETYM)")
+            sqlStat.AppendLine("        AND SOARATE.DELFLG       <> @DELFLG")
+
+            '消費税率（ActualDate基準）
+            sqlStat.AppendLine("  LEFT JOIN GBM0001_COUNTRY CNTY_A with(nolock)")
+            sqlStat.AppendLine("         On CNTY_A.COUNTRYCODE  = TBLSUB.COUNTRYCODE")
+            sqlStat.AppendLine("        And CNTY_A.STYMD       <= isnull(TBLSUB.ACTUALDATEDTM,@NOWDATE)")
+            sqlStat.AppendLine("        And CNTY_A.ENDYMD      >= isnull(TBLSUB.ACTUALDATEDTM,@NOWDATE)")
+            sqlStat.AppendLine("        And CNTY_A.DELFLG      <> @DELFLG ")
+
+            'リース契約消費税(※リース項目が固定・・・)
+            sqlStat.AppendLine("  LEFT JOIN GBT0011_LBR_AGREEMENT LBR_A with(nolock)")
+            sqlStat.AppendLine("         ON LBR_A.RELATEDORDERNO   = TBLSUB.ORDERNO")
+            sqlStat.AppendLine("        And LBR_A.DELFLG           <> @DELFLG")
+            sqlStat.AppendLine("        AND TBLSUB.COSTCODE in ('S0103-01','S0103-02','S0103-03')")
+
+            '船社レート(第１輸送)
+            sqlStat.AppendLine("  LEFT JOIN GBT0007_ODR_VALUE2 OV2_1 with(nolock)")
+            sqlStat.AppendLine("         ON OV2_1.ORDERNO            = TBLSUB.ORDERNO")
+            sqlStat.AppendLine("        And OV2_1.DELFLG             <> @DELFLG")
+            sqlStat.AppendLine("        And OV2_1.TANKSEQ            = '001'")
+            sqlStat.AppendLine("        AND OV2_1.TRILATERAL         = '1'")
+
+            '船社レート(第２輸送)
+            sqlStat.AppendLine("  LEFT JOIN GBT0007_ODR_VALUE2 OV2_2 with(nolock)")
+            sqlStat.AppendLine("         ON OV2_2.ORDERNO            = TBLSUB.ORDERNO")
+            sqlStat.AppendLine("        And OV2_2.DELFLG             <> @DELFLG")
+            sqlStat.AppendLine("        And OV2_2.TANKSEQ            = '001'")
+            sqlStat.AppendLine("        AND OV2_2.TRILATERAL         = '2'")
+
             sqlStat.AppendLine("  LEFT JOIN GBM0020_EXRATE USREXR with(nolock)")
             sqlStat.AppendLine("         ON USREXR.COMPCODE      = @COMPCODE")
             sqlStat.AppendLine("        AND USREXR.CURRENCYCODE  = (SELECT CTRSUB.CURRENCYCODE ")
@@ -7622,41 +7672,6 @@ Public Structure GBA00013SoaInfo
             sqlStat.AppendLine("             ) JOTSOAVL")
             sqlStat.AppendLine("         ON JOTSOAVL.DATAIDODR   = TBLSUB.DATAID")
             '国ごとの表示桁数取得用JOIN END
-
-            '締め月のレート
-            sqlStat.AppendLine("  LEFT JOIN GBM0020_EXRATE SOARATE with(nolock)")
-            sqlStat.AppendLine("         ON SOARATE.COMPCODE      = @COMPCODE")
-            sqlStat.AppendLine("        And SOARATE.COUNTRYCODE   = @COUNTRY")
-            sqlStat.AppendLine("        And SOARATE.TARGETYM      = DateAdd(Day, 1 - DatePart(Day, @TARGETYM), @TARGETYM)")
-            sqlStat.AppendLine("        AND SOARATE.DELFLG       <> @DELFLG")
-
-            '消費税率（ActualDate基準）
-            sqlStat.AppendLine("  LEFT JOIN GBM0001_COUNTRY CNTY_A with(nolock)")
-            sqlStat.AppendLine("         On CNTY_A.COUNTRYCODE  = TBLSUB.COUNTRYCODE")
-            sqlStat.AppendLine("        And CNTY_A.STYMD       <= isnull(TBLSUB.ACTUALDATEDTM,@NOWDATE)")
-            sqlStat.AppendLine("        And CNTY_A.ENDYMD      >= isnull(TBLSUB.ACTUALDATEDTM,@NOWDATE)")
-            sqlStat.AppendLine("        And CNTY_A.DELFLG      <> @DELFLG ")
-
-            'リース契約消費税(※リース項目が固定・・・)
-            sqlStat.AppendLine("  LEFT JOIN GBT0011_LBR_AGREEMENT LBR_A with(nolock)")
-            sqlStat.AppendLine("         ON LBR_A.RELATEDORDERNO   = TBLSUB.ORDERNO")
-            sqlStat.AppendLine("        And LBR_A.DELFLG           <> @DELFLG")
-            sqlStat.AppendLine("        AND TBLSUB.COSTCODE in ('S0103-01','S0103-02','S0103-03')")
-
-            '船社レート(第１輸送)
-            sqlStat.AppendLine("  LEFT JOIN GBT0007_ODR_VALUE2 OV2_1 with(nolock)")
-            sqlStat.AppendLine("         ON OV2_1.ORDERNO            = TBLSUB.ORDERNO")
-            sqlStat.AppendLine("        And OV2_1.DELFLG             <> @DELFLG")
-            sqlStat.AppendLine("        And OV2_1.TANKSEQ            = '001'")
-            sqlStat.AppendLine("        AND OV2_1.TRILATERAL         = '1'")
-
-            '船社レート(第２輸送)
-            sqlStat.AppendLine("  LEFT JOIN GBT0007_ODR_VALUE2 OV2_2 with(nolock)")
-            sqlStat.AppendLine("         ON OV2_2.ORDERNO            = TBLSUB.ORDERNO")
-            sqlStat.AppendLine("        And OV2_2.DELFLG             <> @DELFLG")
-            sqlStat.AppendLine("        And OV2_2.TANKSEQ            = '001'")
-            sqlStat.AppendLine("        AND OV2_2.TRILATERAL         = '2'")
-
 
             '******************************
             '検索画面条件の付与 START
@@ -7770,7 +7785,7 @@ Public Structure GBA00013SoaInfo
             Using sqlCon As New SqlConnection(COA0019Session.DBcon),
               sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
                 sqlCon.Open() '接続オープン
-                sqlCmd.CommandTimeout = 180
+                sqlCmd.CommandTimeout = 240
                 'SQLパラメータ設定
                 With sqlCmd.Parameters
 
@@ -8357,42 +8372,7 @@ Public Structure GBA00013SoaInfo
             sqlStat.AppendLine("  AND VL.ORDERNO  LIKE 'NB%' ")
             sqlStat.AppendLine("  AND VL.BRID        = '' ")
             sqlStat.AppendLine("  ) TBLSUB")
-            sqlStat.AppendLine("  LEFT JOIN GBM0020_EXRATE USREXR with(nolock)")
-            sqlStat.AppendLine("         ON USREXR.COMPCODE      = @COMPCODE")
-            '
-            sqlStat.AppendLine("        AND USREXR.CURRENCYCODE  = (SELECT CTRSUB.CURRENCYCODE ")
-            sqlStat.AppendLine("                                      FROM GBM0001_COUNTRY CTRSUB with(nolock) ")
-            sqlStat.AppendLine("                                     WHERE CTRSUB.COUNTRYCODE = TBLSUB.COUNTRYCODE")
-            sqlStat.AppendLine("                                       AND CTRSUB.STYMD      <= @NOWDATE")
-            sqlStat.AppendLine("                                       AND CTRSUB.ENDYMD     >= @NOWDATE")
-            sqlStat.AppendLine("                                       AND CTRSUB.DELFLG     <> @DELFLG )")
-            sqlStat.AppendLine("        AND USREXR.TARGETYM      = DateAdd(Day, 1 - DatePart(Day, @TARGETYM), @TARGETYM)")
-            sqlStat.AppendLine("        AND USREXR.DELFLG       <> @DELFLG")
-            'SOA締め日JOIN START
-            sqlStat.AppendLine("  LEFT JOIN GBT0006_CLOSINGDAY CLD with(nolock)")
-            'sqlStat.AppendLine("         ON CLD.COUNTRYCODE      = CASE WHEN TBLSUB.INVOICEDBY IN (SELECT JOTA.CARRIERCODE FROM W_JOTAGENT JOTA) THEN '" & GBC_JOT_SOA_COUNTRY & "' ELSE TBLSUB.COUNTRYCODE END")
-            'sqlStat.AppendLine("         ON CLD.COUNTRYCODE      = CASE WHEN TBLSUB.INVOICEDBY IN (SELECT JOTA.CARRIERCODE FROM W_JOTAGENT JOTA with(nolock) ) THEN '" & GBC_JOT_SOA_COUNTRY & "' ELSE @COUNTRYCODE END")
-            If Me.COUNTRYCODE <> "" AndAlso Me.COUNTRYCODE <> "ALL" Then
-                sqlStat.AppendLine("         ON CLD.COUNTRYCODE      = CASE WHEN TBLSUB.INVOICEDBY IN (SELECT JOTA.CARRIERCODE FROM W_JOTAGENT JOTA) THEN '" & GBC_JOT_SOA_COUNTRY & "' ELSE @COUNTRYCODE END")
-            Else
-                sqlStat.AppendLine("         ON CLD.COUNTRYCODE      = CASE WHEN TBLSUB.INVOICEDBY IN (SELECT JOTA.CARRIERCODE FROM W_JOTAGENT JOTA)")
-                sqlStat.AppendLine("                                       THEN '" & GBC_JOT_SOA_COUNTRY & "'")
-                sqlStat.AppendLine("                                       ELSE (SELECT COUNTRYCODE FROM GBM0005_TRADER WHIT (nolock) WHERE COMPCODE = @COMPCODE AND CARRIERCODE = TBLSUB.INVOICEDBY AND DELFLG <> @DELFLG ) ")
-                sqlStat.AppendLine("                                   END")
-            End If
-            sqlStat.AppendLine("        AND CLD.STYMD           <= @NOWDATE")
-            sqlStat.AppendLine("        AND CLD.ENDYMD          >= @NOWDATE")
-            sqlStat.AppendLine("        AND CLD.DELFLG          <> @DELFLG")
-            sqlStat.AppendLine("        AND EXISTS (SELECT CLDS.COUNTRYCODE,MAX(CLDS.REPORTMONTH) AS REPORTMONTH")
-            sqlStat.AppendLine("                      FROM GBT0006_CLOSINGDAY CLDS with(nolock) ")
-            sqlStat.AppendLine("                     WHERE CLDS.STYMD          <= @NOWDATE")
-            sqlStat.AppendLine("                       AND CLDS.ENDYMD         >= @NOWDATE")
-            sqlStat.AppendLine("                       AND CLDS.DELFLG          <> @DELFLG")
-            sqlStat.AppendLine("                     GROUP BY CLDS.COUNTRYCODE")
-            sqlStat.AppendLine("                    HAVING CLDS.COUNTRYCODE      = CLD.COUNTRYCODE")
-            sqlStat.AppendLine("                       AND MAX(CLDS.REPORTMONTH) = CLD.REPORTMONTH")
-            sqlStat.AppendLine("                   )")
-            'SOA締め日JOIN END
+
             '国ごとの表示桁数取得用JOIN START
             'USD以外
             sqlStat.AppendLine("  LEFT JOIN GBM0001_COUNTRY CNTY with(nolock)")
@@ -8441,9 +8421,45 @@ Public Structure GBA00013SoaInfo
             sqlStat.AppendLine("        And OV2_2.DELFLG             <> @DELFLG")
             sqlStat.AppendLine("        And OV2_2.TANKSEQ            = '001'")
             sqlStat.AppendLine("        AND OV2_2.TRILATERAL         = '2'")
-
-
             '国ごとの表示桁数取得用JOIN END
+
+            sqlStat.AppendLine("  LEFT JOIN GBM0020_EXRATE USREXR with(nolock)")
+            sqlStat.AppendLine("         ON USREXR.COMPCODE      = @COMPCODE")
+            '
+            sqlStat.AppendLine("        AND USREXR.CURRENCYCODE  = (SELECT CTRSUB.CURRENCYCODE ")
+            sqlStat.AppendLine("                                      FROM GBM0001_COUNTRY CTRSUB with(nolock) ")
+            sqlStat.AppendLine("                                     WHERE CTRSUB.COUNTRYCODE = TBLSUB.COUNTRYCODE")
+            sqlStat.AppendLine("                                       AND CTRSUB.STYMD      <= @NOWDATE")
+            sqlStat.AppendLine("                                       AND CTRSUB.ENDYMD     >= @NOWDATE")
+            sqlStat.AppendLine("                                       AND CTRSUB.DELFLG     <> @DELFLG )")
+            sqlStat.AppendLine("        AND USREXR.TARGETYM      = DateAdd(Day, 1 - DatePart(Day, @TARGETYM), @TARGETYM)")
+            sqlStat.AppendLine("        AND USREXR.DELFLG       <> @DELFLG")
+            'SOA締め日JOIN START
+            sqlStat.AppendLine("  LEFT JOIN GBT0006_CLOSINGDAY CLD with(nolock)")
+            'sqlStat.AppendLine("         ON CLD.COUNTRYCODE      = CASE WHEN TBLSUB.INVOICEDBY IN (SELECT JOTA.CARRIERCODE FROM W_JOTAGENT JOTA) THEN '" & GBC_JOT_SOA_COUNTRY & "' ELSE TBLSUB.COUNTRYCODE END")
+            'sqlStat.AppendLine("         ON CLD.COUNTRYCODE      = CASE WHEN TBLSUB.INVOICEDBY IN (SELECT JOTA.CARRIERCODE FROM W_JOTAGENT JOTA with(nolock) ) THEN '" & GBC_JOT_SOA_COUNTRY & "' ELSE @COUNTRYCODE END")
+            If Me.COUNTRYCODE <> "" AndAlso Me.COUNTRYCODE <> "ALL" Then
+                sqlStat.AppendLine("         ON CLD.COUNTRYCODE      = CASE WHEN TBLSUB.INVOICEDBY IN (SELECT JOTA.CARRIERCODE FROM W_JOTAGENT JOTA) THEN '" & GBC_JOT_SOA_COUNTRY & "' ELSE @COUNTRYCODE END")
+            Else
+                sqlStat.AppendLine("         ON CLD.COUNTRYCODE      = CASE WHEN TBLSUB.INVOICEDBY IN (SELECT JOTA.CARRIERCODE FROM W_JOTAGENT JOTA)")
+                sqlStat.AppendLine("                                       THEN '" & GBC_JOT_SOA_COUNTRY & "'")
+                sqlStat.AppendLine("                                       ELSE (SELECT COUNTRYCODE FROM GBM0005_TRADER WHIT (nolock) WHERE COMPCODE = @COMPCODE AND CARRIERCODE = TBLSUB.INVOICEDBY AND DELFLG <> @DELFLG ) ")
+                sqlStat.AppendLine("                                   END")
+            End If
+            sqlStat.AppendLine("        AND CLD.STYMD           <= @NOWDATE")
+            sqlStat.AppendLine("        AND CLD.ENDYMD          >= @NOWDATE")
+            sqlStat.AppendLine("        AND CLD.DELFLG          <> @DELFLG")
+            sqlStat.AppendLine("        AND EXISTS (SELECT CLDS.COUNTRYCODE,MAX(CLDS.REPORTMONTH) AS REPORTMONTH")
+            sqlStat.AppendLine("                      FROM GBT0006_CLOSINGDAY CLDS with(nolock) ")
+            sqlStat.AppendLine("                     WHERE CLDS.STYMD          <= @NOWDATE")
+            sqlStat.AppendLine("                       AND CLDS.ENDYMD         >= @NOWDATE")
+            sqlStat.AppendLine("                       AND CLDS.DELFLG          <> @DELFLG")
+            sqlStat.AppendLine("                     GROUP BY CLDS.COUNTRYCODE")
+            sqlStat.AppendLine("                    HAVING CLDS.COUNTRYCODE      = CLD.COUNTRYCODE")
+            sqlStat.AppendLine("                       AND MAX(CLDS.REPORTMONTH) = CLD.REPORTMONTH")
+            sqlStat.AppendLine("                   )")
+            'SOA締め日JOIN END
+
             '******************************
             '検索画面条件の付与 START
             '******************************
@@ -8514,7 +8530,7 @@ Public Structure GBA00013SoaInfo
             Using sqlCon As New SqlConnection(COA0019Session.DBcon),
               sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
                 sqlCon.Open() '接続オープン
-                sqlCmd.CommandTimeout = 180
+                sqlCmd.CommandTimeout = 240
                 'Dim soaAppDateFrom As Date
                 'Dim soaAppDateTo As Date
                 'If Date.Now.Day() > 25 Then

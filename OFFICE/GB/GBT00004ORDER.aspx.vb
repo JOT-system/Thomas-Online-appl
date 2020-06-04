@@ -516,7 +516,9 @@ Public Class GBT00004ORDER
                     If selectedRow IsNot Nothing Then
                         currentCur = Convert.ToString(selectedRow.Item("CURRENCYCODE"))
                     End If
-                    If Me.hdnListMapVariant.Value <> "GB_NonBreaker" Then
+                    'If Me.hdnListMapVariant.Value <> "GB_NonBreaker" Then
+                    If Me.hdnListMapVariant.Value <> "GB_NonBreaker" _
+                        OrElse (Me.hdnListMapVariant.Value = "GB_NonBreaker" AndAlso GBA00003UserSetting.IS_JOTUSER AndAlso Me.hdnOffice.Value <> "") Then
                         'ノンブレーカー以外は発着の国に合わせるリストを都度作成
                         Dim dtCur As DataTable = Me.GetCurrency(selectedRow)
                         If dtCur IsNot Nothing Then
@@ -1146,6 +1148,7 @@ Public Class GBT00004ORDER
                    AndAlso (Me.txtOrderNo.Text = "" OrElse Convert.ToString(dr("ORDERNO")).StartsWith(Me.txtOrderNo.Text)) _
                    AndAlso (Me.txtTankNo.Text = "" OrElse Convert.ToString(dr("TANKNO")).StartsWith(Me.txtTankNo.Text))) _
                    OrElse (Me.hdnListMapVariant.Value = "GB_TankActivity" AndAlso Convert.ToString(dr("ACTIONID")) = "") _
+                   OrElse (Me.hdnListMapVariant.Value = "GB_SOA" AndAlso Me.chkHideNoAmount.Checked = True AndAlso (dr("UAG_USD").Equals("0"))) _
                    OrElse (Me.hdnListMapVariant.Value = "GB_SOA" AndAlso Me.ckhShowTotalInvoiceRelatedCost.Checked = False AndAlso (dr("BRADDEDCOST").Equals("2"))) Then
                     dr.Item("HIDDEN") = 1
                 End If
@@ -2620,7 +2623,7 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("                  WHEN VL.DTLPOLPOD LIKE 'Organizer' AND CST.LDKBN IN ('D') THEN '' ")
         sqlStat.AppendLine("                  ELSE '1'")
         sqlStat.AppendLine("             END")
-        sqlStat.AppendLine("   AND CST.STYMD     <= VL.ENDYMD")
+        sqlStat.AppendLine("   AND CST.STYMD     <= VL.STYMD")
         sqlStat.AppendLine("   AND CST.ENDYMD    >= VL.STYMD")
         sqlStat.AppendLine("   AND CST.DELFLG   <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN COT0002_APPROVALHIST AH") '承認履歴
@@ -2630,41 +2633,48 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("   AND  AH.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FV") 'STATUS用JOIN
         sqlStat.AppendLine("    ON  FV.CLASS        = 'APPROVAL'")
-        sqlStat.AppendLine("   AND  FV.KEYCODE      = CASE WHEN AH.STATUS IS NOT NULL THEN AH.STATUS ")
-        sqlStat.AppendLine("                               WHEN VL.AMOUNTFIX <> VL.AMOUNTORD THEN '" & C_APP_STATUS.APPAGAIN & "'")
+        'sqlStat.AppendLine("   AND  FV.KEYCODE      = CASE WHEN AH.STATUS IS NOT NULL THEN AH.STATUS ")
+        'sqlStat.AppendLine("                               WHEN VL.AMOUNTFIX <> VL.AMOUNTORD THEN '" & C_APP_STATUS.APPAGAIN & "'")
+        'sqlStat.AppendLine("                               ELSE NULL")
+        'sqlStat.AppendLine("                           END")
+        sqlStat.AppendLine("   AND  FV.KEYCODE      = CASE WHEN (AH.STATUS IS NOT NULL AND AH.STATUS <> '' AND AH.STATUS <> '" & C_APP_STATUS.APPROVED & "') THEN AH.STATUS ")
+        sqlStat.AppendLine("                               WHEN ((AH.STATUS IS NULL OR AH.STATUS = '' OR AH.STATUS = '" & C_APP_STATUS.APPROVED & "') AND VL.AMOUNTFIX <> VL.AMOUNTORD) THEN '" & C_APP_STATUS.APPAGAIN & "'")
+        sqlStat.AppendLine("                               WHEN AH.STATUS IS NOT NULL THEN AH.STATUS ")
         sqlStat.AppendLine("                               ELSE NULL")
         sqlStat.AppendLine("                           END")
+        sqlStat.AppendLine("   AND  FV.STYMD       <= VL.STYMD")
+        sqlStat.AppendLine("   AND  FV.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("   AND  FV.DELFLG      <> @DELFLG")
 
         sqlStat.AppendLine("  LEFT JOIN GBM0001_COUNTRY CNTY")
         sqlStat.AppendLine("         ON CNTY.COUNTRYCODE      = VL.COUNTRYCODE")
         sqlStat.AppendLine("        AND CNTY.DELFLG           <> @DELFLG")
-        sqlStat.AppendLine("        AND CNTY.STYMD            <= @NOWDATE")
-        sqlStat.AppendLine("        AND CNTY.ENDYMD           >= @NOWDATE")
+        sqlStat.AppendLine("        AND CNTY.STYMD            <= (case when VL.ACTUALDATE = '1900/01/01' then @NOWDATE else VL.ACTUALDATE end)")
+        sqlStat.AppendLine("        AND CNTY.ENDYMD           >= (case when VL.ACTUALDATE = '1900/01/01' then @NOWDATE else VL.ACTUALDATE end)")
 
         '*BR_CONTRACTOR名取得JOIN START
         sqlStat.AppendLine("      LEFT JOIN GBM0005_TRADER TRBR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORBR = TRBR.CARRIERCODE ")
         sqlStat.AppendLine("       AND  TRBR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  TRBR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  TRBR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  TRBR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  TRBR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0002_PORT PTBR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORBR = PTBR.PORTCODE ")
         sqlStat.AppendLine("       AND  PTBR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  PTBR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  PTBR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  PTBR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  PTBR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0003_DEPOT DPBR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORBR = DPBR.DEPOTCODE ")
         sqlStat.AppendLine("       AND  DPBR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  DPBR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  DPBR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  DPBR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  DPBR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0004_CUSTOMER CTBR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORBR = CTBR.CUSTOMERCODE ")
         sqlStat.AppendLine("       AND  CTBR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  CTBR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  CTBR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  CTBR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  CTBR.DELFLG      <> @DELFLG")
         '*BR_CONTRACTOR名取得JOIN END
@@ -2673,25 +2683,25 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("      LEFT JOIN GBM0005_TRADER TRODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = TRODR.CARRIERCODE ")
         sqlStat.AppendLine("       AND  TRODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  TRODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  TRODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  TRODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  TRODR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0002_PORT PTODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = PTODR.PORTCODE ")
         sqlStat.AppendLine("       AND  PTODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  PTODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  PTODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  PTODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  PTODR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0003_DEPOT DPODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = DPODR.DEPOTCODE ")
         sqlStat.AppendLine("       AND  DPODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  DPODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  DPODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  DPODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  DPODR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0004_CUSTOMER CTODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = CTODR.CUSTOMERCODE ")
         sqlStat.AppendLine("       AND  CTODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  CTODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  CTODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  CTODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  CTODR.DELFLG      <> @DELFLG")
         '*ODR_CONTRACTOR名取得JOIN END
@@ -2700,25 +2710,25 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("      LEFT JOIN GBM0005_TRADER TRFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = TRFIX.CARRIERCODE ")
         sqlStat.AppendLine("       AND  TRFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  TRFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  TRFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  TRFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  TRFIX.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0002_PORT PTFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = PTFIX.PORTCODE ")
         sqlStat.AppendLine("       AND  PTFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  PTFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  PTFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  PTFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  PTFIX.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0003_DEPOT DPFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = DPFIX.DEPOTCODE ")
         sqlStat.AppendLine("       AND  DPFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  DPFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  DPFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  DPFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  DPFIX.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0004_CUSTOMER CTFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = CTFIX.CUSTOMERCODE ")
         sqlStat.AppendLine("       AND  CTFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  CTFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  CTFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  CTFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  CTFIX.DELFLG      <> @DELFLG")
         '*FIX_CONTRACTOR名取得JOIN END
@@ -2751,6 +2761,9 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("                      AND FXSL.SYSCODE  = '" & C_SYSCODE_GB & "'")
         sqlStat.AppendLine("                      AND FXSL.CLASS    = 'LEASEPAYMENT'")
         sqlStat.AppendLine("                      AND FXSL.VALUE3   = VL.COSTCODE")
+        sqlStat.AppendLine("                      AND FXSL.STYMD   <= VL.STYMD")
+        sqlStat.AppendLine("                      AND FXSL.ENDYMD  >= VL.STYMD")
+        sqlStat.AppendLine("                      AND FXSL.DELFLG  <> @DELFLG")
         sqlStat.AppendLine("                 )")
         sqlStat.AppendLine("        )")
         If Me.hdnOrderNo.Value <> "" Then
@@ -2769,7 +2782,7 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("                    WHERE CSTS.COMPCODE = @COMPCODE")
         sqlStat.AppendLine("                      AND CSTS.COSTCODE = VL.COSTCODE")
         sqlStat.AppendLine("                      AND CSTS.CLASS10  = '" & CONST_FLAG_YES & "'")
-        sqlStat.AppendLine("                      AND CSTS.STYMD   <= VL.ENDYMD")
+        sqlStat.AppendLine("                      AND CSTS.STYMD   <= VL.STYMD")
         sqlStat.AppendLine("                      AND CSTS.ENDYMD  >= VL.STYMD")
         sqlStat.AppendLine("                      AND CSTS.DELFLG  <> @DELFLG")
         sqlStat.AppendLine("                  )")
@@ -2821,32 +2834,37 @@ Public Class GBT00004ORDER
                 colNameList.Add(colOb.ColumnName)
             End If
         Next
-        Dim actyNo As Integer = 0
-        Dim orderNo As String = Convert.ToString(dtDbResult.Rows(0).Item("ORDERNO"))
-        Dim tankSeq As String = Convert.ToString(dtDbResult.Rows(0).Item("TANKSEQ"))
-        For Each readDr As DataRow In dtDbResult.Rows
-            '同一カラム名を単純転送
-            Dim writeDr As DataRow = retDt.NewRow
-            writeDr.BeginEdit()
-            For Each colName In colNameList
-                If colName = "DISPSEQ" Then
-                    writeDr.Item(colName) = Convert.ToString(readDr.Item(colName))
-                Else
-                    writeDr.Item(colName) = readDr.Item(colName)
+
+        '対象データ０件以外
+        If dtDbResult.Rows.Count <> 0 Then
+
+            Dim actyNo As Integer = 0
+            Dim orderNo As String = Convert.ToString(dtDbResult.Rows(0).Item("ORDERNO"))
+            Dim tankSeq As String = Convert.ToString(dtDbResult.Rows(0).Item("TANKSEQ"))
+            For Each readDr As DataRow In dtDbResult.Rows
+                '同一カラム名を単純転送
+                Dim writeDr As DataRow = retDt.NewRow
+                writeDr.BeginEdit()
+                For Each colName In colNameList
+                    If colName = "DISPSEQ" Then
+                        writeDr.Item(colName) = Convert.ToString(readDr.Item(colName))
+                    Else
+                        writeDr.Item(colName) = readDr.Item(colName)
+                    End If
+                Next
+                If Not (tankSeq.Equals(readDr.Item("TANKSEQ")) _
+                        AndAlso orderNo.Equals(readDr.Item("ORDERNO"))) Then
+                    actyNo = 0
+                    orderNo = Convert.ToString(readDr.Item("ORDERNO"))
+                    tankSeq = Convert.ToString(readDr.Item("TANKSEQ"))
                 End If
+                actyNo = actyNo + 1
+                writeDr.Item("ACTYNO") = actyNo.ToString("000")
+                writeDr.EndEdit()
+                SetCanRowEdit(writeDr)
+                retDt.Rows.Add(writeDr)
             Next
-            If Not (tankSeq.Equals(readDr.Item("TANKSEQ")) _
-                    AndAlso orderNo.Equals(readDr.Item("ORDERNO"))) Then
-                actyNo = 0
-                orderNo = Convert.ToString(readDr.Item("ORDERNO"))
-                tankSeq = Convert.ToString(readDr.Item("TANKSEQ"))
-            End If
-            actyNo = actyNo + 1
-            writeDr.Item("ACTYNO") = actyNo.ToString("000")
-            writeDr.EndEdit()
-            SetCanRowEdit(writeDr)
-            retDt.Rows.Add(writeDr)
-        Next
+        End If
 
         Return retDt
 
@@ -2899,16 +2917,17 @@ Public Class GBT00004ORDER
                         .AppendLine("     )")
                         .AppendLine(" OR  (     OBS.ETA2 BETWEEN @ETAST AND @ETAEND")
                         .AppendLine("     )")
-                        .AppendLine(" OR  (     EXISTS(SELECT 1 ") 'オーダー明細SHIPがETDの範囲に存在するか
-                        .AppendLine("                   FROM GBT0005_ODR_VALUE ODVALETA ")
-                        .AppendLine("                  WHERE ODVALETA.ORDERNO   = OBS.ORDERNO ")
-                        .AppendLine("                    AND ODVALETA.ACTIONID in " & etaActy & " ")
-                        .AppendLine("                    AND ODVALETA.DELFLG   <> @DELFLG ")
-                        .AppendLine("                    AND CASE WHEN ODVALETA.SCHEDELDATE = '1900/01/01'")
-                        .AppendLine("                               THEN ODVALETA.SCHEDELDATEBR")
-                        .AppendLine("                             ELSE ODVALETA.SCHEDELDATE END BETWEEN @ETAST AND @ETAEND")
-                        .AppendLine("                 )") 'オーダー明細SHIP END
-                        .AppendLine("     )")
+                        .AppendLine(" OR  (     ODVALETA_W.ORDERNO is not null )")
+                        '.AppendLine(" OR  (     EXISTS(SELECT 1 ") 'オーダー明細SHIPがETDの範囲に存在するか
+                        '.AppendLine("                   FROM GBT0005_ODR_VALUE ODVALETA ")
+                        '.AppendLine("                  WHERE ODVALETA.ORDERNO   = OBS.ORDERNO ")
+                        '.AppendLine("                    AND ODVALETA.ACTIONID in " & etaActy & " ")
+                        '.AppendLine("                    AND ODVALETA.DELFLG   <> @DELFLG ")
+                        '.AppendLine("                    AND CASE WHEN ODVALETA.SCHEDELDATE = '1900/01/01'")
+                        '.AppendLine("                               THEN ODVALETA.SCHEDELDATEBR")
+                        '.AppendLine("                             ELSE ODVALETA.SCHEDELDATE END BETWEEN @ETAST AND @ETAEND")
+                        '.AppendLine("                 )") 'オーダー明細SHIP END
+                        '.AppendLine("     )")
                         .AppendLine(")")
                     End With
                 End If
@@ -3042,7 +3061,7 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("                  WHEN VL.DTLPOLPOD LIKE 'PO%'  THEN '' ")
         sqlStat.AppendLine("                  ELSE '1'")
         sqlStat.AppendLine("             END")
-        sqlStat.AppendLine("   AND CST.STYMD     <= VL.ENDYMD")
+        sqlStat.AppendLine("   AND CST.STYMD     <= VL.STYMD")
         sqlStat.AppendLine("   AND CST.ENDYMD    >= VL.STYMD")
         sqlStat.AppendLine("   AND CST.DELFLG   <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN COT0002_APPROVALHIST AH") '承認履歴
@@ -3056,36 +3075,38 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("                               WHEN VL.AMOUNTFIX <> VL.AMOUNTORD THEN '" & C_APP_STATUS.APPAGAIN & "'")
         sqlStat.AppendLine("                               ELSE NULL")
         sqlStat.AppendLine("                           END")
+        sqlStat.AppendLine("   AND  FV.STYMD       <= VL.STYMD")
+        sqlStat.AppendLine("   AND  FV.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("   AND  FV.DELFLG      <> @DELFLG")
         '*BR_CONTRACTOR名取得JOIN START
         sqlStat.AppendLine("      LEFT JOIN GBM0005_TRADER TRBR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORBR = TRBR.CARRIERCODE ")
         sqlStat.AppendLine("       AND  TRBR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  TRBR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  TRBR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  TRBR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  TRBR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0002_PORT PTBR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORBR = PTBR.PORTCODE ")
         sqlStat.AppendLine("       AND  PTBR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  PTBR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  PTBR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  PTBR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  PTBR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0003_DEPOT DPBR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORBR = DPBR.DEPOTCODE ")
         sqlStat.AppendLine("       AND  DPBR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  DPBR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  DPBR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  DPBR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  DPBR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0001_COUNTRY CNTY")
         sqlStat.AppendLine("        ON CNTY.COUNTRYCODE   = VL.COUNTRYCODE")
         sqlStat.AppendLine("       AND CNTY.DELFLG       <> @DELFLG")
-        sqlStat.AppendLine("       AND CNTY.STYMD        <= @NOWDATE")
-        sqlStat.AppendLine("       AND CNTY.ENDYMD       >= @NOWDATE")
+        sqlStat.AppendLine("       AND CNTY.STYMD        <= (case when VL.ACTUALDATE = '1900/01/01' then @NOWDATE else VL.ACTUALDATE end)")
+        sqlStat.AppendLine("       AND CNTY.ENDYMD       >= (case when VL.ACTUALDATE = '1900/01/01' then @NOWDATE else VL.ACTUALDATE end)")
         sqlStat.AppendLine("      LEFT JOIN GBM0004_CUSTOMER CMBR ")
         sqlStat.AppendLine("        ON CMBR.COMPCODE      = '" & GBC_COMPCODE & "' ")
         sqlStat.AppendLine("       AND CMBR.CUSTOMERCODE  = VL.CONTRACTORBR ")
         sqlStat.AppendLine("       AND CST.CLASS4        >= '顧客' ")
-        sqlStat.AppendLine("       AND CMBR.STYMD        <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND CMBR.STYMD        <= VL.STYMD")
         sqlStat.AppendLine("       AND CMBR.ENDYMD       >= VL.STYMD")
         sqlStat.AppendLine("       AND CMBR.DELFLG       <> @DELFLG")
         '*BR_CONTRACTOR名取得JOIN END
@@ -3094,26 +3115,26 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("      LEFT JOIN GBM0005_TRADER TRODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = TRODR.CARRIERCODE ")
         sqlStat.AppendLine("       AND  TRODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  TRODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  TRODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  TRODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  TRODR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0002_PORT PTODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = PTODR.PORTCODE ")
         sqlStat.AppendLine("       AND  PTODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  PTODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  PTODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  PTODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  PTODR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0003_DEPOT DPODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = DPODR.DEPOTCODE ")
         sqlStat.AppendLine("       AND  DPODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  DPODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  DPODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  DPODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  DPODR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0004_CUSTOMER CMODR ")
         sqlStat.AppendLine("        ON CMODR.COMPCODE      = '" & GBC_COMPCODE & "' ")
         sqlStat.AppendLine("       AND CMODR.CUSTOMERCODE  = VL.CONTRACTORODR ")
         sqlStat.AppendLine("       AND CST.CLASS4         >= '顧客' ")
-        sqlStat.AppendLine("       AND CMODR.STYMD        <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND CMODR.STYMD        <= VL.STYMD")
         sqlStat.AppendLine("       AND CMODR.ENDYMD       >= VL.STYMD")
         sqlStat.AppendLine("       AND CMODR.DELFLG       <> @DELFLG")
         '*ODR_CONTRACTOR名取得JOIN END
@@ -3122,26 +3143,26 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("      LEFT JOIN GBM0005_TRADER TRFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = TRFIX.CARRIERCODE ")
         sqlStat.AppendLine("       AND  TRFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  TRFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  TRFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  TRFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  TRFIX.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0002_PORT PTFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = PTFIX.PORTCODE ")
         sqlStat.AppendLine("       AND  PTFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  PTFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  PTFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  PTFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  PTFIX.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0003_DEPOT DPFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = DPFIX.DEPOTCODE ")
         sqlStat.AppendLine("       AND  DPFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  DPFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  DPFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  DPFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  DPFIX.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0004_CUSTOMER CMFIX ")
         sqlStat.AppendLine("        ON CMFIX.COMPCODE      = '" & GBC_COMPCODE & "' ")
         sqlStat.AppendLine("       AND CMFIX.CUSTOMERCODE  = VL.CONTRACTORFIX ")
         sqlStat.AppendLine("       AND CST.CLASS4         >= '顧客' ")
-        sqlStat.AppendLine("       AND CMFIX.STYMD        <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND CMFIX.STYMD        <= VL.STYMD")
         sqlStat.AppendLine("       AND CMFIX.ENDYMD       >= VL.STYMD")
         sqlStat.AppendLine("       AND CMFIX.DELFLG       <> @DELFLG")
         '*FIX_CONTRACTOR名取得JOIN END
@@ -3176,6 +3197,18 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("       AND  TP.CLASS2          = VL.DISPSEQ ")
         sqlStat.AppendLine("       AND  TP.DELFLG         <> @DELFLG")
         '*タンク充填状況及び例外的な顧客名取得 JOIN END
+
+        '*速度改善
+        sqlStat.AppendLine("      LEFT JOIN ( ")
+        sqlStat.AppendLine("      SELECT DISTINCT ORDERNO ")
+        sqlStat.AppendLine("      FROM   GBT0005_ODR_VALUE ODVALETA ")
+        sqlStat.AppendLine("      WHERE ODVALETA.ACTIONID in " & etaActy & " ")
+        sqlStat.AppendLine("       AND ODVALETA.DELFLG   <> @DELFLG ")
+        sqlStat.AppendLine("       AND ((ODVALETA.SCHEDELDATE BETWEEN @ETAST AND @ETAEND) ")
+        sqlStat.AppendLine("       OR   (ODVALETA.SCHEDELDATE = '1900/01/01' and ODVALETA.SCHEDELDATEBR BETWEEN @ETAST AND @ETAEND))")
+        sqlStat.AppendLine("      ) ODVALETA_W ")
+        sqlStat.AppendLine("      ON ODVALETA_W.ORDERNO   = VL.ORDERNO ")
+        '
 
         sqlStat.AppendLine(" WHERE VL.DTLPOLPOD <> @DTLPOLPOD")
         sqlStat.AppendLine("   AND VL.COSTCODE  <> @COSTCODE")
@@ -3463,6 +3496,10 @@ Public Class GBT00004ORDER
                 writeDr.Item("HIDDEN") = "1"
             End If
 
+            If Me.chkHideNoAmount.Checked = True AndAlso (readDr.Item("UAG_USD").ToString.Equals("0")) Then
+                writeDr.Item("HIDDEN") = "1"
+            End If
+
             If Not (tankSeq.Equals(readDr.Item("TANKSEQ")) _
                     AndAlso orderNo.Equals(readDr.Item("ORDERNO"))) Then
                 actyNo = 0
@@ -3573,7 +3610,7 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("    On CST.COMPCODE  = @COMPCODE")
         sqlStat.AppendLine("   AND CST.NONBR     = '" & CONST_FLAG_YES & "'")
         sqlStat.AppendLine("   AND CST.COSTCODE  = VL.COSTCODE")
-        sqlStat.AppendLine("   AND CST.STYMD     <= VL.ENDYMD")
+        sqlStat.AppendLine("   AND CST.STYMD     <= VL.STYMD")
         sqlStat.AppendLine("   AND CST.ENDYMD    >= VL.STYMD")
         sqlStat.AppendLine("   AND CST.DELFLG    <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN COT0002_APPROVALHIST AH") '承認履歴
@@ -3583,33 +3620,43 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("   And  AH.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FV") 'STATUS用JOIN
         sqlStat.AppendLine("    On  FV.CLASS        = 'APPROVAL'")
-        sqlStat.AppendLine("   AND  FV.KEYCODE      = CASE WHEN (AH.STATUS IS NOT NULL AND AH.STATUS <> '') THEN AH.STATUS ")
+        'sqlStat.AppendLine("   AND  FV.KEYCODE      = CASE WHEN (AH.STATUS IS NOT NULL AND AH.STATUS <> '') THEN AH.STATUS ")
+        'sqlStat.AppendLine("                               WHEN CST.NONBR = '" & CONST_FLAG_YES & "' AND CST.CLASS2 <> '' THEN '" & C_APP_STATUS.APPAGAIN & "'")
+        'sqlStat.AppendLine("                               ELSE NULL")
+        'sqlStat.AppendLine("                           END")
+        sqlStat.AppendLine("   AND  FV.KEYCODE      = CASE WHEN (AH.STATUS IS NOT NULL AND AH.STATUS <> '' AND AH.STATUS <> '" & C_APP_STATUS.APPROVED & "') THEN AH.STATUS ")
+        sqlStat.AppendLine("                               WHEN (AH.STATUS = '" & C_APP_STATUS.APPROVED & "' AND VL.AMOUNTFIX <> VL.AMOUNTORD) THEN '" & C_APP_STATUS.APPAGAIN & "'")
+        sqlStat.AppendLine("                               WHEN (AH.STATUS IS NOT NULL AND AH.STATUS <> '') THEN AH.STATUS ")
         sqlStat.AppendLine("                               WHEN CST.NONBR = '" & CONST_FLAG_YES & "' AND CST.CLASS2 <> '' THEN '" & C_APP_STATUS.APPAGAIN & "'")
         sqlStat.AppendLine("                               ELSE NULL")
         sqlStat.AppendLine("                           END")
+        sqlStat.AppendLine("   AND  FV.STYMD       <= VL.STYMD")
+        sqlStat.AppendLine("   AND  FV.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("   AND  FV.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN GBM0005_TRADER TRD")
         sqlStat.AppendLine("    ON  TRD.COMPCODE     = @COMPCODE")
         sqlStat.AppendLine("   AND  TRD.CARRIERCODE  = VL.DTLOFFICE")
+        sqlStat.AppendLine("   AND  TRD.STYMD       <= VL.STYMD")
+        sqlStat.AppendLine("   AND  TRD.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("   AND  TRD.DELFLG      <> @DELFLG")
 
         '*ODR_CONTRACTOR名取得JOIN START
         sqlStat.AppendLine("      LEFT JOIN GBM0005_TRADER TRODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = TRODR.CARRIERCODE ")
         sqlStat.AppendLine("       AND  TRODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  TRODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  TRODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  TRODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  TRODR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0003_DEPOT DPODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = DPODR.DEPOTCODE ")
         sqlStat.AppendLine("       AND  DPODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  DPODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  DPODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  DPODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  DPODR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0004_CUSTOMER CUSODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = CUSODR.CUSTOMERCODE ")
         sqlStat.AppendLine("       AND  CUSODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  CUSODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  CUSODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  CUSODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  CUSODR.DELFLG      <> @DELFLG")
         '*ODR_CONTRACTOR名取得JOIN END
@@ -3618,19 +3665,19 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("      LEFT JOIN GBM0005_TRADER TRFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = TRFIX.CARRIERCODE ")
         sqlStat.AppendLine("       AND  TRFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  TRFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  TRFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  TRFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  TRFIX.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0003_DEPOT DPFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = DPFIX.DEPOTCODE ")
         sqlStat.AppendLine("       AND  DPFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  DPFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  DPFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  DPFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  DPFIX.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0004_CUSTOMER CUSFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = CUSFIX.CUSTOMERCODE ")
         sqlStat.AppendLine("       AND  CUSFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  CUSFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  CUSFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  CUSFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  CUSFIX.DELFLG      <> @DELFLG")
         '*FIX_CONTRACTOR名取得JOIN END
@@ -3638,8 +3685,8 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("  LEFT JOIN GBM0001_COUNTRY CNTY")
         sqlStat.AppendLine("         ON CNTY.COUNTRYCODE      = VL.COUNTRYCODE")
         sqlStat.AppendLine("        AND CNTY.DELFLG           <> @DELFLG")
-        sqlStat.AppendLine("        AND CNTY.STYMD            <= @NOWDATE")
-        sqlStat.AppendLine("        AND CNTY.ENDYMD           >= @NOWDATE")
+        sqlStat.AppendLine("        AND CNTY.STYMD            <= (case when VL.ACTUALDATE = '1900/01/01' then @NOWDATE else VL.ACTUALDATE end)")
+        sqlStat.AppendLine("        AND CNTY.ENDYMD           >= (case when VL.ACTUALDATE = '1900/01/01' then @NOWDATE else VL.ACTUALDATE end)")
         '*国マスタ JOIN END
         sqlStat.AppendLine("WHERE VL.DELFLG     <> @DELFLG ")
         sqlStat.AppendLine("  AND VL.ORDERNO  LIKE 'NB%' ")
@@ -3886,7 +3933,7 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("                  WHEN VL.DTLPOLPOD LIKE 'PO%'  THEN '' ")
         sqlStat.AppendLine("                  ELSE '1'")
         sqlStat.AppendLine("             END")
-        sqlStat.AppendLine("   And CST.STYMD     <= VL.ENDYMD")
+        sqlStat.AppendLine("   And CST.STYMD     <= VL.STYMD")
         sqlStat.AppendLine("   And CST.ENDYMD    >= VL.STYMD")
         sqlStat.AppendLine("   And CST.DELFLG   <> @DELFLG")
 
@@ -3903,13 +3950,15 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("                               ELSE NULL")
         'sqlStat.AppendLine("                               ELSE '" & C_APP_STATUS.APPAGAIN & "'") 'DEMURRAGEの場合はすべて申請が必要な想定
         sqlStat.AppendLine("                           END")
+        sqlStat.AppendLine("   AND  FV.STYMD       <= VL.STYMD")
+        sqlStat.AppendLine("   AND  FV.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("   AND  FV.DELFLG      <> @DELFLG")
 
         sqlStat.AppendLine("  LEFT JOIN GBM0001_COUNTRY CNTY")
         sqlStat.AppendLine("         ON CNTY.COUNTRYCODE      = VL.COUNTRYCODE")
         sqlStat.AppendLine("        AND CNTY.DELFLG           <> @DELFLG")
-        sqlStat.AppendLine("        AND CNTY.STYMD            <= @NOWDATE")
-        sqlStat.AppendLine("        AND CNTY.ENDYMD           >= @NOWDATE")
+        sqlStat.AppendLine("        AND CNTY.STYMD            <= (case when VL.ACTUALDATE = '1900/01/01' then @NOWDATE else VL.ACTUALDATE end)")
+        sqlStat.AppendLine("        AND CNTY.ENDYMD           >= (case when VL.ACTUALDATE = '1900/01/01' then @NOWDATE else VL.ACTUALDATE end)")
 
         sqlStat.AppendLine("  LEFT JOIN GBM0020_EXRATE USREXR")
         sqlStat.AppendLine("         ON USREXR.COMPCODE      = @COMPCODE")
@@ -3920,7 +3969,7 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("  LEFT JOIN GBM0005_TRADER INVTRA")
         sqlStat.AppendLine("         ON INVTRA.COMPCODE      = @COMPCODE")
         sqlStat.AppendLine("        AND INVTRA.CARRIERCODE   = VL.INVOICEDBY")
-        sqlStat.AppendLine("        AND INVTRA.STYMD        <= VL.ENDYMD")
+        sqlStat.AppendLine("        AND INVTRA.STYMD        <= VL.STYMD")
         sqlStat.AppendLine("        AND INVTRA.ENDYMD       >= VL.STYMD")
         sqlStat.AppendLine("        AND INVTRA.DELFLG       <> @DELFLG")
         'InvoicedByの国コードを取得 END
@@ -3941,19 +3990,19 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("      LEFT JOIN GBM0005_TRADER TRBR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORBR = TRBR.CARRIERCODE ")
         sqlStat.AppendLine("       AND  TRBR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  TRBR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  TRBR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  TRBR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  TRBR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0003_DEPOT DPBR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORBR = DPBR.DEPOTCODE ")
         sqlStat.AppendLine("       AND  DPBR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  DPBR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  DPBR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  DPBR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  DPBR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0004_CUSTOMER CTBR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORBR = CTBR.CUSTOMERCODE ")
         sqlStat.AppendLine("       AND  CTBR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  CTBR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  CTBR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  CTBR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  CTBR.DELFLG      <> @DELFLG")
         '*BR_CONTRACTOR名取得JOIN END
@@ -3962,19 +4011,19 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("      LEFT JOIN GBM0005_TRADER TRODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = TRODR.CARRIERCODE ")
         sqlStat.AppendLine("       AND  TRODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  TRODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  TRODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  TRODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  TRODR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0003_DEPOT DPODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = DPODR.DEPOTCODE ")
         sqlStat.AppendLine("       AND  DPODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  DPODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  DPODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  DPODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  DPODR.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0004_CUSTOMER CTODR")
         sqlStat.AppendLine("        ON  VL.CONTRACTORODR = CTODR.CUSTOMERCODE ")
         sqlStat.AppendLine("       AND  CTODR.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  CTODR.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  CTODR.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  CTODR.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  CTODR.DELFLG      <> @DELFLG")
         '*ODR_CONTRACTOR名取得JOIN END
@@ -3983,19 +4032,19 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("      LEFT JOIN GBM0005_TRADER TRFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = TRFIX.CARRIERCODE ")
         sqlStat.AppendLine("       AND  TRFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  TRFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  TRFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  TRFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  TRFIX.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0003_DEPOT DPFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = DPFIX.DEPOTCODE ")
         sqlStat.AppendLine("       AND  DPFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  DPFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  DPFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  DPFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  DPFIX.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("      LEFT JOIN GBM0004_CUSTOMER CTFIX")
         sqlStat.AppendLine("        ON  VL.CONTRACTORFIX = CTFIX.CUSTOMERCODE ")
         sqlStat.AppendLine("       AND  CTFIX.COMPCODE     = '" & GBC_COMPCODE & "' ")
-        sqlStat.AppendLine("       AND  CTFIX.STYMD       <= VL.ENDYMD")
+        sqlStat.AppendLine("       AND  CTFIX.STYMD       <= VL.STYMD")
         sqlStat.AppendLine("       AND  CTFIX.ENDYMD      >= VL.STYMD")
         sqlStat.AppendLine("       AND  CTFIX.DELFLG      <> @DELFLG")
         '*FIX_CONTRACTOR名取得JOIN END
@@ -5579,7 +5628,7 @@ Public Class GBT00004ORDER
                 Me.btnBliingClose.Attributes("class") = "aspNetDisabled"
             End If
 
-            showSearchFieldList.AddRange({Me.spnTankNo, Me.spnCostItem, Me.spnClosingDate, Me.spnVender, Me.spnUsdAmountSummary})
+            showSearchFieldList.AddRange({Me.spnTankNo, Me.spnCostItem, Me.spnClosingDate, Me.spnVender, Me.spnUsdAmountSummary, Me.spnHideNoAmount})
             '↓20190725 TOTALINVOICE含み額を表示させるチェックボックス条件
             If GBA00003UserSetting.IS_JOTUSER Then
                 spnShowTotalInvoiceRelatedCost.Visible = True
@@ -5870,11 +5919,21 @@ Public Class GBT00004ORDER
                 GBA00004CountryRelated.LISTBOX_OTHER = listboxBummy
                 GBA00004CountryRelated.GBA00004getLeftListOther()
             Case GBC_CHARGECLASS4.CUSTOMER
-                retDt = GetCustomer(countryCode:=countryCode)
+                If carrierCode <> "" Then
+                    retDt = GetCustomer(customerCode:=carrierCode)
+                ElseIf countryCode <> "" Then
+                    retDt = GetCustomer(countryCode:=countryCode)
+                Else
+                    retDt = GetCustomer()
+                End If
             Case Else
                 ' 内航船は国指定なし
                 If Left(chargeClass4, Len(GBC_CHARGECLASS4.PORT_I)).Equals(GBC_CHARGECLASS4.PORT_I) Then
-                    retDt = GBA00006PortRelated.GBA00006getPortCodeValue()
+                    If carrierCode <> "" Then
+                        retDt = GBA00006PortRelated.GBA00006getPortCodeValue(portCode:=carrierCode)
+                    Else
+                        retDt = GBA00006PortRelated.GBA00006getPortCodeValue()
+                    End If
                 End If
 
         End Select
@@ -6173,9 +6232,10 @@ Public Class GBT00004ORDER
                     displayValue = val
                 End If
                 dr.Item(fieldId.Key) = displayValue
-                If Me.hdnListMapVariant.Value = "GB_NonBreaker" AndAlso fieldId.Key.Equals("AMOUNTORD") AndAlso Convert.ToString(dr.Item("STATUS")).Equals("") Then
-                    dr.Item("AMOUNTFIX") = dr.Item(fieldId.Key)
-                End If
+                'ノンブレーカー申請チェックボックス制御有効化のためコメントアウト
+                'If Me.hdnListMapVariant.Value = "GB_NonBreaker" AndAlso fieldId.Key.Equals("AMOUNTORD") AndAlso Convert.ToString(dr.Item("STATUS")).Equals("") Then
+                '    dr.Item("AMOUNTFIX") = dr.Item(fieldId.Key)
+                'End If
             Next
 
         Next
@@ -6462,12 +6522,24 @@ Public Class GBT00004ORDER
         addDr.Item("DATAID") = sysNo '新規レコードは暫定的にSYSKEY(タンク引当のキーとするため)
         addDr.Item("STATUS") = dispStatus
         addDr.Item("CHARGE_CLASS1") = class1Val
-        Dim agent As String = Me.hdnUserOffice.Value
+        'Dim agent As String = Me.hdnUserOffice.Value
+        Dim agent As String
+        If GBA00003UserSetting.IS_JOTUSER AndAlso Me.hdnOffice.Value <> "" Then
+            agent = Me.hdnOffice.Value
+            Dim GBA00005OfficeRelated As New GBA00005OfficeRelated
+            GBA00005OfficeRelated.OFFICECODE = Me.hdnOffice.Value
+            GBA00005OfficeRelated.GBA00005getCountry()
+            addDr.Item("COUNTRYCODE") = GBA00005OfficeRelated.COUNTRYCODE
+        Else
+            agent = Me.hdnUserOffice.Value
+            addDr.Item("COUNTRYCODE") = Me.hdnUserCountry.Value
+        End If
         addDr.Item("AGENTORGANIZER") = agent
         addDr.Item("AGENT") = agent
         addDr.Item("DTLOFFICE") = agent
-        addDr.Item("COUNTRYCODE") = Me.hdnUserCountry.Value
-        addDr.Item("TAXATION") = "0"
+        'addDr.Item("COUNTRYCODE") = Me.hdnUserCountry.Value
+        'addDr.Item("TAXATION") = "0"
+        addDr.Item("TAXATION") = GetDefaultTaxation(Convert.ToString(addDr.Item("COUNTRYCODE")))
         addDr.Item("INVOICEDBY") = agent
         addDr.Item("ENABLEACCCURRENCYSEGMENT") = enableAccCurrencySegment
         If enableAccCurrencySegment = "1" Then
@@ -7093,6 +7165,8 @@ Public Class GBT00004ORDER
             sqlStat.AppendLine(" WHERE COMPCODE  = @COMPCODE")
             sqlStat.AppendLine("   AND CLASS7 LIKE '%' + @CLASS7 + '%'")
             sqlStat.AppendLine("   AND (LDKBN = 'B' OR LDKBN = @LDKBN)")
+            sqlStat.AppendLine("   AND STYMD    <= @STYMD")
+            sqlStat.AppendLine("   AND ENDYMD   >= @ENDYMD")
             sqlStat.AppendLine("   AND DELFLG   <> @DELFLG")
             Dim retDb As New DataTable
             Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
@@ -7101,6 +7175,8 @@ Public Class GBT00004ORDER
                     .Add("@DELFLG", SqlDbType.NVarChar).Value = CONST_FLAG_YES
                     .Add("@CLASS7", SqlDbType.NVarChar).Value = actyNo
                     .Add("@LDKBN", SqlDbType.NVarChar).Value = Right(polPod, 1)
+                    .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
                 End With
                 '取得結果をDataTableに転送
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -7779,6 +7855,8 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("                   WHEN VL.DTLPOLPOD LIKE 'PO%'  THEN '' ")
         sqlStat.AppendLine("                   ELSE '1'")
         sqlStat.AppendLine("              END")
+        sqlStat.AppendLine("    AND CC.STYMD  <= getdate() ")
+        sqlStat.AppendLine("    AND CC.ENDYMD >= getdate() ")
         sqlStat.AppendLine("    AND CC.DELFLG <> @DELFLG")
         sqlStat.AppendLine("  WHERE VL.DATAID  = @DATAID ")
         sqlStat.AppendLine("    AND VL.DELFLG <> @DELFLG")
@@ -8704,7 +8782,7 @@ Public Class GBT00004ORDER
             sqlStat.AppendLine("                                     ELSE '1'")
             sqlStat.AppendLine("                                END")
             sqlStat.AppendLine("                      AND CSTS.CLASS10  = '" & CONST_FLAG_YES & "'")
-            sqlStat.AppendLine("                      AND CSTS.STYMD   <= VL.ENDYMD")
+            sqlStat.AppendLine("                      AND CSTS.STYMD   <= VL.STYMD")
             sqlStat.AppendLine("                      AND CSTS.ENDYMD  >= VL.STYMD")
             sqlStat.AppendLine("                      AND CSTS.DELFLG  <> @DELFLG")
             sqlStat.AppendLine("                  )")
@@ -10056,6 +10134,8 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("                               WHEN VL.AMOUNTBR <> VL.AMOUNTORD THEN '" & C_APP_STATUS.APPAGAIN & "'")
         sqlStat.AppendLine("                               ELSE NULL")
         sqlStat.AppendLine("                           END")
+        sqlStat.AppendLine("   AND  FV.STYMD    <= VL.STYMD")
+        sqlStat.AppendLine("   AND  FV.ENDYMD   >= VL.STYMD")
         sqlStat.AppendLine("   AND  FV.DELFLG   <> @DELFLG")
         If fromRow = False Then
             'SOACLOSE連動済確認JOIN START
@@ -10601,7 +10681,10 @@ Public Class GBT00004ORDER
             sqlStat.AppendLine("      + (SELECT VALUE1")
             sqlStat.AppendLine("           FROM COS0017_FIXVALUE")
             sqlStat.AppendLine("          WHERE CLASS   = @CLASS")
-            sqlStat.AppendLine("            AND KEYCODE = @KEYCODE)")
+            sqlStat.AppendLine("            AND KEYCODE = @KEYCODE")
+            sqlStat.AppendLine("            AND STYMD  <= @STYMD")
+            sqlStat.AppendLine("            AND ENDYMD >= @ENDYMD")
+            sqlStat.AppendLine("            AND DELFLG <> @DELFLG)")
             sqlStat.AppendLine("      + '-'")
             sqlStat.AppendLine("      + right('0000' + trim(convert(char,NEXT VALUE FOR " & C_SQLSEQ.NONBREAKER & ")),4)")
             Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
@@ -10609,6 +10692,9 @@ Public Class GBT00004ORDER
                 With sqlCmd.Parameters
                     .Add("@CLASS", SqlDbType.NVarChar, 20).Value = C_SERVERSEQ
                     .Add("@KEYCODE", SqlDbType.NVarChar, 20).Value = HttpContext.Current.Session("APSRVname")
+                    .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                 End With
 
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -10824,10 +10910,14 @@ Public Class GBT00004ORDER
                     If dateString <> "" Then
                         dateString = dateBuff.ToString("yyyy/MM/dd")
                     End If
-
+                    ' 日付のクリア
+                    If dateString = "1900/01/01" Then
+                        dateString = ""
+                    End If
                     '日付項目一括転送を行う
                     Dim actyNo As String = Convert.ToString(writeDr.Item("ACTIONID"))
-                    If actyNo <> "" Then
+                    'If actyNo <> "" Then
+                    If actyNo <> "" AndAlso dateString <> "" Then
                         '日付入力したACTYをもとに他の日付を連鎖して更新
                         Dim rowNum As String = Convert.ToString(writeDr.Item("LINECNT"))
                         Dim txtBoxName As String = String.Format("txt{0}{1}Dummy", Me.WF_LISTAREA.ID, fieldName)
@@ -11494,7 +11584,8 @@ Public Class GBT00004ORDER
             '課税フラグの表示制御
             If dicColumnNameToNo("TAXATION") <> "" AndAlso dicColumnNameToNo("COUNTRYCODE") <> "" Then
                 Dim rowCountryCode As String = tbrRight.Cells(Integer.Parse(dicColumnNameToNo("COUNTRYCODE"))).Text
-                If rowCountryCode <> "JP" Then
+                'If rowCountryCode <> "JP" Then
+                If rowCountryCode <> "JP" AndAlso GBA00003UserSetting.IS_JOTUSER <> True Then
                     With tbrRight.Cells(Integer.Parse(dicColumnNameToNo("TAXATION")))
                         If .HasControls = True AndAlso TypeOf .Controls(0) Is CheckBox Then
                             Dim chkObj As CheckBox = DirectCast(.Controls(0), CheckBox)
@@ -11757,6 +11848,8 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("   AND USR.COMPCODE = ORG.COMPCODE")
         sqlStat.AppendLine("   AND USR.ORG      = ORG.ORGCODE")
         sqlStat.AppendLine(" WHERE ORG.SYSCODE  = @SYSCODE")
+        sqlStat.AppendLine("   AND ORG.STYMD  <= USR.STYMD")
+        sqlStat.AppendLine("   AND ORG.ENDYMD >= USR.STYMD")
         sqlStat.AppendLine("   AND ORG.DELFLG <> @DELFLG")
         Dim dtDbResult As New DataTable
         'DB接続
@@ -12045,23 +12138,23 @@ Public Class GBT00004ORDER
             sqlStat.AppendLine("  LEFT JOIN GBT0004_ODR_BASE OBS")
             sqlStat.AppendLine("         ON OBS.ORDERNO   = OV.ORDERNO")
             sqlStat.AppendLine("        AND OBS.DELFLG   <> @DELFLG")
-            sqlStat.AppendLine("  LEFT JOIN GBM0010_CHARGECODE CC")
-            sqlStat.AppendLine("         ON CC.COSTCODE = OVS.COSTCODE")
-            sqlStat.AppendLine("        AND '1' = CASE WHEN OVS.DTLPOLPOD LIKE 'POL%' AND CC.LDKBN IN ('B','L') THEN '1' ")
-            sqlStat.AppendLine("                       WHEN OVS.DTLPOLPOD LIKE 'POD%' AND CC.LDKBN IN ('B','D') THEN '1' ")
-            sqlStat.AppendLine("                       WHEN OVS.DTLPOLPOD LIKE 'PO%'  THEN '' ")
-            sqlStat.AppendLine("                       ELSE '1'")
-            sqlStat.AppendLine("                  END")
-            sqlStat.AppendLine("        AND CC.DELFLG  <> @DELFLG")
-            sqlStat.AppendLine("        AND CC.CLASS4 IN (SELECT CCS.CLASS4")
-            sqlStat.AppendLine("                            FROM GBM0010_CHARGECODE CCS")
-            sqlStat.AppendLine("                           WHERE CCS.COSTCODE = OV.COSTCODE")
-            sqlStat.AppendLine("                             AND '1' = CASE WHEN OV.DTLPOLPOD LIKE 'POL%' AND CCS.LDKBN IN ('B','L') THEN '1' ")
-            sqlStat.AppendLine("                                            WHEN OV.DTLPOLPOD LIKE 'POD%' AND CCS.LDKBN IN ('B','D') THEN '1' ")
-            sqlStat.AppendLine("                                            WHEN OV.DTLPOLPOD LIKE 'PO%'  THEN '' ")
-            sqlStat.AppendLine("                                            ELSE '1'")
-            sqlStat.AppendLine("                                       END")
-            sqlStat.AppendLine("                             AND CCS.DELFLG  <> @DELFLG)")
+            'sqlStat.AppendLine("  LEFT JOIN GBM0010_CHARGECODE CC")
+            'sqlStat.AppendLine("         ON CC.COSTCODE = OVS.COSTCODE")
+            'sqlStat.AppendLine("        AND '1' = CASE WHEN OVS.DTLPOLPOD LIKE 'POL%' AND CC.LDKBN IN ('B','L') THEN '1' ")
+            'sqlStat.AppendLine("                       WHEN OVS.DTLPOLPOD LIKE 'POD%' AND CC.LDKBN IN ('B','D') THEN '1' ")
+            'sqlStat.AppendLine("                       WHEN OVS.DTLPOLPOD LIKE 'PO%'  THEN '' ")
+            'sqlStat.AppendLine("                       ELSE '1'")
+            'sqlStat.AppendLine("                  END")
+            'sqlStat.AppendLine("        AND CC.DELFLG  <> @DELFLG")
+            'sqlStat.AppendLine("        AND CC.CLASS4 IN (SELECT CCS.CLASS4")
+            'sqlStat.AppendLine("                            FROM GBM0010_CHARGECODE CCS")
+            'sqlStat.AppendLine("                           WHERE CCS.COSTCODE = OV.COSTCODE")
+            'sqlStat.AppendLine("                             AND '1' = CASE WHEN OV.DTLPOLPOD LIKE 'POL%' AND CCS.LDKBN IN ('B','L') THEN '1' ")
+            'sqlStat.AppendLine("                                            WHEN OV.DTLPOLPOD LIKE 'POD%' AND CCS.LDKBN IN ('B','D') THEN '1' ")
+            'sqlStat.AppendLine("                                            WHEN OV.DTLPOLPOD LIKE 'PO%'  THEN '' ")
+            'sqlStat.AppendLine("                                            ELSE '1'")
+            'sqlStat.AppendLine("                                       END")
+            'sqlStat.AppendLine("                             AND CCS.DELFLG  <> @DELFLG)")
             sqlStat.AppendLine(" WHERE OV.DATAID=@DATAID;")
         End If
         Try
@@ -12099,14 +12192,6 @@ Public Class GBT00004ORDER
     ''' <param name="dr"></param>
     Private Sub SetCanRowEdit(ByRef dr As DataRow)
         '********************
-        'JOTはフル許可
-        '********************
-        If GBA00003UserSetting.IS_JOTUSER Then
-            dr("CANROWEDIT") = "1"
-            Return
-        End If
-
-        '********************
         'BliingClose済の判定があるなたこのあたりに
         '********************
         '一旦デマ画面のみ
@@ -12118,6 +12203,15 @@ Public Class GBT00004ORDER
                 Return
             End If
         End If
+
+        '********************
+        'JOTはフル許可　※計上済みは対象外
+        '********************
+        If GBA00003UserSetting.IS_JOTUSER Then
+            dr("CANROWEDIT") = "1"
+            Return
+        End If
+
         '********************
         '国ごとの判定
         '********************

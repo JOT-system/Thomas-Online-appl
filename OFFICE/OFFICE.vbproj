@@ -46,8 +46,9 @@
     <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BASEDLL">
-      <HintPath>..\..\..\..\..\BIN\LIB\BASEDLL.dll</HintPath>
+    <Reference Include="BASEDLL, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\DLL\BASEDLL.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -109,16 +110,17 @@
     <Content Include="GB\css\GBM00006TANK.css" />
     <Content Include="GB\css\GBM00008PRODUCT.css" />
     <Content Include="GB\css\GBM00014CUSTOMERAGENT.css" />
+    <Content Include="GB\css\GBM00022ORG.css" />
+    <Content Include="GB\css\GBM00023TRPATTERN.css" />
+    <Content Include="GB\css\GBM00024TRPATTERNSUB.css" />
     <Content Include="GB\css\GBT00001BREAKER.css" />
     <Content Include="GB\css\GBT00002RESULT.css" />
     <Content Include="GB\css\GBT00003RESULT.css" />
-    <Content Include="GB\css\GBT00030DETAILEDLIST.css" />
     <Content Include="GB\css\GBT00019APPROVAL.css" />
     <Content Include="GB\css\GBT00020AGREEMENT.css" />
     <Content Include="GB\css\GBT00020LEASE.css" />
     <Content Include="GB\css\GBT00020RESULT.css" />
     <Content Include="GB\css\GBT00021RESULT.css" />
-    <Content Include="GB\css\GBT00030RESULT.css" />
     <Content Include="GB\css\GBT00022RESULT.css" />
     <Content Include="GB\css\GBT00023RESULT.css" />
     <Content Include="GB\css\GBT00024APPROVAL.css" />
@@ -127,14 +129,18 @@
     <Content Include="GB\css\GBT00028RESULT.css" />
     <Content Include="GB\GBM00021CLIENT.aspx" />
     <Content Include="GB\GBM00021SELECT.aspx" />
-    <Content Include="GB\GBT00030DETAILEDLIST.aspx" />
+    <Content Include="GB\GBM00022ORG.aspx" />
+    <Content Include="GB\GBM00022SELECT.aspx" />
+    <Content Include="GB\GBM00023SELECT.aspx" />
+    <Content Include="GB\GBM00023TRPATTERN.aspx" />
+    <Content Include="GB\GBM00024SELECT.aspx" />
+    <Content Include="GB\GBM00024TRPATTERNSUB.aspx" />
     <Content Include="GB\GBT00006RESULTTST.aspx" />
+    <Content Include="GB\GBT00007RESULT.aspx" />
     <Content Include="GB\GBT00013RESULT.aspx" />
     <Content Include="GB\GBT00019APPROVAL.aspx" />
     <Content Include="GB\GBT00019SELECT.aspx" />
     <Content Include="GB\GBT00020AGREEMENT.aspx" />
-    <Content Include="GB\GBT00030SELECT.aspx" />
-    <Content Include="GB\GBT00030RESULT.aspx" />
     <Content Include="GB\GBT00020LEASE.aspx" />
     <Content Include="GB\GBT00020RESULT.aspx" />
     <Content Include="GB\GBT00020SELECT.aspx" />
@@ -231,11 +237,11 @@
     <Content Include="GB\script\GBT00020AGREEMENT.js" />
     <Content Include="GB\script\GBT00020RESULT.js" />
     <Content Include="GB\script\GBT00021RESULT.js" />
-    <Content Include="GB\script\GBT00030RESULT.js" />
     <Content Include="GB\script\GBT00022RESULT.js" />
     <Content Include="GB\script\GBT00023RESULT.js" />
     <Content Include="GB\script\GBT00026BLNOTRANSFER.js" />
     <Content Include="GB\script\GBT00028INVOICEEDIT.js" />
+    <Content Include="GB\script\GBTcommonPanel.js" />
     <Content Include="Images\ascending.png" />
     <Content Include="Images\delete.png" />
     <Content Include="Images\descending.png" />
@@ -503,6 +509,48 @@
       <DependentUpon>GBM00021SELECT.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="GB\GBM00022ORG.aspx.designer.vb">
+      <DependentUpon>GBM00022ORG.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00022ORG.aspx.vb">
+      <DependentUpon>GBM00022ORG.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00022SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00022SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00022SELECT.aspx.vb">
+      <DependentUpon>GBM00022SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00023SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00023SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00023SELECT.aspx.vb">
+      <DependentUpon>GBM00023SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00023TRPATTERN.aspx.designer.vb">
+      <DependentUpon>GBM00023TRPATTERN.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00023TRPATTERN.aspx.vb">
+      <DependentUpon>GBM00023TRPATTERN.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00024SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00024SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00024SELECT.aspx.vb">
+      <DependentUpon>GBM00024SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00024TRPATTERNSUB.aspx.designer.vb">
+      <DependentUpon>GBM00024TRPATTERNSUB.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00024TRPATTERNSUB.aspx.vb">
+      <DependentUpon>GBM00024TRPATTERNSUB.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="GB\GBT00001BREAKER.aspx.designer.vb">
       <DependentUpon>GBT00001BREAKER.aspx</DependentUpon>
     </Compile>
@@ -580,13 +628,6 @@
       <DependentUpon>GBT00005SELECT.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="GB\GBT00030DETAILEDLIST.aspx.designer.vb">
-      <DependentUpon>GBT00030DETAILEDLIST.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="GB\GBT00030DETAILEDLIST.aspx.vb">
-      <DependentUpon>GBT00030DETAILEDLIST.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
     <Compile Include="GB\GBT00006RESULT.aspx.designer.vb">
       <DependentUpon>GBT00006RESULT.aspx</DependentUpon>
     </Compile>
@@ -599,6 +640,13 @@
     </Compile>
     <Compile Include="GB\GBT00006RESULTTST.aspx.vb">
       <DependentUpon>GBT00006RESULTTST.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00007RESULT.aspx.designer.vb">
+      <DependentUpon>GBT00007RESULT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00007RESULT.aspx.vb">
+      <DependentUpon>GBT00007RESULT.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="GB\GBT00007SELECT.aspx.designer.vb">
@@ -748,20 +796,6 @@
       <DependentUpon>GBT00020AGREEMENT.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="GB\GBT00030SELECT.aspx.designer.vb">
-      <DependentUpon>GBT00030SELECT.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="GB\GBT00030SELECT.aspx.vb">
-      <DependentUpon>GBT00030SELECT.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="GB\GBT00030RESULT.aspx.designer.vb">
-      <DependentUpon>GBT00030RESULT.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="GB\GBT00030RESULT.aspx.vb">
-      <DependentUpon>GBT00030RESULT.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
     <Compile Include="GB\GBT00020LEASE.aspx.designer.vb">
       <DependentUpon>GBT00020LEASE.aspx</DependentUpon>
     </Compile>
@@ -864,8 +898,8 @@
       <DependentUpon>GBT00028RESULT.aspx</DependentUpon>
     </Compile>
     <Compile Include="GB\GBT00028RESULT.aspx.vb">
-      <SubType>ASPXCodeBehind</SubType>
       <DependentUpon>GBT00028RESULT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="GB\GBT00028SELECT.aspx.designer.vb">
       <DependentUpon>GBT00028SELECT.aspx</DependentUpon>
@@ -918,7 +952,6 @@
     <None Include="My Project\PublishProfiles\FolderProfile.pubxml" />
     <None Include="My Project\PublishProfiles\FolderProfile1.pubxml" />
     <None Include="My Project\PublishProfiles\FolderProfile2.pubxml" />
-    <None Include="My Project\PublishProfiles\FolderProfile3.pubxml" />
     <None Include="My Project\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <CustomToolNamespace>My</CustomToolNamespace>

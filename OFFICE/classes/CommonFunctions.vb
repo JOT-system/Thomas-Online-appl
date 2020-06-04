@@ -740,27 +740,4 @@ Public Class CommonFunctions
     End Function
 #End Region
 
-    ''' <summary>
-    ''' 切り上げ
-    ''' </summary>
-    ''' <param name="value">対象の数値</param>
-    ''' <param name="decimalPlaces">有効小数桁数</param>
-    ''' <returns>切り上げした数値</returns>
-    Public Shared Function RoundUp(ByVal value As Decimal, ByVal decimalPlaces As UInt32) As Decimal
-        Dim rate As Decimal = CDec(Math.Pow(10.0R, decimalPlaces))
-
-        If value < 0 Then
-            Return (Math.Ceiling(value * -1D * rate) / rate) * -1D
-        Else
-            Return Math.Ceiling(value * rate) / rate
-        End If
-    End Function
-End Class
-
-Public Class aa
-    Public Shared Sub Ra()
-
-    End Sub
-
-
 End Class

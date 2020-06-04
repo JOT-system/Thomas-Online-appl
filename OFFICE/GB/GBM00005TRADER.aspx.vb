@@ -1640,6 +1640,16 @@ Public Class GBM00005TRADER
         'DetailBoxをINPtblへ退避
         DetailBoxToINPtbl()
 
+        '新規作成用にCarrierCode補正
+        If INPtbl.Rows(0).Item("CARRIERCODE").ToString = "" Then
+            Dim maxCode As String = BASEtbl.Rows.Cast(Of DataRow) _
+            .Where(Function(row) Left(row("CARRIERCODE").ToString, 4) = INPtbl.Rows(0).Item("COUNTRYCODE").ToString & Left(INPtbl.Rows(0).Item("CLASS").ToString, 1) & "0") _
+            .Select(Function(row) row("CARRIERCODE").ToString).Max()
+            Dim codeNoString As String = maxCode.Replace(INPtbl.Rows(0).Item("COUNTRYCODE").ToString & Left(INPtbl.Rows(0).Item("CLASS").ToString, 1), "")
+            Dim newCode As String = INPtbl.Rows(0).Item("COUNTRYCODE").ToString & Left(INPtbl.Rows(0).Item("CLASS").ToString, 1) & Format(Integer.Parse(codeNoString) + 1, "00000")
+            INPtbl.Rows(0).Item("CARRIERCODE") = newCode
+        End If
+
         'INPtbl内容 チェック
         '　※チェックOKデータをUPDtblへ格納する
         INPtblCheck()

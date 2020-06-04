@@ -12,6 +12,15 @@
     <link href="~/css/commonStyle.css" rel="stylesheet" type="text/css" />
     <%--個別のスタイルは以下に記載 OR 外部ファイルに逃す --%>
     <link href="~/GB/css/GBT00014BL.css" rel="stylesheet" type="text/css" />
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-162522994-1');
+    </script>
     <%--共通利用するJavaScript --%>
     <script src='<%= ResolveUrl("~/script/common.js") %>' type="text/javascript" charset="utf-8"></script>
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
@@ -577,6 +586,34 @@
                         <td colspan="6">
                         </td>
                     </tr>
+                    <%--経由地１、２の船社・船名記入領域--%>
+                    <tr>
+                        <th>
+                            <asp:Label ID="lblVsl2nd" runat="server" Text="2nd Vessel" ></asp:Label>
+                        </th>
+                        <td colspan="2">
+                            <asp:TextBox ID="txtVsl2nd" runat="server" Text=""></asp:TextBox>
+                        </td>
+                        <th>
+                            <asp:Label ID="lblVoy2nd" runat="server" Text="2nd Voyage" ></asp:Label>
+                        </th>
+                        <td colspan="2">
+                            <asp:TextBox ID="txtVoy2nd" runat="server" Text=""></asp:TextBox>
+                        </td>
+                        <th>
+                            <asp:Label ID="lblVsl3rd" runat="server" Text="3rd Vessel" ></asp:Label>
+                        </th>
+                        <td colspan="2">
+                            <asp:TextBox ID="txtVsl3rd" runat="server" Text=""></asp:TextBox>
+                        </td>
+                        <th>
+                            <asp:Label ID="lblVoy3rd" runat="server" Text="3rd Voyage" ></asp:Label>
+                        </th>
+                        <td colspan="2">
+                            <asp:TextBox ID="txtVoy3rd" runat="server" Text=""></asp:TextBox>
+                        </td>
+                    </tr>
+
                 </table>
                 </div>
                 <div id="divTankDetailInfo" runat="server">

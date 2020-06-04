@@ -1393,7 +1393,8 @@ Public Class GBT00001BREAKER
                 GBA00009MailSendSet.BRID = Convert.ToString(orgDt.Rows(0).Item("BRID"))
                 GBA00009MailSendSet.BRSUBID = brInfo("INFO").SubId
                 GBA00009MailSendSet.BRBASEID = brInfo("INFO").LinkId
-                GBA00009MailSendSet.BRROUND = inputRequstInfo.EventCode
+                'GBA00009MailSendSet.BRROUND = inputRequstInfo.EventCode
+                GBA00009MailSendSet.BRROUND = inputRequstInfo.BrRound
                 GBA00009MailSendSet.APPLYID = applyId
                 GBA00009MailSendSet.GBA00009setMailToBR()
                 If GBA00009MailSendSet.ERR <> C_MESSAGENO.NORMAL Then
@@ -2753,6 +2754,8 @@ Public Class GBT00001BREAKER
 
                 'メイン情報取得
                 dtBreakerBase = GetBreakerBase(dicBrInfo)
+                'コピー新規時はAGENTORGANIZERを再設定
+                dtBreakerBase.Rows(0).Item("AGENTORGANIZER") = GBA00003UserSetting.OFFICECODE
                 ViewState("COPYORGANIZERINFO") = CommonFunctions.DeepCopy(dtBreakerBase)
                 ViewState("INITORGANIZERINFO") = CommonFunctions.DeepCopy(dtBreakerBase)
                 Dim dr As DataRow = dtBreakerBase.Rows(0)
@@ -3718,7 +3721,7 @@ Public Class GBT00001BREAKER
         sqlStat.AppendLine("                    WHERE FXVS.COMPCODE = '" & GBC_COMPCODE_D & "'")
         sqlStat.AppendLine("                      AND FXVS.CLASS   = '" & C_FIXVALUECLAS.BREX & "'")
         sqlStat.AppendLine("                      AND FXVS.STYMD  <= @STYMD")
-        sqlStat.AppendLine("                      AND FXVS.STYMD  >= @ENDYMD")
+        sqlStat.AppendLine("                      AND FXVS.ENDYMD >= @ENDYMD")
         sqlStat.AppendLine("                      AND FXVS.DELFLG <> @DELFLG")
         sqlStat.AppendLine("                      AND FXVS.KEYCODE = TR.COSTCODE")
         sqlStat.AppendLine("                   )")
@@ -4359,7 +4362,7 @@ Public Class GBT00001BREAKER
                     visibleControls.Add(Me.trPortInfoRow3)
                 End If
             Else
-                visibleControls.AddRange({Me.trPortInfoRow4, Me.trPortInfoRow5})
+                visibleControls.AddRange({Me.trPortInfoRow4, Me.trPortInfoRow5, Me.lblRemarks2})
             End If
         End If
         '******************************
@@ -4477,7 +4480,8 @@ Public Class GBT00001BREAKER
             Select Case Me.hdnStatus.Value
                 Case C_APP_STATUS.APPLYING '【申請中】
                     '承認・否認・編集(EDIT)ボタン解放
-                    enabledObjectList.AddRange({Me.btnApproval, Me.btnAppReject, Me.btnReject})
+                    'enabledObjectList.AddRange({Me.btnApproval, Me.btnAppReject, Me.btnReject})
+                    enabledObjectList.AddRange({Me.lblAppJotRemarks, Me.btnApproval, Me.btnAppReject, Me.btnReject})
                 Case C_APP_STATUS.REVISE   '【編集(EDIT)での解放時OR中】
                     '承認コメント,否認ボタン、費目追加,発着代理店費用項目グリッド
                     enabledObjectList.AddRange({Me.lblAppJotRemarks, Me.gvDetailInfo, Me.btnAddCost, Me.btnAppReject})
@@ -6539,7 +6543,8 @@ Public Class GBT00001BREAKER
 
                 End With
                 '動的パラメータの設定
-                Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 200)
+                'Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 200)
+                Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 5120)
                 Dim paramType As SqlParameter = sqlCmd.Parameters.Add("@TYPE", SqlDbType.NVarChar, 20)
                 Dim paramLinkID As SqlParameter = sqlCmd.Parameters.Add("@LINKID", SqlDbType.NVarChar, 20)
 
@@ -6771,7 +6776,8 @@ Public Class GBT00001BREAKER
                     .Add("@AGENTPOL2", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("AGENTPOL2"))
                     .Add("@AGENTPOD1", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("AGENTPOD1"))
                     .Add("@AGENTPOD2", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("AGENTPOD2"))
-                    .Add("@APPLYTEXT", SqlDbType.NVarChar, 1024).Value = Convert.ToString(dr.Item("APPLYTEXT"))
+                    '.Add("@APPLYTEXT", SqlDbType.NVarChar, 1024).Value = Convert.ToString(dr.Item("APPLYTEXT"))
+                    .Add("@APPLYTEXT", SqlDbType.NVarChar, 5120).Value = Convert.ToString(dr.Item("APPLYTEXT"))
                     .Add("@COUNTRYORGANIZER", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("COUNTRYORGANIZER"))
                     .Add("@LASTORDERNO", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("LASTORDERNO"))
                     .Add("@TANKNO", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("TANKNO"))
@@ -6927,7 +6933,8 @@ Public Class GBT00001BREAKER
                 Dim paramApprovedUsd As SqlParameter = sqlCmd.Parameters.Add("@APPROVEDUSD", SqlDbType.Float)
                 Dim paramInvoicedBy As SqlParameter = sqlCmd.Parameters.Add("@INVOICEDBY", SqlDbType.NVarChar, 20)
                 Dim paramBilling As SqlParameter = sqlCmd.Parameters.Add("@BILLING", SqlDbType.NVarChar)
-                Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 200)
+                'Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 200)
+                Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 5120)
 
                 For Each dr As DataRow In costDt.Rows
                     Dim dtlPolPod As String = Convert.ToString(dr.Item("DTLPOLPOD"))
@@ -7211,7 +7218,8 @@ Public Class GBT00001BREAKER
                     Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon, tran)
                         With sqlCmd.Parameters
                             'パラメータ設定
-                            .Add("@APPROVEDTEXT", SqlDbType.NVarChar, 1024).Value = dr.Item("APPROVEDTEXT")
+                            '.Add("@APPROVEDTEXT", SqlDbType.NVarChar, 1024).Value = dr.Item("APPROVEDTEXT")
+                            .Add("@APPROVEDTEXT", SqlDbType.NVarChar, 5120).Value = dr.Item("APPROVEDTEXT")
                             .Add("@COMPCODE", SqlDbType.NVarChar, 20).Value = COA0019Session.APSRVCamp
                             .Add("@APPLYID", SqlDbType.NVarChar, 20).Value = brInfoItem.ApplyId
                             .Add("@STEP", SqlDbType.NVarChar, 20).Value = brInfoItem.LastStep
@@ -7269,7 +7277,9 @@ Public Class GBT00001BREAKER
                 '承認画面遷移の場合
                 If Me.hdnCallerMapId.Value = CONST_APP_MAPID Then
                     'ステータスが否認時修正中の初回保存以外
-                    If Me.hdnStatus.Value = C_APP_STATUS.REVISE AndAlso currentStat = C_APP_STATUS.REVISE Then
+                    'If Me.hdnStatus.Value = C_APP_STATUS.REVISE AndAlso currentStat = C_APP_STATUS.REVISE Then
+                    If (Me.hdnStatus.Value = C_APP_STATUS.REVISE AndAlso currentStat = C_APP_STATUS.REVISE) _
+                        OrElse (Me.hdnStatus.Value = currentStat AndAlso callerButton = "btnSave") Then
                         subIdParamValue = InsBrInfo("INFO").SubId
                     Else
                         Dim reg As New Regex("[^\d]")
@@ -7298,7 +7308,8 @@ Public Class GBT00001BREAKER
                 End With
 
                 '動的パラメータの設定
-                Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 200)
+                'Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 200)
+                Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 5120)
                 Dim paramType As SqlParameter = sqlCmd.Parameters.Add("@TYPE", SqlDbType.NVarChar, 20)
                 Dim paramLinkID As SqlParameter = sqlCmd.Parameters.Add("@LINKID", SqlDbType.NVarChar, 20)
                 Dim paramApplyId As SqlParameter = sqlCmd.Parameters.Add("@APPLYID", SqlDbType.NVarChar, 20)
@@ -7548,7 +7559,8 @@ Public Class GBT00001BREAKER
                         .Add("@AGENTPOL2", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("AGENTPOL2"))
                         .Add("@AGENTPOD1", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("AGENTPOD1"))
                         .Add("@AGENTPOD2", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("AGENTPOD2"))
-                        .Add("@APPLYTEXT", SqlDbType.NVarChar, 1024).Value = Convert.ToString(dr.Item("APPLYTEXT"))
+                        '.Add("@APPLYTEXT", SqlDbType.NVarChar, 1024).Value = Convert.ToString(dr.Item("APPLYTEXT"))
+                        .Add("@APPLYTEXT", SqlDbType.NVarChar, 5120).Value = Convert.ToString(dr.Item("APPLYTEXT"))
                         .Add("@COUNTRYORGANIZER", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("COUNTRYORGANIZER"))
                         .Add("@LASTORDERNO", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("LASTORDERNO"))
                         .Add("@TANKNO", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("TANKNO"))
@@ -7700,7 +7712,8 @@ Public Class GBT00001BREAKER
                 Dim paramApprovedUsd As SqlParameter = sqlCmd.Parameters.Add("@APPROVEDUSD", SqlDbType.Float)
                 Dim paramInvoicedBy As SqlParameter = sqlCmd.Parameters.Add("@INVOICEDBY", SqlDbType.NVarChar, 20)
                 Dim paramBilling As SqlParameter = sqlCmd.Parameters.Add("@BILLING", SqlDbType.NVarChar)
-                Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 200)
+                'Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 200)
+                Dim paramRemark As SqlParameter = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar, 5120)
 
                 For Each dr As DataRow In costDt.Rows
                     Dim dtlPolPod As String = Convert.ToString(dr.Item("DTLPOLPOD"))
@@ -7852,6 +7865,8 @@ Public Class GBT00001BREAKER
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FV") 'STATUS用JOIN
         sqlStat.AppendLine("    ON  FV.CLASS        = 'APPROVAL'")
         sqlStat.AppendLine("   AND  FV.KEYCODE      = AH.STATUS")
+        sqlStat.AppendLine("   AND  FV.STYMD       <= @STYMD")
+        sqlStat.AppendLine("   AND  FV.ENDYMD      >= @ENDYMD")
         sqlStat.AppendLine("   AND  FV.DELFLG      <> @DELFLG")
         sqlStat.AppendLine(" WHERE BI.BRID         = @BRID")
         sqlStat.AppendLine("   And BI.STYMD       <= @STYMD")
@@ -8020,12 +8035,18 @@ Public Class GBT00001BREAKER
         sqlStat.AppendLine("   AND  AH.DELFLG     <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN COS0005_USER US1")
         sqlStat.AppendLine("    ON  US1.USERID      = AH.APPLICANTID")
+        sqlStat.AppendLine("   AND  US1.STYMD      <= (CASE BS.VALIDITYTO   WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO  END) ")
+        sqlStat.AppendLine("   AND  US1.ENDYMD     >= (CASE BS.VALIDITYTO   WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO  END) ")
         sqlStat.AppendLine("   AND  US1.DELFLG     <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN COS0005_USER US2")
         sqlStat.AppendLine("    ON  US2.USERID      = AH.APPROVERID")
+        sqlStat.AppendLine("   AND  US2.STYMD      <= (CASE BS.VALIDITYTO   WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO  END) ")
+        sqlStat.AppendLine("   AND  US2.ENDYMD     >= (CASE BS.VALIDITYTO   WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO  END) ")
         sqlStat.AppendLine("   AND  US2.DELFLG     <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN COS0005_USER US3")
         sqlStat.AppendLine("    ON  US3.USERID      = BS.INITUSER")
+        sqlStat.AppendLine("   AND  US3.STYMD      <= (CASE BS.VALIDITYTO   WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO  END) ")
+        sqlStat.AppendLine("   AND  US3.ENDYMD     >= (CASE BS.VALIDITYTO   WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO  END) ")
         sqlStat.AppendLine("   AND  US3.DELFLG     <> @DELFLG")
         sqlStat.AppendLine(" WHERE BS.BRID     = @BRID ")
         sqlStat.AppendLine("   AND BS.BRBASEID = @BRBASEID ")
@@ -8258,7 +8279,10 @@ Public Class GBT00001BREAKER
         sqlStat.AppendLine("      + (SELECT VALUE1")
         sqlStat.AppendLine("           FROM COS0017_FIXVALUE")
         sqlStat.AppendLine("          WHERE CLASS   = @CLASS")
-        sqlStat.AppendLine("            AND KEYCODE = @KEYCODE)")
+        sqlStat.AppendLine("            AND KEYCODE = @KEYCODE")
+        sqlStat.AppendLine("            AND STYMD  <= @STYMD")
+        sqlStat.AppendLine("            AND ENDYMD >= @ENDYMD")
+        sqlStat.AppendLine("            AND DELFLG <> @DELFLG)")
         Try
             If sqlCon Is Nothing Then
                 sqlCon = New SqlConnection(COA0019Session.DBcon)
@@ -8271,6 +8295,9 @@ Public Class GBT00001BREAKER
                 With sqlCmd.Parameters
                     .Add("@CLASS", SqlDbType.NVarChar, 20).Value = C_SERVERSEQ
                     .Add("@KEYCODE", SqlDbType.NVarChar, 20).Value = COA0019Session.APSRVname
+                    .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                 End With
                 'paramKeyCode.Value = "DESKTOP-D5IC4N5" '本当は動作させるホスト名
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -8721,9 +8748,9 @@ Public Class GBT00001BREAKER
         sqlStat.AppendLine("   AND BRTYPE   = @BRTYPE")
         sqlStat.AppendLine("   AND USETYPE  = @USETYPE")
         sqlStat.AppendLine("   AND AGENTKBN = @AGENTKBN")
-        sqlStat.AppendLine("   And STYMD    <= @STYMD")
-        sqlStat.AppendLine("   And ENDYMD   >= @ENDYMD")
-        sqlStat.AppendLine("   And DELFLG   <> @DELFLG")
+        sqlStat.AppendLine("   AND STYMD    <= @STYMD")
+        sqlStat.AppendLine("   AND ENDYMD   >= @ENDYMD")
+        sqlStat.AppendLine("   AND DELFLG   <> @DELFLG")
         Dim agentKbn As String = ""
         Select Case currentTab
             Case COSTITEM.CostItemGroup.Export1
@@ -8785,7 +8812,7 @@ Public Class GBT00001BREAKER
                 findResult(0).Class5 = Convert.ToString(dr.Item("CLASS5"))
                 findResult(0).Class6 = Convert.ToString(dr.Item("CLASS6"))
                 findResult(0).Class7 = Convert.ToString(dr.Item("CLASS7"))
-                findResult(0).Class8 = "0"
+                findResult(0).Class8 = "1"
                 findResult(0).SortOrder = "0"
             Else
                 dicAddedCost.Add(Convert.ToString(dr.Item("COSTCODE")), "")
@@ -8798,7 +8825,7 @@ Public Class GBT00001BREAKER
                 findResult(0).Class5 = Convert.ToString(dr.Item("CLASS5"))
                 findResult(0).Class6 = Convert.ToString(dr.Item("CLASS6"))
                 findResult(0).Class7 = Convert.ToString(dr.Item("CLASS7"))
-                findResult(0).Class8 = "1"
+                findResult(0).Class8 = "0"
                 findResult(0).SortOrder = sortNum.ToString
                 sortNum = sortNum + 1
             End If

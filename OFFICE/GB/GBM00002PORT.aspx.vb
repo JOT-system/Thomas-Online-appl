@@ -769,12 +769,12 @@ Public Class GBM00002PORT
                 Dim searchStr As String = ""
                 '検索用文字列（部分一致）
                 If (COA0019Session.LANGDISP = C_LANG.JA) Then
-                    searchStr = Convert.ToString(BASEtbl.Rows(i)("AREANAME"))
+                    searchStr = Convert.ToString(BASEtbl.Rows(i)("AREANAME")).ToUpper
                 Else
-                    searchStr = Convert.ToString(BASEtbl.Rows(i)("AREANAME"))
+                    searchStr = Convert.ToString(BASEtbl.Rows(i)("AREANAME")).ToUpper
                 End If
 
-                If Not searchStr.Contains(txtAreaNameEx.Text) Then
+                If Not searchStr.Contains(txtAreaNameEx.Text.ToUpper) Then
                     BASEtbl.Rows(i)("HIDDEN") = 1
                 End If
             End If

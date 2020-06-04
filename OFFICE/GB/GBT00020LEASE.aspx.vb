@@ -329,7 +329,7 @@ Public Class GBT00020LEASE
         '******************************
         Dim invChangeField As New List(Of String) From {"CONTRACTFROM", "CONTRACTTO", "SHIPPER", "LEASETERM",
                                                         "LEASEPAYMENT", "LEASEPAYMENTTYPE", "LEASEPAYMENTKIND",
-                                                        "AUTOEXTEND", "ACCOUNT", "TAXKIND", "NOOFAGREEMENT"}
+                                                        "AUTOEXTEND", "ACCOUNT", "TAXKIND", "NOOFAGREEMENT", "ACCSEGMENT"}
         ChangeInvalidChar(ds.Tables(CONST_DT_NAME_CONTRACT), invChangeField)
         '******************************
         '単項目チェック
@@ -338,7 +338,7 @@ Public Class GBT00020LEASE
         {{"CONTRACTFROM", Me.txtLeaseFrom}, {"SHIPPER", Me.txtShipper},
          {"LEASEPAYMENTTYPE", Me.txtLeasePaymentType}, {"AUTOEXTEND", Me.txtAutoExtend},
         {"ACCOUNT", Me.txtLeaseAccount}, {"TAXKIND", Me.txtTax}, {"NOOFAGREEMENT", Me.txtNoOfAgreement},
-        {"REMARK", Me.txtRemarks}, {"LEASEPAYMENTKIND", Me.txtLeasePaymentKind}}
+        {"REMARK", Me.txtRemarks}, {"LEASEPAYMENTKIND", Me.txtLeasePaymentKind}, {"ACCSEGMENT", Me.txtAccSegment}}
         Dim dr As DataRow = ds.Tables(CONST_DT_NAME_CONTRACT).Rows(0)
         For Each singleChkItem As KeyValuePair(Of String, TextBox) In dicCheckField
             Dim fieldName As String = singleChkItem.Key
@@ -658,6 +658,7 @@ Public Class GBT00020LEASE
             sqlStat.AppendLine("  ,INITUSER")
             sqlStat.AppendLine("  ,ORGANIZER")
             sqlStat.AppendLine("  ,COUNRTYORGANIZER")
+            sqlStat.AppendLine("  ,ACCSEGMENT")
             sqlStat.AppendLine("  ,REMARK")
             sqlStat.AppendLine("  ,DELFLG")
             sqlStat.AppendLine("  ,INITYMD")
@@ -679,6 +680,7 @@ Public Class GBT00020LEASE
             sqlStat.AppendLine("  ,@INITUSER")
             sqlStat.AppendLine("  ,@ORGANIZER")
             sqlStat.AppendLine("  ,@COUNRTYORGANIZER")
+            sqlStat.AppendLine("  ,@ACCSEGMENT")
             sqlStat.AppendLine("  ,@REMARK")
             sqlStat.AppendLine("  ,@DELFLG")
             sqlStat.AppendLine("  ,@INITYMD")
@@ -703,6 +705,7 @@ Public Class GBT00020LEASE
                     .Add("@INITUSER", SqlDbType.NVarChar).Value = dr.Item("INITUSER")
                     .Add("@ORGANIZER", SqlDbType.NVarChar).Value = dr.Item("ORGANIZER")
                     .Add("@COUNRTYORGANIZER", SqlDbType.NVarChar).Value = dr.Item("COUNRTYORGANIZER")
+                    .Add("@ACCSEGMENT", SqlDbType.NVarChar).Value = dr.Item("ACCSEGMENT")
                     .Add("@REMARK", SqlDbType.NVarChar).Value = dr.Item("REMARK")
                     .Add("@DELFLG", SqlDbType.NVarChar).Value = CONST_FLAG_NO
                     .Add("@INITYMD", SqlDbType.DateTime).Value = procDate.ToString("yyyy/MM/dd HH:mm:ss.FFF")
@@ -756,6 +759,7 @@ Public Class GBT00020LEASE
             sqlStat.AppendLine("       ,INITUSER         = @INITUSER")
             sqlStat.AppendLine("       ,ORGANIZER        = @ORGANIZER")
             sqlStat.AppendLine("       ,COUNRTYORGANIZER = @COUNRTYORGANIZER")
+            sqlStat.AppendLine("       ,ACCSEGMENT       = @ACCSEGMENT")
             sqlStat.AppendLine("       ,REMARK           = @REMARK")
             sqlStat.AppendLine("       ,UPDYMD           = @UPDYMD")
             sqlStat.AppendLine("       ,UPDUSER          = @UPDUSER")
@@ -781,6 +785,7 @@ Public Class GBT00020LEASE
                     .Add("@INITUSER", SqlDbType.NVarChar).Value = dr.Item("INITUSER")
                     .Add("@ORGANIZER", SqlDbType.NVarChar).Value = dr.Item("ORGANIZER")
                     .Add("@COUNRTYORGANIZER", SqlDbType.NVarChar).Value = dr.Item("COUNRTYORGANIZER")
+                    .Add("@ACCSEGMENT", SqlDbType.NVarChar).Value = dr.Item("ACCSEGMENT")
                     .Add("@REMARK", SqlDbType.NVarChar).Value = dr.Item("REMARK")
                     .Add("@DELFLG", SqlDbType.NVarChar).Value = CONST_FLAG_YES
                     .Add("@INITYMD", SqlDbType.DateTime).Value = procDate.ToString("yyyy/MM/dd HH:mm:ss.FFF")
@@ -857,6 +862,8 @@ Public Class GBT00020LEASE
         AddLangSetting(dicDisplayText, Me.lblShipperAddress, "Address", "Address")
 
         AddLangSetting(dicDisplayText, Me.lblShipper, "荷主", "Shipper")
+
+        AddLangSetting(dicDisplayText, Me.lblAccSegment, "Segment", "Segment")
 
         '****************************************
         ' 添付ファイルヘッダー部
@@ -961,6 +968,7 @@ Public Class GBT00020LEASE
             .Add("INITUSER", GetType(String)).DefaultValue = ""
             .Add("ORGANIZER", GetType(String)).DefaultValue = ""
             .Add("COUNRTYORGANIZER", GetType(String)).DefaultValue = ""
+            .Add("ACCSEGMENT", GetType(String)).DefaultValue = ""
             .Add("REMARK", GetType(String)).DefaultValue = ""
             .Add("NOOFAGREEMENT", GetType(String)).DefaultValue = ""
             .Add("NOOFAGREEMENTAPPLOVED", GetType(String)).DefaultValue = ""
@@ -1026,6 +1034,7 @@ Public Class GBT00020LEASE
         sqlStat.AppendLine("     , CTR.INITUSER")
         sqlStat.AppendLine("     , CTR.ORGANIZER")
         sqlStat.AppendLine("     , CTR.COUNRTYORGANIZER")
+        sqlStat.AppendLine("     , CTR.ACCSEGMENT")
         sqlStat.AppendLine("     , CTR.REMARK")
         sqlStat.AppendLine("     , (SELECT COUNT(AGR.AGREEMENTNO) ")
         sqlStat.AppendFormat("          FROM {0} AGR", CONST_TBL_AGREEMENT).AppendLine()
@@ -1147,6 +1156,8 @@ Public Class GBT00020LEASE
         Me.txtTax.Text = Convert.ToString(dr.Item("TAXKIND"))
         Me.txtNoOfAgreement.Text = Convert.ToString(dr.Item("NOOFAGREEMENT"))
         Me.txtRemarks.Text = Convert.ToString(dr.Item("REMARK"))
+        Me.txtAccSegment.Text = Convert.ToString(dr.Item("ACCSEGMENT"))
+
         '付帯文言を展開
         If GBT00020RValues.NewBrCreate = False Then
             txtShipper_Change()
@@ -1185,6 +1196,7 @@ Public Class GBT00020LEASE
         dispDr.Item("TAXKIND") = Me.txtTax.Text
         dispDr.Item("NOOFAGREEMENT") = Me.txtNoOfAgreement.Text
         dispDr.Item("REMARK") = Me.txtRemarks.Text
+        dispDr.Item("ACCSEGMENT") = Me.txtAccSegment.Text
         dispDt.Rows.Add(dispDr)
         retDs.Tables.Add(dispDt)
         '添付ファイルの収集
@@ -1226,7 +1238,7 @@ Public Class GBT00020LEASE
         Dim inputControls As New List(Of Control) From {Me.txtShipper, Me.txtLeaseFrom, Me.txtLeasePaymentType,
                                                         Me.txtLeasePaymentKind, Me.txtAutoExtend,
                                                         Me.txtLeaseAccount, Me.txtTax,
-                                                        Me.txtRemarks}
+                                                        Me.txtRemarks, Me.txtAccSegment}
         Dim inputEnabled As Boolean = True
 
 
@@ -1483,7 +1495,7 @@ Public Class GBT00020LEASE
                                                   "ENABLED",
                                                   "LEASEPAYMENTTYPE", "LEASEPAYMENTKIND",
                                                   "AUTOEXTEND", "ACCOUNT", "TAXKIND",
-                                                  "REMARK"})
+                                                  "ACCSEGMENT", "REMARK"})
         dicModCheck.Add(C_DTNAME_ATTACHMENT,
                         New List(Of String) From {"FILENAME", "DELFLG", "ISMODIFIED"})
         For Each modCheckItem In dicModCheck

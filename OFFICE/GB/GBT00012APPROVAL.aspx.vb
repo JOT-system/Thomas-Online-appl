@@ -583,7 +583,10 @@ Public Class GBT00012APPROVAL
             sqlStat.AppendLine("      + (SELECT VALUE1")
             sqlStat.AppendLine("           FROM COS0017_FIXVALUE")
             sqlStat.AppendLine("          WHERE CLASS   = @CLASS")
-            sqlStat.AppendLine("            AND KEYCODE = @KEYCODE)")
+            sqlStat.AppendLine("            AND KEYCODE = @KEYCODE")
+            sqlStat.AppendLine("            AND STYMD  <= @STYMD")
+            sqlStat.AppendLine("            AND ENDYMD >= @ENDYMD")
+            sqlStat.AppendLine("            AND DELFLG <> @DELFLG)")
             sqlStat.AppendLine("      + '-'")
             sqlStat.AppendLine("      + right('0000' + trim(convert(char,NEXT VALUE FOR GBQ0003_ORDER)),4)")
             Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
@@ -591,6 +594,9 @@ Public Class GBT00012APPROVAL
                 With sqlCmd.Parameters
                     .Add("@CLASS", SqlDbType.NVarChar).Value = "SERVERSEQ"
                     .Add("@KEYCODE", SqlDbType.NVarChar).Value = HttpContext.Current.Session("APSRVname")
+                    .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                 End With
 
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -720,7 +726,7 @@ Public Class GBT00012APPROVAL
             sqlStat.AppendLine("   AND TRP.BRTYPE     = INF.BRTYPE")
             sqlStat.AppendLine("   AND TRP.USETYPE    = INF.USETYPE")
             sqlStat.AppendLine("   AND TRP.AGENTKBN   = 'Organizer'")
-            sqlStat.AppendLine("   AND TRP.STYMD     <= INF.ENDYMD")
+            sqlStat.AppendLine("   AND TRP.STYMD     <= INF.STYMD")
             sqlStat.AppendLine("   AND TRP.ENDYMD    >= INF.STYMD")
             sqlStat.AppendLine("   AND TRP.DELFLG    <> @DELFLG")
             sqlStat.AppendLine(" WHERE INF.BRID      = @BRID")
@@ -777,7 +783,7 @@ Public Class GBT00012APPROVAL
             sqlStat.AppendLine("   AND TRP.USETYPE    = INF.USETYPE")
             sqlStat.AppendLine("   AND TRP.AGENTKBN   IN ('POL1','POD1','POL2','POD2')")
             sqlStat.AppendLine("   AND TRP.AGENTKBN   = INF.TYPE")
-            sqlStat.AppendLine("   AND TRP.STYMD     <= INF.ENDYMD")
+            sqlStat.AppendLine("   AND TRP.STYMD     <= INF.STYMD")
             sqlStat.AppendLine("   AND TRP.ENDYMD    >= INF.STYMD")
             sqlStat.AppendLine("   AND TRP.DELFLG    <> @DELFLG")
             sqlStat.AppendLine("   AND EXISTS (SELECT 1 ")
@@ -786,6 +792,9 @@ Public Class GBT00012APPROVAL
             sqlStat.AppendLine("                  AND SYSCODE  = @FIXVALSYSCODE")
             sqlStat.AppendLine("                  AND CLASS    = @FIXVALCLASS")
             sqlStat.AppendLine("                  AND KEYCODE  = TRP.COSTCODE")
+            sqlStat.AppendLine("                  AND STYMD   <= INF.STYMD")
+            sqlStat.AppendLine("                  AND ENDYMD  >= INF.STYMD")
+            sqlStat.AppendLine("                  AND DELFLG  <> @DELFLG")
             sqlStat.AppendLine("       )")
             sqlStat.AppendLine(" WHERE INF.BRID      = @BRID")
             sqlStat.AppendLine("   AND INF.DELFLG   <> @DELFLG")
@@ -1079,6 +1088,8 @@ Public Class GBT00012APPROVAL
 
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FV1") 'FIXVAL
         sqlStat.AppendLine("    ON FV1.CLASS       = 'DESCGOODS'")
+        sqlStat.AppendLine("   AND FV1.STYMD      <= @STYMD")
+        sqlStat.AppendLine("   AND FV1.ENDYMD     >= @ENTDATE")
         sqlStat.AppendLine("   AND FV1.DELFLG     <> @DELFLG")
 
         sqlStat.AppendLine("  LEFT JOIN GBM0020_EXRATE ER") 'ExRate

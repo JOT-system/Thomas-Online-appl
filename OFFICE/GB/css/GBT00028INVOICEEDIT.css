@@ -121,21 +121,10 @@ li .areaTitle {
     vertical-align: middle;
 }
 
-
 td.numHeader {
     text-align:right;
     font-weight:bold;
     padding-right:15px;
-}
-.remarksMessage, #lblBrRemarkText, #lblApplyRemarks, #lblAppJotRemarks, #lblRemarks2 {
-    border: 1px solid rgb(100,100,100);
-    color: rgb(0,0,0) !important;
-    min-width: 10px;
-    min-height: 13.33px;
-    display: inline-block;
-    padding-left: 2px;
-    padding-right: 2px;
-    width: 98px;
 }
 
 input[type="text"] {
@@ -156,7 +145,7 @@ th {
 }
 
 #txtInvoicePostNo, #txtInvoiceAddress1, #txtInvoiceAddress2,
-#txtInvoiceAddress3, #txtInvoiceName1, #txtInvoiceName2 {
+#txtInvoiceAddress3, #txtInvoiceName1, #txtInvoiceName2, #txtInvoiceName3 {
     width: 232px !important;
 }
 
@@ -171,99 +160,15 @@ th {
 .varticalTop {
     vertical-align:top;
 }
-#divAttachmentArea {
-    margin-top: 2px;
-    width: calc(100% - 100px);
-    min-height: 80px;
-    border: 1px solid gray;
-    resize: vertical;
-    overflow-y: scroll;
-    overflow-x: hidden;
-}
 
 #divTankListArea {
     width: calc(100% - 100px);
-    min-height: 180px;
+    /*min-height: 180px;*/
+    resize: vertical;
     overflow-y: scroll;
     overflow-x: scroll;
 }
 
-/* *************************** */
-/* タブ風スタイル              */
-/* *************************** */
-#tabsBox {
-    overflow: hidden;
-    top: 32px;
-    width: calc(100% - 2px);
-    height: 25px;
-    background-color: gray;
-    font-size: 0;
-    z-index: 19;
-    white-space: nowrap;
-}
-
-#tabsBox div.tabLeftSide {
-    // width: calc(100% - 500px);
-    display: table-cell;
-    letter-spacing: -10px;
-}
-
-#tabsBox .tabRightSide {
-    min-width: 200px;
-    text-align: right;
-    font-size: small;
-    display: table-cell;
-}
-
-#spnShowCommonInfo {
-    padding-right: 10px;
-    color: white;
-}
-
-#spnShowCommonInfo:hover {
-    padding-right: 10px;
-    color: rgb(220, 230, 240);
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-#tabsBox div {
-    display: inline-block;
-}
-
-/* タブの基本スタイル */
-
-#tabsBox div.tabLeftSide div {
-    display: inline-block;
-    padding: 5px;
-    text-align: center;
-    border-top: 1px solid rgb(200, 200, 200);
-    border-right: 1px solid rgb(200, 200, 200);
-    border-left: 1px solid rgb(200, 200, 200);
-    border-bottom: 1px solid rgb(220, 230, 240);
-    height: 19px;
-    vertical-align: middle;
-    font-size: small;
-    font-weight: bold;
-    color: white;
-    min-width: 100px;
-    letter-spacing: normal;
-}
-
-#tabsBox div.tabLeftSide div:nth-child(1) {
-    margin-left: 0;
-}
-
-#tabsBox div.tabLeftSide div:hover:not(.selected) {
-    background-color: rgb(132, 139, 146);
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-#tabsBox .tabLeftSide .selected {
-    color: black;
-    background-color: rgb(220, 230, 240);
-}
 /* タンク一覧表 */
 #tblTankInfoList {
     margin-top:2px;
@@ -287,13 +192,6 @@ th {
 #tblTankInfoList th.status {
     width: 60px;
 }
-#tblTankInfoList th.delButtonCol {
-    /* width: 60px; */
-}
-.delButtonCol {
-    width:0;
-    display:none;
-}
 .lineCnt {
     width: 0;
     display: none;
@@ -314,7 +212,6 @@ th {
     width: 50px;
     min-width: 50px;
 }
-
 
 #tblTankInfoList tr:nth-child(n+2) {
     background-color: white;
@@ -338,51 +235,6 @@ th {
 /* ************************* 
     タンク入力
 *************************** */
-/* 削除確認ポップアップ */
-#divTankInputBoxWrapper {
-    display: none;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    top: 32px;
-    justify-content: space-around;
-    opacity: 1;
-    z-index: 19;
-    background-color: rgba(55, 55, 55, 0.6);
-    vertical-align: middle;
-    text-align: center;
-}
-#divTankInputBox {
-    position: fixed;
-    top: 60px;
-    text-align: left;
-    min-width: 500px;
-    min-height: 300px;
-    left: calc(50% - 250px);
-    background-color: rgb(240,240,240);
-    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
-    border-radius: 2px;
-}
-#divTankInputBoxButtons {
-    display:inline-block;
-}
-#divTankInputBoxInputitle {
-    width: calc(100% - 20px);
-    font-weight: bold;
-    padding: 10px;
-    height: 20px;
-    background-color: #8BACCD;
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-}
-
-#divTankInputBoxInputitle input[type=button] {
-    min-width: 70px;
-    margin-right: 2px;
-    margin-left:2px;
-    margin-top:0;
-}
-
 table.tankInput {
     table-layout: fixed;
     width: 500px;
@@ -513,148 +365,4 @@ table.tankInput span[id^="lbl"][id$="Text"] {
 
 #txtTotal {
     text-align: right;
-}
-/* **************************
-    添付ファイル関連
-************************** */
-.tblAttachmentHeader {
-    background-color: rgb(22,54,92);
-    color: white;
-}
-
-.tblAttachmentHeader, .tblAttachment {
-    width: 100%;
-    table-layout: fixed;
-}
-
-    .tblAttachment input[type="text"] {
-        width: calc(100% - 5px);
-    }
-
-    .tblAttachmentHeader tr:nth-child(1) th:last-child,
-    .tblAttachment td:last-child {
-        width: 45px;
-    }
-
-#divAttachmentArea .tblAttachmentHeader th {
-    vertical-align: bottom;
-    padding-bottom: 0;
-    padding-top: 0;
-    height: 12px;
-}
-
-#divAttachmentArea .tblAttachmentHeader tr:nth-child(1) th:first-child {
-    width: 80px;
-}
-
-#divAttachmentArea .tblAttachmentHeader tr:nth-child(1) th:first-child,
-#divAttachmentArea .tblAttachment td:first-child {
-    text-align: left;
-}
-
-#divAttachmentArea .tblAttachmentHeader tr:nth-child(1) th:nth-child(2),
-#divAttachmentArea .tblAttachmentHeader tr:nth-child(2) th:nth-child(1) {
-    text-align: center;
-}
-
-#divAttachmentArea .tblAttachment td:nth-child(1):hover {
-    text-decoration: underline;
-    cursor: pointer;
-}
-.remarksMessage, #lblApplyRemarks, #lblAppJotRemarks {
-    border: 1px solid rgb(100,100,100);
-    color: rgb(0,0,0) !important;
-    min-width: 10px;
-    min-height: 13.33px;
-    display: inline-block;
-    padding-left: 2px;
-    padding-right: 2px;
-}
-
-#lblAppJotRemarks, #lblApplyRemarks {
-    width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-#spnApplyRemarks span:nth-child(2),
-#spnAppJotRemarks span:nth-child(2){
-    display: none;
-}
-#spnApplyRemarks.aspNetDisabled *,
-#spnAppJotRemarks.aspNetDisabled *
-{
-    pointer-events: auto !important;
-}
-/* マルチラインテキスト入力ポップアップ */
-#divRemarkInputBoxWrapper {
-    display: none;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    justify-content: space-around;
-    opacity: 1;
-    z-index: 9998;
-    background-color: rgba(55, 55, 55, 0.6);
-    vertical-align: middle;
-    text-align: center;
-}
-
-#divRemarkInputBox {
-    position: fixed;
-    top: 100px;
-    text-align: left;
-    min-width: 500px;
-    left: calc(50% - 250px);
-    background-color: rgb(240,240,240);
-    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
-}
-
-#divRemarkInputitle {
-    width: calc(100% - 20px);
-    font-weight: bold;
-    padding: 10px;
-    height: 15px;
-    background-color: #8BACCD;
-}
-
-#divRemarkInputButtons {
-    padding: 10px 10px 5px 5px;
-}
-
-#divRemarkInputButtons input[type=button] {
-    min-width: 70px;
-}
-
-#divRemarkTextArea {
-    padding: 10px 10px 5px 5px;
-}
-
-#divRemarkTextArea textarea {
-    width: 500px;
-    height: 300px;
-}
-
-.remarksMessage {
-    color: rgb(211,211,211) !important;
-    font-style: italic;
-    display: block;
-    width: 100px;
-}
-#lblApplyRemarks:before,
-#lblAppJotRemarks:before{
-    height: 12px;
-    width: 12px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-image: url('../../Images/exclamation.png');
-    content: '';
-    display: inline-block;
-}
-#hdnUpload {
-    display: none;
-}
-#ddlOrderStart {
-    min-width: 110px;
-    min-height: 25px;
 }

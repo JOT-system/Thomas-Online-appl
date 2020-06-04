@@ -149,22 +149,22 @@ Partial Public Class GBT00004NEWORDER
     Protected WithEvents lblSalesPic As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''lblNoOfTanks コントロール。
+    '''lblCopy コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents lblNoOfTanks As Global.System.Web.UI.WebControls.Label
+    Protected WithEvents lblCopy As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''txtNoOfTanks コントロール。
+    '''txtCopy コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents txtNoOfTanks As Global.System.Web.UI.WebControls.TextBox
+    Protected WithEvents txtCopy As Global.System.Web.UI.WebControls.TextBox
     
     '''<summary>
     '''txtOffice コントロール。
@@ -185,22 +185,22 @@ Partial Public Class GBT00004NEWORDER
     Protected WithEvents txtSalesPic As Global.System.Web.UI.WebControls.TextBox
     
     '''<summary>
-    '''lblCopy コントロール。
+    '''lblNoOfTanks コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents lblCopy As Global.System.Web.UI.WebControls.Label
+    Protected WithEvents lblNoOfTanks As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''txtCopy コントロール。
+    '''txtNoOfTanks コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents txtCopy As Global.System.Web.UI.WebControls.TextBox
+    Protected WithEvents txtNoOfTanks As Global.System.Web.UI.WebControls.TextBox
     
     '''<summary>
     '''lblTotalTanks コントロール。

@@ -858,12 +858,12 @@ Public Class GBM00003DEPOT
                 Dim searchStr As String = ""
                 '検索用文字列（部分一致）
                 If (COA0019Session.LANGDISP = C_LANG.JA) Then
-                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMESJP"))
+                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMESJP")).ToUpper
                 Else
-                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMES"))
+                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMES")).ToUpper
                 End If
 
-                If Not searchStr.Contains(txtDepotNameEx.Text) Then
+                If Not searchStr.Contains(txtDepotNameEx.Text.ToUpper) Then
                     BASEtbl.Rows(i)("HIDDEN") = 1
                 End If
             End If

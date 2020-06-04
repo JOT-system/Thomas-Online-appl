@@ -10,7 +10,7 @@
     margin: 3px;
 }
 
-#lblPOL, #lblPOD, #lblShipper, #lblConsignee, #lblProduct, #lbApproval {
+#lblPOLCountry, #lblPOL, #lblPODCountry, #lblPOD, #lblShipper, #lblConsignee, #lblProduct, #lbApproval {
     text-decoration: underline;
 }
 

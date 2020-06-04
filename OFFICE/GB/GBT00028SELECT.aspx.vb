@@ -73,6 +73,10 @@ Public Class GBT00028SELECT
                     Return
                 End If
                 '****************************************
+                '使用可否制御
+                '****************************************
+                enabledControls()
+                '****************************************
                 'フォーカス設定
                 '****************************************
                 txtInvoiceMonth.Focus()
@@ -172,21 +176,12 @@ Public Class GBT00028SELECT
                 'Productビュー表示切替
                 Case Me.vLeftProduct.ID
                     SetProductListItem(Me.txtProduct.Text)
-                    ''カレンダビュー表示切替
-                    'Case Me.vLeftCal.ID
-                    '    'targetObject = FindControl(Me.hdnTextDbClickField.Value)
-                    '    'If targetObject IsNot Nothing Then
-                    '    '    Dim txtobj As TextBox = DirectCast(targetObject, TextBox)
-                    '    '    Me.hdnCalendarValue.Value = txtEndYMD.Text
-                    '    Me.hdnCalendarValue.Value = FormatDateYMD(txtStYMD.Text, GBA00003UserSetting.DATEFORMAT) ' カレンダーは常にFROM基準で表示
-
-                    '    Me.mvLeft.Focus()
-                    '    'End If
 
             End Select
         End If
 
     End Sub
+
     ''' <summary>
     ''' 実行ボタン押下時
     ''' </summary>
@@ -194,7 +189,11 @@ Public Class GBT00028SELECT
         Dim COA0012DoUrl As BASEDLL.COA0012DoUrl
 
         'チェック処理
-        checkProc()
+        If Me.hdnThisMapVariant.Value = "Management" Then
+            checkProc2()
+        Else
+            checkProc()
+        End If
         If returnCode <> C_MESSAGENO.NORMAL Then
             Return
         End If
@@ -215,6 +214,7 @@ Public Class GBT00028SELECT
         Server.Transfer(COA0012DoUrl.URL)
 
     End Sub
+
     ''' <summary>
     ''' 終了ボタン押下時
     ''' </summary>
@@ -240,6 +240,7 @@ Public Class GBT00028SELECT
         Server.Transfer(COA0011ReturnUrl.URL)
 
     End Sub
+
     ''' <summary>
     ''' 左ボックス選択ボタン押下時
     ''' </summary>
@@ -331,14 +332,6 @@ Public Class GBT00028SELECT
                             txtobj.Focus()
                         End If
                     End If
-                    'Case Me.vLeftCal.ID 'アクティブなビューがカレンダー
-                    '    'カレンダー選択時
-                    '    targetObject = FindControl(Me.hdnTextDbClickField.Value)
-                    '    If targetObject IsNot Nothing Then
-                    '        Dim txtobj As TextBox = DirectCast(targetObject, TextBox)
-                    '        txtobj.Text = Me.hdnCalendarValue.Value
-                    '        txtobj.Focus()
-                    '    End If
                 Case Else
                     '何もしない
             End Select
@@ -347,6 +340,7 @@ Public Class GBT00028SELECT
         Me.hdnTextDbClickField.Value = ""
         Me.hdnIsLeftBoxOpen.Value = ""
     End Sub
+
     ''' <summary>
     ''' 左ボックスキャンセルボタン押下時
     ''' </summary>
@@ -411,7 +405,11 @@ Public Class GBT00028SELECT
             'メニューからの画面遷移
             '○画面項目設定（変数より）処理
             SetInvoiceMonthListItem(Me.txtInvoiceMonth.Text)
-            Me.txtInvoiceMonth.Text = lbInvoiceMonth.Items(0).Value
+            'If Me.hdnThisMapVariant.Value = "Management" Then
+            '    Me.txtInvoiceMonth.Text = lbInvoiceMonth.Items(lbInvoiceMonth.Items.Count - 3).Value
+            'Else
+            Me.txtInvoiceMonth.Text = lbInvoiceMonth.Items(lbInvoiceMonth.Items.Count - 2).Value
+            'End If
 
         ElseIf TypeOf Page.PreviousPage Is GBT00028RESULT Then
             Dim prevPage As GBT00028RESULT = DirectCast(Page.PreviousPage, GBT00028RESULT)
@@ -448,6 +446,37 @@ Public Class GBT00028SELECT
         End If
 
     End Sub
+
+    ''' <summary>
+    ''' 使用可否コントロール
+    ''' </summary>
+    Private Sub enabledControls()
+
+        'メニューから遷移/業務画面戻り判定
+        If Me.hdnThisMapVariant.Value = "Management" Then
+
+            '請求書管理画面であれば下記抽出条件非表示
+            Me.lblCustomer.Text = ""
+            Me.lblPOL.Text = ""
+            Me.lblPOD.Text = ""
+            Me.lblProduct.Text = ""
+
+            '請求書管理の場合、以下の項目を非表示
+            Dim lstInputObjects As New List(Of Control) From {Me.txtCustomer, Me.txtPOL, Me.txtPOD, Me.txtProduct}
+
+            For Each obj As Control In lstInputObjects
+                If TypeOf obj Is TextBox Then
+                    Dim txtObj As TextBox = DirectCast(obj, TextBox)
+                    txtObj.Visible = False
+                End If
+            Next
+        Else
+            '請求書作成画面であれば顧客コード必須
+            Me.lblCustomer.CssClass = "requiredMark"
+        End If
+
+    End Sub
+
     ''' <summary>
     ''' 変数設定
     ''' </summary>
@@ -479,6 +508,7 @@ Public Class GBT00028SELECT
             End If
         Next
     End Sub
+
     ''' <summary>
     ''' 右ボックス設定
     ''' </summary>
@@ -526,6 +556,7 @@ Public Class GBT00028SELECT
         Next
 
     End Sub
+
     ''' <summary>
     ''' チェック処理
     ''' </summary>
@@ -535,7 +566,7 @@ Public Class GBT00028SELECT
         '入力文字置き換え
         '画面PassWord内の使用禁止文字排除
 
-        'Custmer
+        'Custmer(取引先)
         COA0008InvalidChar.CHARin = txtCustomer.Text
         COA0008InvalidChar.COA0008RemoveInvalidChar()
         If COA0008InvalidChar.CHARin = COA0008InvalidChar.CHARout Then
@@ -570,14 +601,14 @@ Public Class GBT00028SELECT
         '入力項目チェック
         '①単項目チェック
         'Customer
-        CheckSingle("CUSTOMERCODE", FormatDateYMD(txtCustomer.Text, GBA00003UserSetting.DATEFORMAT))
+        CheckSingle("CUSTOMERCODE", txtCustomer.Text)
         If returnCode <> C_MESSAGENO.NORMAL Then
             txtCustomer.Focus()
             Return
         End If
 
         'POL
-        CheckSingle("POL", FormatDateYMD(txtPOL.Text, GBA00003UserSetting.DATEFORMAT))
+        CheckSingle("POL", txtPOL.Text)
         If returnCode <> C_MESSAGENO.NORMAL Then
             txtPOL.Focus()
             Return
@@ -633,18 +664,23 @@ Public Class GBT00028SELECT
             Return
         End If
 
-        ''③相関チェック
-        ''有効開始日<=有効終了日
-        'If txtStYMD.Text <> "" AndAlso txtEndYMD.Text <> "" Then
-        '    If FormatDateYMD(txtStYMD.Text, GBA00003UserSetting.DATEFORMAT) > FormatDateYMD(txtEndYMD.Text, GBA00003UserSetting.DATEFORMAT) Then
-        '        returnCode = C_MESSAGENO.VALIDITYINPUT
-        '        CommonFunctions.ShowMessage(returnCode, Me.lblFooterMessage, pageObject:=Me)
-        '        txtStYMD.Focus()
-        '        Return
-        '    End If
-        'End If
+    End Sub
+
+    ''' <summary>
+    ''' チェック処理(請求月チェックのみ)
+    ''' </summary>
+    Public Sub checkProc2()
+
+        '②存在チェック(LeftBoxチェック)
+        'Invoice Month
+        CheckList(txtInvoiceMonth.Text, lbInvoiceMonth)
+        If returnCode <> C_MESSAGENO.NORMAL Then
+            txtInvoiceMonth.Focus()
+            Return
+        End If
 
     End Sub
+
     ''' <summary>
     ''' 単項目チェック
     ''' </summary>
@@ -693,7 +729,6 @@ Public Class GBT00028SELECT
         End If
     End Sub
 
-
     ''' <summary>
     ''' InvoiceMonthリストアイテムを設定
     ''' </summary>
@@ -702,23 +737,36 @@ Public Class GBT00028SELECT
         'リストクリア
         Me.lbInvoiceMonth.Items.Clear()
         Try
+
             '検索SQL文
+            Dim initMonth As String = ""
             Dim sqlStat As New StringBuilder
-            sqlStat.AppendLine("DECLARE @INVOICEDATE nvarchar(10);")
-            sqlStat.AppendLine("SELECT @INVOICEDATE =  DATEADD(M,1,CONVERT(date,MAX(CD.REPORTMONTH) + '/01'))")
+            sqlStat.AppendLine("DECLARE @STARTDATE nvarchar(10);")
+            sqlStat.AppendLine("DECLARE @ENDDATE nvarchar(10);")
+            sqlStat.AppendLine("SELECT @STARTDATE =  DATEADD(M,1,CONVERT(date,MAX(CD.REPORTMONTH) + '/01'))")
             sqlStat.AppendLine("FROM GBT0006_CLOSINGDAY CD")
             sqlStat.AppendLine("WHERE  CD.COUNTRYCODE = 'JOT'")
             sqlStat.AppendLine("AND    CD.DELFLG     <> @DELFLG;")
+            sqlStat.AppendLine("SELECT @ENDDATE =  DATEADD(m,1,CONVERT(DATETIME, @STARTDATE));")
+            If Me.hdnThisMapVariant.Value = "Management" Then
+                ' 管理の場合は、システム導入時から
+                sqlStat.AppendLine("SELECT @STARTDATE =  DATEADD(M,1,CONVERT(date,MIN(CD.REPORTMONTH) + '/01'))")
+                sqlStat.AppendLine("FROM GBT0006_CLOSINGDAY CD")
+                sqlStat.AppendLine("WHERE  CD.COUNTRYCODE = 'JOT'")
+                sqlStat.AppendLine("AND    CD.DELFLG     <> @DELFLG;")
+                'sqlStat.AppendLine("SELECT @INVOICEDATE =  '2020/01/01';")
+                'sqlStat =
+            End If
             sqlStat.AppendLine("WITH DateTable(MyDate) AS ( ")
             sqlStat.AppendLine("  SELECT")
-            sqlStat.AppendLine("    CONVERT(DATETIME, @INVOICEDATE)")
+            sqlStat.AppendLine("    CONVERT(DATETIME, @STARTDATE)")
             sqlStat.AppendLine("  UNION ALL ")
             sqlStat.AppendLine("  SELECT")
             sqlStat.AppendLine("    DATEADD(m, 1, MyDate) ")
             sqlStat.AppendLine("  FROM")
             sqlStat.AppendLine("    DateTable ")
             sqlStat.AppendLine("  WHERE")
-            sqlStat.AppendLine("    MyDate < DATEADD(m,11,CONVERT(DATETIME, @INVOICEDATE))")
+            sqlStat.AppendLine("    MyDate < @ENDDATE")
             sqlStat.AppendLine(") ")
             sqlStat.AppendLine("SELECT CONVERT(CHAR(7),MyDate,111) as 'CODE', CONVERT(CHAR(7),MyDate,111) as 'NAME',")
             sqlStat.AppendLine("       CONVERT(CHAR(7),MyDate,111) as 'DISPLAYNAME' FROM DateTable")
@@ -735,14 +783,7 @@ Public Class GBT00028SELECT
                 Using sqlDa As New SqlDataAdapter(SQLcmd)
                     sqlDa.Fill(retDt)
                 End Using 'sqlDa
-                'Using SQLdr As SqlDataReader = SQLcmd.ExecuteReader()
-                '    While SQLdr.Read
-                '        Me.lbCustomer.Items.Add(Convert.ToString(SQLdr("CUSTOMER")))
-                '    End While
-                'End Using
                 If retDt IsNot Nothing Then
-                    'Me.ERR = C_MESSAGENO.NODATA
-                    'Return
                     With Me.lbInvoiceMonth
                         .DataValueField = "CODE"
                         .DataTextField = "DISPLAYNAME"
@@ -774,7 +815,7 @@ Public Class GBT00028SELECT
     End Sub
 
     ''' <summary>
-    ''' Customerリストアイテムを設定
+    ''' Customer(取引先)リストアイテムを設定
     ''' </summary>
     Private Sub SetCustomerListItem(selectedValue As String)
 
@@ -783,9 +824,9 @@ Public Class GBT00028SELECT
         Try
             '検索SQL文
             Dim sqlStat As New StringBuilder
-            sqlStat.AppendLine("select distinct cm.CUSTOMERCODE as 'CODE',")
-            sqlStat.AppendLine("                cm.NAMESEN      as 'NAME',")
-            sqlStat.AppendLine("                cm.CUSTOMERCODE + ':' + cm.NAMESEN as 'DISPLAYNAME'")
+            sqlStat.AppendLine("select distinct tm.TORICODE as 'CODE',")
+            sqlStat.AppendLine("                tm.NAMES1      as 'NAME',")
+            sqlStat.AppendLine("                tm.TORICODE + ':' + tm.NAMES1 as 'DISPLAYNAME'")
             sqlStat.AppendLine("  from GBT0005_ODR_VALUE ov ")
             sqlStat.AppendLine("    inner join GBT0004_ODR_BASE ob ")
             sqlStat.AppendLine("      on ob.DELFLG <> @DELFLG")
@@ -795,6 +836,13 @@ Public Class GBT00028SELECT
             sqlStat.AppendLine("      and cm.CUSTOMERCODE = ov.CONTRACTORFIX")
             sqlStat.AppendLine("      and cm.STYMD <= getdate()")
             sqlStat.AppendLine("      and cm.ENDYMD >= getdate()")
+            sqlStat.AppendLine("    inner join GBM0025_TORI tm ")
+            sqlStat.AppendLine("      on tm.DELFLG <> @DELFLG")
+            sqlStat.AppendLine("      and tm.COMPCODE = '01'")
+            sqlStat.AppendLine("      and tm.TORIKBN = 'I'")
+            sqlStat.AppendLine("      and tm.TORICODE = cm.INCTORICODE")
+            sqlStat.AppendLine("      and tm.STYMD <= getdate()")
+            sqlStat.AppendLine("      and tm.ENDYMD >= getdate()")
             sqlStat.AppendLine("  where ov.DELFLG <> @DELFLG ")
             sqlStat.AppendLine("  and   ov.INVOICEDBY = 'JPA00001' ")
             sqlStat.AppendLine("  and   ov.TANKNO    <> '' ")
@@ -815,7 +863,7 @@ Public Class GBT00028SELECT
                 sqlStat.AppendLine("  and   ob.PRODUCTCODE = @PRODUCT ")
             End If
 
-            sqlStat.AppendLine(" ORDER BY cm.CUSTOMERCODE, cm.NAMESEN, cm.CUSTOMERCODE + ':' + cm.NAMESEN ")
+            sqlStat.AppendLine(" ORDER BY tm.TORICODE, tm.NAMES1, tm.TORICODE + ':' + tm.NAMES1 ")
             Dim retDt As New DataTable
             Using SQLcon As New SqlConnection(COA0019Session.DBcon),
                   SQLcmd = New SqlCommand(sqlStat.ToString, SQLcon)
@@ -841,14 +889,7 @@ Public Class GBT00028SELECT
                 Using sqlDa As New SqlDataAdapter(SQLcmd)
                     sqlDa.Fill(retDt)
                 End Using 'sqlDa
-                'Using SQLdr As SqlDataReader = SQLcmd.ExecuteReader()
-                '    While SQLdr.Read
-                '        Me.lbCustomer.Items.Add(Convert.ToString(SQLdr("CUSTOMER")))
-                '    End While
-                'End Using
                 If retDt IsNot Nothing Then
-                    'Me.ERR = C_MESSAGENO.NODATA
-                    'Return
                     With Me.lbCustomer
                         .DataValueField = "CODE"
                         .DataTextField = "DISPLAYNAME"
@@ -880,7 +921,7 @@ Public Class GBT00028SELECT
     End Sub
 
     ''' <summary>
-    ''' Customer名設定
+    ''' Customer(取引先)名設定
     ''' </summary>
     Public Sub txtCustomer_Change()
 
@@ -948,16 +989,26 @@ Public Class GBT00028SELECT
             sqlStat.AppendLine("      and pm.PORTCODE = ob.LOADPORT1")
             sqlStat.AppendLine("      and pm.STYMD <= getdate()")
             sqlStat.AppendLine("      and pm.ENDYMD >= getdate()")
+
+            If Me.txtCustomer.Text <> "" Then
+                sqlStat.AppendLine("    inner join GBM0004_CUSTOMER cm ")
+                sqlStat.AppendLine("      on cm.DELFLG <> @DELFLG")
+                sqlStat.AppendLine("      and cm.CUSTOMERCODE = ov.CONTRACTORFIX")
+                sqlStat.AppendLine("      and cm.INCTORICODE = @INCTORICODE")
+                sqlStat.AppendLine("      and cm.STYMD <= getdate()")
+                sqlStat.AppendLine("      and cm.ENDYMD >= getdate()")
+            End If
+
             sqlStat.AppendLine("  where ov.DELFLG <> @DELFLG ")
             sqlStat.AppendLine("  and   ov.INVOICEDBY = 'JPA00001' ")
             sqlStat.AppendLine("  and   ov.COSTCODE = 'A0001-01' ")
             sqlStat.AppendLine("  and   ov.SOAAPPDATE = '1900/01/01' ")
             sqlStat.AppendLine("  and   ov.BRID like 'BT%' ")
 
+            'If Me.txtCustomer.Text <> "" Then
+            '    sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
+            'End If
             ' 指定済み
-            If Me.txtCustomer.Text <> "" Then
-                sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
-            End If
             'If selectedValue <> "" Then
             '    sqlStat.AppendLine("  and   ob.LOADPORT1 = @POL ")
             'End If
@@ -978,7 +1029,8 @@ Public Class GBT00028SELECT
                     .Add("@COMPCODE", System.Data.SqlDbType.NVarChar).Value = HttpContext.Current.Session("APSRVCamp")
                     .Add("@DELFLG", System.Data.SqlDbType.NVarChar).Value = CONST_FLAG_YES
                     If Me.txtCustomer.Text <> "" Then
-                        .Add("@CUSTOMER", System.Data.SqlDbType.NVarChar).Value = Me.txtCustomer.Text
+                        '.Add("@CUSTOMER", System.Data.SqlDbType.NVarChar).Value = Me.txtCustomer.Text
+                        .Add("@INCTORICODE", System.Data.SqlDbType.NVarChar).Value = Me.txtCustomer.Text
                     End If
                     If selectedValue <> "" Then
                         .Add("@POL", System.Data.SqlDbType.NVarChar).Value = selectedValue
@@ -994,14 +1046,7 @@ Public Class GBT00028SELECT
                 Using sqlDa As New SqlDataAdapter(SQLcmd)
                     sqlDa.Fill(retDt)
                 End Using 'sqlDa
-                'Using SQLdr As SqlDataReader = SQLcmd.ExecuteReader()
-                '    While SQLdr.Read
-                '        Me.lbPOL.Items.Add(Convert.ToString(SQLdr("POL")))
-                '    End While
-                'End Using
                 If retDt IsNot Nothing Then
-                    'Me.ERR = C_MESSAGENO.NODATA
-                    'Return
                     With Me.lbPOL
                         .DataValueField = "CODE"
                         .DataTextField = "DISPLAYNAME"
@@ -1103,19 +1148,29 @@ Public Class GBT00028SELECT
             sqlStat.AppendLine("      and pm.PORTCODE = ob.DISCHARGEPORT1")
             sqlStat.AppendLine("      and pm.STYMD <= getdate()")
             sqlStat.AppendLine("      and pm.ENDYMD >= getdate()")
+
+            If Me.txtCustomer.Text <> "" Then
+                sqlStat.AppendLine("    inner join GBM0004_CUSTOMER cm ")
+                sqlStat.AppendLine("      on cm.DELFLG <> @DELFLG")
+                sqlStat.AppendLine("      and cm.CUSTOMERCODE = ov.CONTRACTORFIX")
+                sqlStat.AppendLine("      and cm.INCTORICODE = @INCTORICODE")
+                sqlStat.AppendLine("      and cm.STYMD <= getdate()")
+                sqlStat.AppendLine("      and cm.ENDYMD >= getdate()")
+            End If
+
             sqlStat.AppendLine("  where ov.DELFLG <> @DELFLG ")
             sqlStat.AppendLine("  and   ov.INVOICEDBY = 'JPA00001' ")
             sqlStat.AppendLine("  and   ov.COSTCODE = 'A0001-01' ")
             sqlStat.AppendLine("  and   ov.SOAAPPDATE = '1900/01/01' ")
             sqlStat.AppendLine("  and   ov.BRID like 'BT%' ")
 
-            ' 指定済み
-            If Me.txtCustomer.Text <> "" Then
-                sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
-            End If
+            'If Me.txtCustomer.Text <> "" Then
+            '    sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
+            'End If
             If Me.txtPOL.Text <> "" Then
                 sqlStat.AppendLine("  and   ob.LOADPORT1 = @POL ")
             End If
+            ' 指定済み
             'If selectedValue <> "" Then
             '    sqlStat.AppendLine("  and   ob.DISCHARGEPORT1 = @POD ")
             'End If
@@ -1133,7 +1188,8 @@ Public Class GBT00028SELECT
                     .Add("@COMPCODE", System.Data.SqlDbType.NVarChar).Value = HttpContext.Current.Session("APSRVCamp")
                     .Add("@DELFLG", System.Data.SqlDbType.NVarChar).Value = CONST_FLAG_YES
                     If Me.txtCustomer.Text <> "" Then
-                        .Add("@CUSTOMER", System.Data.SqlDbType.NVarChar).Value = Me.txtCustomer.Text
+                        '.Add("@CUSTOMER", System.Data.SqlDbType.NVarChar).Value = Me.txtCustomer.Text
+                        .Add("@INCTORICODE", System.Data.SqlDbType.NVarChar).Value = Me.txtCustomer.Text
                     End If
                     If Me.txtPOL.Text <> "" Then
                         .Add("@POL", System.Data.SqlDbType.NVarChar).Value = Me.txtPOL.Text
@@ -1149,14 +1205,7 @@ Public Class GBT00028SELECT
                 Using sqlDa As New SqlDataAdapter(SQLcmd)
                     sqlDa.Fill(retDt)
                 End Using 'sqlDa
-                'Using SQLdr As SqlDataReader = SQLcmd.ExecuteReader()
-                '    While SQLdr.Read
-                '        Me.lbPOD.Items.Add(Convert.ToString(SQLdr("POD")))
-                '    End While
-                'End Using
                 If retDt IsNot Nothing Then
-                    'Me.ERR = C_MESSAGENO.NODATA
-                    'Return
                     With Me.lbPOD
                         .DataValueField = "CODE"
                         .DataTextField = "DISPLAYNAME"
@@ -1257,22 +1306,32 @@ Public Class GBT00028SELECT
             sqlStat.AppendLine("      and pm.PRODUCTCODE = ob.PRODUCTCODE")
             sqlStat.AppendLine("      and pm.STYMD <= getdate()")
             sqlStat.AppendLine("      and pm.ENDYMD >= getdate()")
+
+            If Me.txtCustomer.Text <> "" Then
+                sqlStat.AppendLine("    inner join GBM0004_CUSTOMER cm ")
+                sqlStat.AppendLine("      on cm.DELFLG <> @DELFLG")
+                sqlStat.AppendLine("      and cm.CUSTOMERCODE = ov.CONTRACTORFIX")
+                sqlStat.AppendLine("      and cm.INCTORICODE = @INCTORICODE")
+                sqlStat.AppendLine("      and cm.STYMD <= getdate()")
+                sqlStat.AppendLine("      and cm.ENDYMD >= getdate()")
+            End If
+
             sqlStat.AppendLine("  where ov.DELFLG <> @DELFLG ")
             sqlStat.AppendLine("  and   ov.INVOICEDBY = 'JPA00001' ")
             sqlStat.AppendLine("  and   ov.COSTCODE = 'A0001-01' ")
             sqlStat.AppendLine("  and   ov.SOAAPPDATE = '1900/01/01' ")
             sqlStat.AppendLine("  and   ov.BRID like 'BT%' ")
 
-            ' 指定済み
-            If Me.txtCustomer.Text <> "" Then
-                sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
-            End If
+            'If Me.txtCustomer.Text <> "" Then
+            '    sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
+            'End If
             If Me.txtPOL.Text <> "" Then
                 sqlStat.AppendLine("  and   ob.LOADPORT1 = @POL ")
             End If
             If Me.txtPOD.Text <> "" Then
                 sqlStat.AppendLine("  and   ob.DISCHARGEPORT1 = @POD ")
             End If
+            ' 指定済み
             'If selectedValue <> "" Then
             '    sqlStat.AppendLine("  and   ob.PRODUCTCODE = @PRODUCT ")
             'End If
@@ -1287,7 +1346,8 @@ Public Class GBT00028SELECT
                     .Add("@COMPCODE", System.Data.SqlDbType.NVarChar).Value = HttpContext.Current.Session("APSRVCamp")
                     .Add("@DELFLG", System.Data.SqlDbType.NVarChar).Value = CONST_FLAG_YES
                     If Me.txtCustomer.Text <> "" Then
-                        .Add("@CUSTOMER", System.Data.SqlDbType.NVarChar).Value = Me.txtCustomer.Text
+                        '.Add("@CUSTOMER", System.Data.SqlDbType.NVarChar).Value = Me.txtCustomer.Text
+                        .Add("@INCTORICODE", System.Data.SqlDbType.NVarChar).Value = Me.txtCustomer.Text
                     End If
                     If Me.txtPOL.Text <> "" Then
                         .Add("@POL", System.Data.SqlDbType.NVarChar).Value = Me.txtPOL.Text
@@ -1303,14 +1363,7 @@ Public Class GBT00028SELECT
                 Using sqlDa As New SqlDataAdapter(SQLcmd)
                     sqlDa.Fill(retDt)
                 End Using 'sqlDa
-                'Using SQLdr As SqlDataReader = SQLcmd.ExecuteReader()
-                '    While SQLdr.Read
-                '        Me.lbProduct.Items.Add(Convert.ToString(SQLdr("PRODUCT")))
-                '    End While
-                'End Using
                 If retDt IsNot Nothing Then
-                    'Me.ERR = C_MESSAGENO.NODATA
-                    'Return
                     With Me.lbProduct
                         .DataValueField = "CODE"
                         .DataTextField = "DISPLAYNAME"
@@ -1387,6 +1440,7 @@ Public Class GBT00028SELECT
         End Try
 
     End Sub
+
     ''' <summary>
     ''' GBT00028S(請求書検索条件)保持用クラス
     ''' </summary>
@@ -1403,7 +1457,7 @@ Public Class GBT00028SELECT
         ''' <returns></returns>
         Public Property CustomerCode As String
         ''' <summary>
-        ''' (検索条件)顧客名
+        ''' (検索条件)顧客名(取引先)
         ''' </summary>
         ''' <returns></returns>
         Public Property CustomerName As String
@@ -1441,10 +1495,10 @@ Public Class GBT00028SELECT
         retVal.POL = Me.txtPOL.Text
         retVal.POD = Me.txtPOD.Text
         retVal.ProductCode = Me.txtProduct.Text
-        retVal.ViewId = ""
-        If Me.lbRightList.SelectedItem IsNot Nothing Then
-            retVal.ViewId = Me.lbRightList.SelectedItem.Value
-        End If
+        retVal.ViewId = Me.hdnThisMapVariant.Value
+        'If Me.lbRightList.SelectedItem IsNot Nothing Then
+        '    retVal.ViewId = Me.lbRightList.SelectedItem.Value
+        'End If
         Return retVal
     End Function
 

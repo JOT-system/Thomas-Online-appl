@@ -38,10 +38,6 @@ Public Module GBConst
     ''' </summary>
     Public Const GBC_COSTCODE_FREIGHT_REVENUE As String = "A0100-01"
     ''' <summary>
-    ''' 費用項目：元請輸送収入(Freight Revenue)仮計上
-    ''' </summary>
-    Public Const GBC_COSTCODE_PROVISIONAL As String = "A0100-02"
-    ''' <summary>
     ''' 費用項目:リース料(JOT Hirage)
     ''' </summary>
     Public Const GBC_COSTCODE_JOTHIRAGE As String = "S0101-01"

@@ -15,6 +15,15 @@
     <link href="~/GB/css/GBT00020LEASE.css" rel="stylesheet" type="text/css" />
     <style>
     </style>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-162522994-1');
+    </script>
     <%--共通利用するJavaScript --%>
     <script src='<%= ResolveUrl("~/script/common.js") %>' type="text/javascript" charset="utf-8"></script>
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
@@ -220,8 +229,8 @@
 					    		    <th><asp:Label ID="lblEnabled" runat="server" Text="Enabled"></asp:Label></th>
 					    		    <td><asp:CheckBox ID="chkEnabled" runat="server" /></td>
                                     <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <th><asp:Label ID="lblAccSegment" runat="server" Text="Segment"></asp:Label></th>
+                                    <td><asp:TextBox ID="txtAccSegment" runat="server" Text=""></asp:TextBox></td>
                                     <td></td>
                                     <td></td>
 					    	    </tr>

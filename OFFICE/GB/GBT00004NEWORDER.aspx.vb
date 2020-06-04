@@ -432,10 +432,9 @@ Public Class GBT00004NEWORDER
             Dim dicBrInfo As Dictionary(Of String, BreakerInfo) = GetBreakerInfo(brId, sqlCon)
             ViewState("BRINFO") = (dicBrInfo) '画面表示時のブレーカー情報をVIEWSTATEに退避
             Dim dtBrBase As DataTable = GetBreakerBase(dicBrInfo, sqlCon)
-            Dim totalCost As String = GetBreakerValue(dicBrInfo, "", "", sqlCon)
-            Dim totalShipperCost As String = GetBreakerValue(dicBrInfo, "1", "", sqlCon)
-            Dim totalConsigneeCost As String = GetBreakerValue(dicBrInfo, "0", "", sqlCon)
-            Dim totalProvisionalCost As String = GetBreakerValue(dicBrInfo, "", "P", sqlCon) '仮計上コスト総額
+            Dim totalCost As String = GetBreakerValue(dicBrInfo, "", sqlCon)
+            Dim totalShipperCost As String = GetBreakerValue(dicBrInfo, "1", sqlCon)
+            Dim totalConsigneeCost As String = GetBreakerValue(dicBrInfo, "0", sqlCon)
 
             '取得値を戻り値に設定
             Dim drBrBase As DataRow = dtBrBase.Rows(0)
@@ -503,7 +502,6 @@ Public Class GBT00004NEWORDER
             retBrData.BrValidityFrom = Convert.ToString(drBrBase("VALIDITYFROM"))
             retBrData.BrValidityTo = Convert.ToString(drBrBase("VALIDITYTO"))
             retBrData.BrTotalCost = totalCost
-            retBrData.BrTotalProvisionalCost = totalProvisionalCost
 
             sqlCon.Close()
         End Using
@@ -632,7 +630,7 @@ Public Class GBT00004NEWORDER
         sqlStat.AppendLine("   AND  BI.DELFLG  <> @DELFLG")
         sqlStat.AppendLine("  LEFT JOIN GBM0008_PRODUCT PD") 'PRODUCT名称用JOIN
         sqlStat.AppendLine("    ON  PD.COMPCODE     = @COMPCODE")
-        sqlStat.AppendLine("   AND  PD.STYMD       <= BS.ENDYMD")
+        sqlStat.AppendLine("   AND  PD.STYMD       <= BS.STYMD")
         sqlStat.AppendLine("   AND  PD.ENDYMD      >= BS.STYMD")
         sqlStat.AppendLine("   AND  PD.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("   AND  PD.ENABLED      = @ENABLED")
@@ -692,7 +690,7 @@ Public Class GBT00004NEWORDER
     ''' </summary>
     ''' <param name="dicBrInfo"></param>
     ''' <returns></returns>
-    Private Function GetBreakerValue(dicBrInfo As Dictionary(Of String, BreakerInfo), billing As String, Provisional As String, Optional sqlCon As SqlConnection = Nothing) As String
+    Private Function GetBreakerValue(dicBrInfo As Dictionary(Of String, BreakerInfo), billing As String, Optional sqlCon As SqlConnection = Nothing) As String
         Dim canCloseConnect As Boolean = False
         Dim sqlStat As New Text.StringBuilder
         Dim retValue As String = ""
@@ -726,14 +724,10 @@ Public Class GBT00004NEWORDER
         sqlStat.AppendLine("                 FROM GBM0010_CHARGECODE CST")
         sqlStat.AppendLine("                WHERE CST.DELFLG    <> @DELFLG")
         sqlStat.AppendLine("                  AND CST.COSTCODE   = VL.COSTCODE")
-        If Provisional <> "" Then
-            ' 仮計上項目を取得
-            sqlStat.AppendLine("                  AND ( CST.CLASS3    <> '' AND CST.CLASS3    = 'P' )")
-        Else
-            ' 全費用項目を抽出
-            sqlStat.AppendLine("                  AND CST.CLASS3    <> ''")
-        End If
+        sqlStat.AppendLine("                  AND CST.CLASS3    <> ''")
         sqlStat.AppendLine("                  AND CST.COMPCODE   = @COMPCODE")
+        sqlStat.AppendLine("                  AND CST.STYMD     <= VL.STYMD")
+        sqlStat.AppendLine("                  AND CST.ENDYMD    >= VL.STYMD")
         sqlStat.AppendLine("               )")
         Try
             If sqlCon Is Nothing Then
@@ -1056,7 +1050,8 @@ Public Class GBT00004NEWORDER
         '******************************
         'ブレーカー有効期限vsETD1チェック
         '******************************
-        Dim etd1DtmStr As String = Date.ParseExact(Me.txtEtd1.Text, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+        'Dim etd1DtmStr As String = Date.ParseExact(Me.txtEtd1.Text, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+        Dim etd1DtmStr As String = FormatDateYMD(Me.txtEtd1.Text, GBA00003UserSetting.DATEFORMAT)
         Dim brData As BreakerData = DirectCast(ViewState("BRDATA"), BreakerData)
         '発日付がValidityの範囲外の場合エラー
         If etd1DtmStr < brData.BrValidityFrom OrElse etd1DtmStr > brData.BrValidityTo Then
@@ -1166,7 +1161,8 @@ Public Class GBT00004NEWORDER
             If txtObj.Text.Trim = "" Then
                 Continue For
             End If
-            Dim dateString = Date.ParseExact(txtObj.Text, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+            'Dim dateString = Date.ParseExact(txtObj.Text, GBA00003UserSetting.DATEFORMAT, Nothing).ToString("yyyy/MM/dd")
+            Dim dateString = FormatDateYMD(txtObj.Text, GBA00003UserSetting.DATEFORMAT)
             If hasValue = False Then
                 Date.TryParse(dateString, prevFieldtDate)
                 hasValue = True
@@ -1267,15 +1263,26 @@ Public Class GBT00004NEWORDER
             sqlStat.AppendLine("      + '-'")
             sqlStat.AppendLine("      + (SELECT VALUE1")
             sqlStat.AppendLine("           FROM COS0017_FIXVALUE")
-            sqlStat.AppendLine("          WHERE CLASS   = @CLASS")
-            sqlStat.AppendLine("            AND KEYCODE = @KEYCODE)")
+            sqlStat.AppendLine("          WHERE COMPCODE = @COMPCODE")
+            sqlStat.AppendLine("            AND SYSCODE  = @SYSCODE")
+            sqlStat.AppendLine("            AND CLASS    = @CLASS")
+            sqlStat.AppendLine("            AND KEYCODE  = @KEYCODE")
+            sqlStat.AppendLine("            AND STYMD   <= @STYMD")
+            sqlStat.AppendLine("            AND ENDYMD  >= @ENDYMD")
+            sqlStat.AppendLine("            AND DELFLG  <> @DELFLG)")
+
             sqlStat.AppendLine("      + '-'")
             sqlStat.AppendLine("      + right('0000' + trim(convert(char,NEXT VALUE FOR " & C_SQLSEQ.ORDER & ")),4)")
             Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
                 'SQLパラメータ設定
                 With sqlCmd.Parameters
+                    .Add("@COMPCODE", SqlDbType.NVarChar).Value = GBC_COMPCODE_D
+                    .Add("@SYSCODE", SqlDbType.NVarChar).Value = C_SYSCODE_GB
                     .Add("@CLASS", SqlDbType.NVarChar, 20).Value = C_SERVERSEQ
                     .Add("@KEYCODE", SqlDbType.NVarChar, 20).Value = HttpContext.Current.Session("APSRVname")
+                    .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                 End With
 
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -1435,7 +1442,7 @@ Public Class GBT00004NEWORDER
             sqlStat.AppendLine("   AND TRP.BRTYPE     = INF.BRTYPE")
             sqlStat.AppendLine("   AND TRP.USETYPE    = INF.USETYPE")
             sqlStat.AppendLine("   AND TRP.AGENTKBN   = 'Organizer'")
-            sqlStat.AppendLine("   AND TRP.STYMD     <= INF.ENDYMD")
+            sqlStat.AppendLine("   AND TRP.STYMD     <= INF.STYMD")
             sqlStat.AppendLine("   AND TRP.ENDYMD    >= INF.STYMD")
             sqlStat.AppendLine("   AND TRP.DELFLG    <> @DELFLG")
             sqlStat.AppendLine("LEFT JOIN GBM0020_EXRATE EX ")
@@ -1511,7 +1518,7 @@ Public Class GBT00004NEWORDER
             sqlStat.AppendLine("   AND TRP.USETYPE    = INF.USETYPE")
             sqlStat.AppendLine("   AND TRP.AGENTKBN   IN ('POL1','POD1','POL2','POD2')")
             sqlStat.AppendLine("   AND TRP.AGENTKBN   = INF.TYPE")
-            sqlStat.AppendLine("   AND TRP.STYMD     <= INF.ENDYMD")
+            sqlStat.AppendLine("   AND TRP.STYMD     <= INF.STYMD")
             sqlStat.AppendLine("   AND TRP.ENDYMD    >= INF.STYMD")
             sqlStat.AppendLine("   AND TRP.DELFLG    <> @DELFLG")
             sqlStat.AppendLine("   AND EXISTS (SELECT 1 ")
@@ -1520,6 +1527,9 @@ Public Class GBT00004NEWORDER
             sqlStat.AppendLine("                  AND SYSCODE  = @FIXVALSYSCODE")
             sqlStat.AppendLine("                  AND CLASS    = @FIXVALCLASS")
             sqlStat.AppendLine("                  AND KEYCODE  = TRP.COSTCODE")
+            sqlStat.AppendLine("                  AND STYMD   <= INF.STYMD")
+            sqlStat.AppendLine("                  AND ENDYMD  >= INF.STYMD")
+            sqlStat.AppendLine("                  AND DELFLG  <> @DELFLG")
             sqlStat.AppendLine("       )")
             sqlStat.AppendLine("LEFT JOIN GBM0020_EXRATE EX ")
             sqlStat.AppendLine("       ON EX.COMPCODE     = @COMPCODE ")
@@ -1586,25 +1596,9 @@ Public Class GBT00004NEWORDER
                 drM("TRPBILLING") = ""
                 'オーガナイザーレコードの数字項目を埋める
                 If brData IsNot Nothing Then
-                    'drM("AMOUNTBR") = DecimalStringToDecimal(brData.BrTotalCost) + DecimalStringToDecimal(brData.BrCommission)
-                    '仮計上分を考慮
-                    drM("AMOUNTBR") = DecimalStringToDecimal(brData.BrTotalCost) + DecimalStringToDecimal(brData.BrCommission) - DecimalStringToDecimal(brData.BrTotalProvisionalCost)
+                    drM("AMOUNTBR") = DecimalStringToDecimal(brData.BrTotalCost) + DecimalStringToDecimal(brData.BrCommission)
                 End If
                 dtDbResult.Rows.Add(drM)
-                '元受け輸送収入のレコード増幅(仮計上分)
-                If DecimalStringToDecimal(brData.BrTotalProvisionalCost) <> 0 Then
-                    Dim drMp As DataRow = dtDbResult.NewRow
-                    drMp.ItemArray = copyDt.Rows(0).ItemArray
-                    drMp("COSTCODE") = GBC_COSTCODE_PROVISIONAL
-                    drMp("AMOUNTBR") = "0"
-                    drMp("TRPBILLING") = ""
-                    drMp("REMARK") = "Provisional Cost"
-                    'オーガナイザーレコードの数字項目を埋める
-                    If brData IsNot Nothing Then
-                        drMp("AMOUNTBR") = DecimalStringToDecimal(brData.BrTotalProvisionalCost)
-                    End If
-                    dtDbResult.Rows.Add(drMp)
-                End If
                 '↓DISCOUNTRATEのレコード増幅(S0101-02) 20190712
                 If brData.BrAmtDiscount <> "" AndAlso IsNumeric(brData.BrAmtDiscount) AndAlso brData.BrAmtDiscount.Trim <> "0" Then
                     Dim drDiscount As DataRow = dtDbResult.NewRow
@@ -2209,6 +2203,8 @@ Public Class GBT00004NEWORDER
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FV1") 'FIXVAL
         sqlStat.AppendLine("    ON FV1.CLASS       = 'REPORTTEXT'")
         sqlStat.AppendLine("   AND FV1.KEYCODE     = 'BL_DESCGOODS'")
+        sqlStat.AppendLine("   AND FV1.STYMD      <= @STYMD")
+        sqlStat.AppendLine("   AND FV1.ENDYMD     >= @ENTDATE")
         sqlStat.AppendLine("   AND FV1.DELFLG     <> @DELFLG")
 
         sqlStat.AppendLine("  LEFT JOIN GBM0020_EXRATE ER") 'ExRate
@@ -2305,6 +2301,8 @@ Public Class GBT00004NEWORDER
         sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FV2 ")
         sqlStat.AppendLine("    ON FV2.KEYCODE   = BB.TERMTYPE")
         sqlStat.AppendLine("   AND FV2.CLASS     = 'TERM'")
+        sqlStat.AppendLine("   AND FV2.STYMD    <= @STYMD")
+        sqlStat.AppendLine("   AND FV2.ENDYMD   >= @ENTDATE")
         sqlStat.AppendLine("   AND FV2.DELFLG   <> @DELFLG")
 
         sqlStat.AppendLine(" WHERE BI.BRID    = @BRID")
@@ -2402,6 +2400,8 @@ Public Class GBT00004NEWORDER
             sqlStat.AppendLine(" WHERE COMPCODE  = @COMPCODE")
             sqlStat.AppendLine("   AND CLASS7 LIKE '%' + @CLASS7 + '%'")
             sqlStat.AppendLine("   AND (LDKBN = 'B' OR LDKBN = @LDKBN)")
+            sqlStat.AppendLine("   AND STYMD    <= @ENTDATE")
+            sqlStat.AppendLine("   AND ENDYMD   >= @ENTDATE")
             sqlStat.AppendLine("   AND DELFLG   <> @DELFLG")
             Dim retDb As New DataTable
             Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
@@ -2410,6 +2410,7 @@ Public Class GBT00004NEWORDER
                     .Add("@DELFLG", SqlDbType.NVarChar).Value = CONST_FLAG_YES
                     .Add("@CLASS7", SqlDbType.NVarChar).Value = actyNo
                     .Add("@LDKBN", SqlDbType.NVarChar).Value = Right(polPod, 1)
+                    .Add("@ENTDATE", SqlDbType.DateTime).Value = Date.Now
                 End With
                 '取得結果をDataTableに転送
                 Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -3252,11 +3253,6 @@ Public Class GBT00004NEWORDER
         ''' </summary>
         ''' <returns></returns>
         Public Property BrAmtDiscount As String = ""
-        ''' <summary>
-        ''' BR時点仮計上費用合計
-        ''' </summary>
-        ''' <returns></returns>
-        Public Property BrTotalProvisionalCost As String = ""
     End Class
     ''' <summary>
     ''' ブレーカー情報保持

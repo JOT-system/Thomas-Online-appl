@@ -15,6 +15,15 @@
     <link href="~/GB/css/GBT00020AGREEMENT.css" rel="stylesheet" type="text/css" />
     <style>
     </style>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-162522994-1');
+    </script>
     <%--共通利用するJavaScript --%>
     <script src='<%= ResolveUrl("~/script/common.js") %>' type="text/javascript" charset="utf-8"></script>
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
@@ -62,6 +71,8 @@
                                    ['<%= Me.txtEndDateSche.ClientID %>', viewCalId],
                                    ['<%= Me.txtEndDate.ClientID %>',viewCalId],
                                    ['<%= Me.txtDepoIn.ClientID %>',viewDepot], 
+                                   ['<%= Me.txtSegSwStartDate.ClientID %>', viewCalId],
+                                   ['<%= Me.txtSegSwEndDate.ClientID %>', viewCalId],
                                    ['<%= Me.txtAutoExtendKind.ClientID %>',viewAutoExtendKind],
                                    ['<%= Me.txtCurrency.ClientID %>', viewLeaseCurrency],
                                    ['<%= Me.txtLeaseType.ClientID %>', viewLeasePayment],
@@ -403,6 +414,8 @@
                                             <asp:HiddenField ID="hdnListHeaderCancel" runat="server" Value="Cancel" />
                                             <asp:HiddenField ID="hdnListHeaderEndDate" runat="server" Value="End Date" />
                                             <asp:HiddenField ID="hdnListHeaderDepoIn" runat="server" Value="Depo in" />
+                                            <asp:HiddenField ID="hdnListHeaderSegSwStartDate" runat="server" Value="Seg Sw From" />
+                                            <asp:HiddenField ID="hdnListHeaderSegSwEndDate" runat="server" Value="Seg Sw To" />
                                             <asp:HiddenField ID="hdnListHeaderRemarks" runat="server" Value="Remarks" />
                                             <asp:Repeater ID="repTankInfo" runat="server">
                                                 <HeaderTemplate>
@@ -418,6 +431,8 @@
                                                             <th class="dateCol"><%= Me.hdnListHeaderCancel.Value %></th>
                                                             <th class="dateCol"><%= Me.hdnListHeaderEndDate.Value %></th>
                                                             <th class="depoNameCol"><%= Me.hdnListHeaderDepoIn.Value %></th>
+                                                            <th class="dateCol"><%= Me.hdnListHeaderSegSwStartDate.Value %></th>
+                                                            <th class="dateCol"><%= Me.hdnListHeaderSegSwEndDate.Value %></th>
                                                             <th class="remarks"><%= Me.hdnListHeaderRemarks.Value %></th>
                                                             <th class="lineCnt">No.</th>
                                                         </tr>
@@ -435,6 +450,8 @@
                                                         <td title='<%# Eval("CANCELFLG") %>'     ><%# if(Convert.ToString(Eval("CANCELFLG")) = "1", "&#10003;", "") %></td>
                                                         <td title='<%# Eval("LEASEENDYMD") %>'    ><%# BASEDLL.FormatDateContrySettings(Eval("LEASEENDYMD"), OFFICE.GBA00003UserSetting.DATEFORMAT) %></td>
                                                         <td title='<%# Eval("DEPOTINNAME") %>'   ><%# Eval("DEPOTINNAME") %></td>
+                                                        <td title='<%# Eval("SEGSWSTYMD") %>'     ><%# BASEDLL.FormatDateContrySettings(Eval("SEGSWSTYMD"), OFFICE.GBA00003UserSetting.DATEFORMAT) %></td>
+                                                        <td title='<%# Eval("SEGSWENDYMD") %>'     ><%# BASEDLL.FormatDateContrySettings(Eval("SEGSWENDYMD"), OFFICE.GBA00003UserSetting.DATEFORMAT) %></td>
                                                         <td title='<%# Eval("REMARK") %>'   ><%# Eval("REMARK") %></td>
                                                         <td class="lineCnt"><asp:Label ID="lblLineCnt" runat="server" Text='<%# Eval("LINECNT") %>'></asp:Label></td>
                                                     </tr>
@@ -805,6 +822,24 @@
                                 </td>
                                 <td></td>
                             </tr>
+                            <tr>
+                                <th>
+                                    <asp:Label ID="lblSegSwStartDate" runat="server" Text="Seg Switching Date"></asp:Label>
+                                </th>
+                                <td>
+                                    <asp:TextBox ID="txtSegSwStartDate" runat="server"></asp:TextBox>
+                                </td>
+                                <th>
+                                    <asp:Label ID="lblSegSwEndDate" runat="server" Text="～"></asp:Label>
+                                </th>
+                                <td>
+                                    <asp:TextBox ID="txtSegSwEndDate" runat="server"></asp:TextBox>
+                                </td>
+                                <td>
+
+                                </td>
+                            </tr>
+
                         </table>
                     </div>
                 </div>

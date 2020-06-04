@@ -396,16 +396,20 @@ Public Class GBM00021CLIENT
                 & "       BANKCODE                           , " _
                 & "       NAMES1                             , " _
                 & "       NAMES2                             , " _
+                & "       NAMES3                             , " _
                 & "       NAMEL1                             , " _
                 & "       NAMEL2                             , " _
+                & "       NAMEL3                             , " _
                 & "       POSTNUM                            , " _
                 & "       ADDR1                              , " _
                 & "       ADDR2                              , " _
                 & "       ADDR3                              , " _
                 & "       NAMESJP1                           , " _
                 & "       NAMESJP2                           , " _
+                & "       NAMESJP3                           , " _
                 & "       NAMELJP1                           , " _
                 & "       NAMELJP2                           , " _
+                & "       NAMELJP3                           , " _
                 & "       POSTNUMJP                          , " _
                 & "       ADDRJP1                            , " _
                 & "       ADDRJP2                            , " _
@@ -426,16 +430,20 @@ Public Class GBM00021CLIENT
                 & "       isnull(rtrim(BANKCODE),'')                 as BANKCODE , " _
                 & "       isnull(rtrim(NAMES1),'')                   as NAMES1 , " _
                 & "       isnull(rtrim(NAMES2),'')                   as NAMES2 , " _
+                & "       isnull(rtrim(NAMES3),'')                   as NAMES3 , " _
                 & "       isnull(rtrim(NAMEL1),'')                   as NAMEL1 , " _
                 & "       isnull(rtrim(NAMEL2),'')                   as NAMEL2 , " _
+                & "       isnull(rtrim(NAMEL3),'')                   as NAMEL3 , " _
                 & "       isnull(rtrim(POSTNUM),'')                  as POSTNUM , " _
                 & "       isnull(rtrim(ADDR1),'')                    as ADDR1 , " _
                 & "       isnull(rtrim(ADDR2),'')                    as ADDR2 , " _
                 & "       isnull(rtrim(ADDR3),'')                    as ADDR3 , " _
                 & "       isnull(rtrim(NAMESJP1),'')                 as NAMESJP1 , " _
                 & "       isnull(rtrim(NAMESJP2),'')                 as NAMESJP2 , " _
+                & "       isnull(rtrim(NAMESJP3),'')                 as NAMESJP3 , " _
                 & "       isnull(rtrim(NAMELJP1),'')                 as NAMELJP1 , " _
                 & "       isnull(rtrim(NAMELJP2),'')                 as NAMELJP2 , " _
+                & "       isnull(rtrim(NAMELJP3),'')                 as NAMELJP3 , " _
                 & "       isnull(rtrim(POSTNUMJP),'')                as POSTNUMJP , " _
                 & "       isnull(rtrim(ADDRJP1),'')                  as ADDRJP1 , " _
                 & "       isnull(rtrim(ADDRJP2),'')                  as ADDRJP2 , " _
@@ -476,16 +484,20 @@ Public Class GBM00021CLIENT
                 & "       isnull(rtrim(BANKCODE),'')                 as BANKCODE , " _
                 & "       isnull(rtrim(NAMES1),'')                   as NAMES1 , " _
                 & "       isnull(rtrim(NAMES2),'')                   as NAMES2 , " _
+                & "       isnull(rtrim(NAMES3),'')                   as NAMES3 , " _
                 & "       isnull(rtrim(NAMEL1),'')                   as NAMEL1 , " _
                 & "       isnull(rtrim(NAMEL2),'')                   as NAMEL2 , " _
+                & "       isnull(rtrim(NAMEL3),'')                   as NAMEL3 , " _
                 & "       isnull(rtrim(POSTNUM),'')                  as POSTNUM , " _
                 & "       isnull(rtrim(ADDR1),'')                    as ADDR1 , " _
                 & "       isnull(rtrim(ADDR2),'')                    as ADDR2 , " _
                 & "       isnull(rtrim(ADDR3),'')                    as ADDR3 , " _
                 & "       isnull(rtrim(NAMESJP1),'')                 as NAMESJP1 , " _
                 & "       isnull(rtrim(NAMESJP2),'')                 as NAMESJP2 , " _
+                & "       isnull(rtrim(NAMESJP3),'')                 as NAMESJP3 , " _
                 & "       isnull(rtrim(NAMELJP1),'')                 as NAMELJP1 , " _
                 & "       isnull(rtrim(NAMELJP2),'')                 as NAMELJP2 , " _
+                & "       isnull(rtrim(NAMELJP3),'')                 as NAMELJP3 , " _
                 & "       isnull(rtrim(POSTNUMJP),'')                as POSTNUMJP , " _
                 & "       isnull(rtrim(ADDRJP1),'')                  as ADDRJP1 , " _
                 & "       isnull(rtrim(ADDRJP2),'')                  as ADDRJP2 , " _
@@ -852,12 +864,12 @@ Public Class GBM00021CLIENT
                 Dim searchStr As String = ""
                 '検索用文字列（部分一致）
                 If (COA0019Session.LANGDISP = C_LANG.JA) Then
-                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMESJP1"))
+                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMESJP1")).ToUpper
                 Else
-                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMES1"))
+                    searchStr = Convert.ToString(BASEtbl.Rows(i)("NAMES1")).ToUpper
                 End If
 
-                If Not searchStr.Contains(txtNamesEx.Text) Then
+                If Not searchStr.Contains(txtNamesEx.Text.ToUpper) Then
                     BASEtbl.Rows(i)("HIDDEN") = 1
                 End If
             End If
@@ -1154,27 +1166,31 @@ Public Class GBM00021CLIENT
                                  & "        BANKCODE = @P07 , " _
                                  & "        NAMES1 = @P08 , " _
                                  & "        NAMES2 = @P09 , " _
-                                 & "        NAMEL1 = @P10 , " _
-                                 & "        NAMEL2 = @P11 , " _
-                                 & "        POSTNUM = @P12 , " _
-                                 & "        ADDR1 = @P13 , " _
-                                 & "        ADDR2 = @P14 , " _
-                                 & "        ADDR3 = @P15 , " _
-                                 & "        NAMESJP1 = @P16 , " _
-                                 & "        NAMESJP2 = @P17 , " _
-                                 & "        NAMELJP1 = @P18 , " _
-                                 & "        NAMELJP2 = @P19 , " _
-                                 & "        POSTNUMJP = @P20 , " _
-                                 & "        ADDRJP1 = @P21 , " _
-                                 & "        ADDRJP2 = @P22 , " _
-                                 & "        ADDRJP3 = @P23 , " _
-                                 & "        REMARK = @P24 , " _
-                                 & "        DELFLG = @P25 , " _
-                                 & "        INITYMD = @P26 , " _
-                                 & "        UPDYMD = @P27 , " _
-                                 & "        UPDUSER = @P28 , " _
-                                 & "        UPDTERMID = @P29 , " _
-                                 & "        RECEIVEYMD = @P30  " _
+                                 & "        NAMES3 = @P10 , " _
+                                 & "        NAMEL1 = @P11 , " _
+                                 & "        NAMEL2 = @P12 , " _
+                                 & "        NAMEL3 = @P13 , " _
+                                 & "        POSTNUM = @P14 , " _
+                                 & "        ADDR1 = @P15 , " _
+                                 & "        ADDR2 = @P16 , " _
+                                 & "        ADDR3 = @P17 , " _
+                                 & "        NAMESJP1 = @P18 , " _
+                                 & "        NAMESJP2 = @P19 , " _
+                                 & "        NAMESJP3 = @P20 , " _
+                                 & "        NAMELJP1 = @P21 , " _
+                                 & "        NAMELJP2 = @P22 , " _
+                                 & "        NAMELJP3 = @P23 , " _
+                                 & "        POSTNUMJP = @P24 , " _
+                                 & "        ADDRJP1 = @P25 , " _
+                                 & "        ADDRJP2 = @P26 , " _
+                                 & "        ADDRJP3 = @P27 , " _
+                                 & "        REMARK = @P28 , " _
+                                 & "        DELFLG = @P29 , " _
+                                 & "        INITYMD = @P30 , " _
+                                 & "        UPDYMD = @P31 , " _
+                                 & "        UPDUSER = @P32 , " _
+                                 & "        UPDTERMID = @P33 , " _
+                                 & "        RECEIVEYMD = @P34  " _
                                  & "  WHERE COMPCODE = @P02 " _
                                  & "    AND TORIKBN = @P03 " _
                                  & "    AND TORICODE = @P04 " _
@@ -1193,16 +1209,20 @@ Public Class GBM00021CLIENT
                                  & "        BANKCODE , " _
                                  & "        NAMES1 , " _
                                  & "        NAMES2 , " _
+                                 & "        NAMES3 , " _
                                  & "        NAMEL1 , " _
                                  & "        NAMEL2 , " _
+                                 & "        NAMEL3 , " _
                                  & "        POSTNUM , " _
                                  & "        ADDR1 , " _
                                  & "        ADDR2 , " _
                                  & "        ADDR3 , " _
                                  & "        NAMESJP1 , " _
                                  & "        NAMESJP2 , " _
+                                 & "        NAMESJP3 , " _
                                  & "        NAMELJP1 , " _
                                  & "        NAMELJP2 , " _
+                                 & "        NAMELJP3 , " _
                                  & "        POSTNUMJP , " _
                                  & "        ADDRJP1 , " _
                                  & "        ADDRJP2 , " _
@@ -1220,7 +1240,8 @@ Public Class GBM00021CLIENT
                         End If
                         SQLStr = SQLStr & "         @P02,@P03,@P04,@P05,@P06,@P07,@P08,@P09,@P10, " _
                                  & "           @P11,@P12,@P13,@P14,@P15,@P16,@P17,@P18,@P19,@P20, " _
-                                 & "           @P21,@P22,@P23,@P24,@P25,@P26,@P27,@P28,@P29,@P30); " _
+                                 & "           @P21,@P22,@P23,@P24,@P25,@P26,@P27,@P28,@P29,@P30, " _
+                                 & "           @P31,@P32,@P33,@P34); " _
                                  & " CLOSE timestamp ; " _
                                  & " DEALLOCATE timestamp ; "
 
@@ -1235,27 +1256,31 @@ Public Class GBM00021CLIENT
                             .Add("@P07", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("BANKCODE")
                             .Add("@P08", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMES1")
                             .Add("@P09", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMES2")
-                            .Add("@P10", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMEL1")
-                            .Add("@P11", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMEL2")
-                            .Add("@P12", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("POSTNUM")
-                            .Add("@P13", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDR1")
-                            .Add("@P14", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDR2")
-                            .Add("@P15", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDR3")
-                            .Add("@P16", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMESJP1")
-                            .Add("@P17", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMESJP2")
-                            .Add("@P18", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMELJP1")
-                            .Add("@P19", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMELJP2")
-                            .Add("@P20", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("POSTNUMJP")
-                            .Add("@P21", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDRJP1")
-                            .Add("@P22", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDRJP2")
-                            .Add("@P23", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDRJP3")
-                            .Add("@P24", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("REMARK")
-                            .Add("@P25", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("DELFLG")
-                            .Add("@P26", System.Data.SqlDbType.DateTime).Value = nowDate
-                            .Add("@P27", System.Data.SqlDbType.DateTime).Value = nowDate
-                            .Add("@P28", System.Data.SqlDbType.NVarChar).Value = COA0019Session.USERID
-                            .Add("@P29", System.Data.SqlDbType.NVarChar).Value = HttpContext.Current.Session("APSRVname")
-                            .Add("@P30", System.Data.SqlDbType.DateTime).Value = CONST_DEFAULT_RECEIVEYMD
+                            .Add("@P10", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMES3")
+                            .Add("@P11", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMEL1")
+                            .Add("@P12", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMEL2")
+                            .Add("@P13", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMEL3")
+                            .Add("@P14", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("POSTNUM")
+                            .Add("@P15", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDR1")
+                            .Add("@P16", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDR2")
+                            .Add("@P17", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDR3")
+                            .Add("@P18", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMESJP1")
+                            .Add("@P19", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMESJP2")
+                            .Add("@P20", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMESJP3")
+                            .Add("@P21", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMELJP1")
+                            .Add("@P22", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMELJP2")
+                            .Add("@P23", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("NAMELJP3")
+                            .Add("@P24", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("POSTNUMJP")
+                            .Add("@P25", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDRJP1")
+                            .Add("@P26", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDRJP2")
+                            .Add("@P27", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("ADDRJP3")
+                            .Add("@P28", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("REMARK")
+                            .Add("@P29", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("DELFLG")
+                            .Add("@P30", System.Data.SqlDbType.DateTime).Value = nowDate
+                            .Add("@P31", System.Data.SqlDbType.DateTime).Value = nowDate
+                            .Add("@P32", System.Data.SqlDbType.NVarChar).Value = COA0019Session.USERID
+                            .Add("@P33", System.Data.SqlDbType.NVarChar).Value = HttpContext.Current.Session("APSRVname")
+                            .Add("@P34", System.Data.SqlDbType.DateTime).Value = CONST_DEFAULT_RECEIVEYMD
 
                         End With
                         SQLcmd.ExecuteNonQuery()
@@ -2097,10 +2122,14 @@ Public Class GBM00021CLIENT
         table.Columns("NAMES1").DefaultValue = ""
         table.Columns.Add("NAMES2", GetType(String))
         table.Columns("NAMES2").DefaultValue = ""
+        table.Columns.Add("NAMES3", GetType(String))
+        table.Columns("NAMES3").DefaultValue = ""
         table.Columns.Add("NAMEL1", GetType(String))
         table.Columns("NAMEL1").DefaultValue = ""
         table.Columns.Add("NAMEL2", GetType(String))
         table.Columns("NAMEL2").DefaultValue = ""
+        table.Columns.Add("NAMEL3", GetType(String))
+        table.Columns("NAMEL3").DefaultValue = ""
         table.Columns.Add("POSTNUM", GetType(String))
         table.Columns("POSTNUM").DefaultValue = ""
         table.Columns.Add("ADDR1", GetType(String))
@@ -2113,10 +2142,14 @@ Public Class GBM00021CLIENT
         table.Columns("NAMESJP1").DefaultValue = ""
         table.Columns.Add("NAMESJP2", GetType(String))
         table.Columns("NAMESJP2").DefaultValue = ""
+        table.Columns.Add("NAMESJP3", GetType(String))
+        table.Columns("NAMESJP3").DefaultValue = ""
         table.Columns.Add("NAMELJP1", GetType(String))
         table.Columns("NAMELJP1").DefaultValue = ""
         table.Columns.Add("NAMELJP2", GetType(String))
         table.Columns("NAMELJP2").DefaultValue = ""
+        table.Columns.Add("NAMELJP3", GetType(String))
+        table.Columns("NAMELJP3").DefaultValue = ""
         table.Columns.Add("POSTNUMJP", GetType(String))
         table.Columns("POSTNUMJP").DefaultValue = ""
         table.Columns.Add("ADDRJP1", GetType(String))
@@ -2172,16 +2205,20 @@ Public Class GBM00021CLIENT
         workRow("BANKCODE") = ""
         workRow("NAMES1") = ""
         workRow("NAMES2") = ""
+        workRow("NAMES3") = ""
         workRow("NAMEL1") = ""
         workRow("NAMEL2") = ""
+        workRow("NAMEL3") = ""
         workRow("POSTNUM") = ""
         workRow("ADDR1") = ""
         workRow("ADDR2") = ""
         workRow("ADDR3") = ""
         workRow("NAMESJP1") = ""
         workRow("NAMESJP2") = ""
+        workRow("NAMESJP3") = ""
         workRow("NAMELJP1") = ""
         workRow("NAMELJP2") = ""
+        workRow("NAMELJP3") = ""
         workRow("POSTNUMJP") = ""
         workRow("ADDRJP1") = ""
         workRow("ADDRJP2") = ""
@@ -2245,16 +2282,20 @@ Public Class GBM00021CLIENT
             workRow("BANKCODE") = ""
             workRow("NAMES1") = ""
             workRow("NAMES2") = ""
+            workRow("NAMES3") = ""
             workRow("NAMEL1") = ""
             workRow("NAMEL2") = ""
+            workRow("NAMEL3") = ""
             workRow("POSTNUM") = ""
             workRow("ADDR1") = ""
             workRow("ADDR2") = ""
             workRow("ADDR3") = ""
             workRow("NAMESJP1") = ""
             workRow("NAMESJP2") = ""
+            workRow("NAMESJP3") = ""
             workRow("NAMELJP1") = ""
             workRow("NAMELJP2") = ""
+            workRow("NAMELJP3") = ""
             workRow("POSTNUMJP") = ""
             workRow("ADDRJP1") = ""
             workRow("ADDRJP2") = ""
@@ -3081,9 +3122,9 @@ Public Class GBM00021CLIENT
             End Select
         Next
         Dim compareUpdTargetFieldList = CommonFunctions.CreateCompareFieldList({"COMPCODE", "TORIKBN", "TORICODE", "STYMD"})
-        Dim compareModCheckFieldList = CommonFunctions.CreateCompareFieldList({"ENDYMD", "BANKCODE", "NAMES1", "NAMES2", "NAMEL1", "NAMEL2",
+        Dim compareModCheckFieldList = CommonFunctions.CreateCompareFieldList({"ENDYMD", "BANKCODE", "NAMES1", "NAMES2", "NAMES3", "NAMEL1", "NAMEL2", "NAMEL3",
                                                                                "POSTNUM", "ADDR1", "ADDR2", "ADDR2",
-                                                                               "NAMESJP1", "NAMESJP2", "NAMELJP1", "NAMELJP2",
+                                                                               "NAMESJP1", "NAMESJP2", "NAMESJP3", "NAMELJP1", "NAMELJP2", "NAMELJP3",
                                                                                "POSTNUMJP", "ADDRJP1", "ADDRJP2", "ADDRJP3",
                                                                                "REMARK", "DELFLG"})
 
@@ -3222,16 +3263,20 @@ Public Class GBM00021CLIENT
                         workBaseRow("BANKCODE") = drInput("BANKCODE")
                         workBaseRow("NAMES1") = drInput("NAMES1")
                         workBaseRow("NAMES2") = drInput("NAMES2")
+                        workBaseRow("NAMES3") = drInput("NAMES3")
                         workBaseRow("NAMEL1") = drInput("NAMEL1")
                         workBaseRow("NAMEL2") = drInput("NAMEL2")
+                        workBaseRow("NAMEL3") = drInput("NAMEL3")
                         workBaseRow("POSTNUM") = drInput("POSTNUM")
                         workBaseRow("ADDR1") = drInput("ADDR1")
                         workBaseRow("ADDR2") = drInput("ADDR2")
                         workBaseRow("ADDR3") = drInput("ADDR3")
                         workBaseRow("NAMESJP1") = drInput("NAMESJP1")
                         workBaseRow("NAMESJP2") = drInput("NAMESJP2")
+                        workBaseRow("NAMESJP3") = drInput("NAMESJP3")
                         workBaseRow("NAMELJP1") = drInput("NAMELJP1")
                         workBaseRow("NAMELJP2") = drInput("NAMELJP2")
+                        workBaseRow("NAMELJP3") = drInput("NAMELJP3")
                         workBaseRow("POSTNUMJP") = drInput("POSTNUMJP")
                         workBaseRow("ADDRJP1") = drInput("ADDRJP1")
                         workBaseRow("ADDRJP2") = drInput("ADDRJP2")
