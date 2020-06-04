@@ -441,7 +441,7 @@ Public Class GBM00020EXRATE
                 & "          CT.COUNTRYCODE   as COUNTRYCODE , " _
                 & "          CT.CURRENCYCODE  as CURRENCYCODE , " _
                 & "          DATEADD(dd, 1, EOMONTH (getdate() , -1)) as TARGETYM , " _
-                & "          CT.STYMD         as STYMD , " _
+                & "          DATEADD(dd, 1, EOMONTH (getdate() , -1)) as STYMD , " _
                 & "          CT.ENDYMD        as ENDYMD , " _
                 & "          ''               as EXRATE , " _
                 & "          ''               as REMARK , " _
@@ -479,7 +479,7 @@ Public Class GBM00020EXRATE
                 & "          CT.COUNTRYCODE   as COUNTRYCODE , " _
                 & "          CT.CURRENCYCODE  as CURRENCYCODE , " _
                 & "          DATEADD(dd, 1, EOMONTH (getdate() , 0)) as TARGETYM , " _
-                & "          CT.STYMD         as STYMD , " _
+                & "          DATEADD(dd, 1, EOMONTH (getdate() , 0)) as STYMD , " _
                 & "          CT.ENDYMD        as ENDYMD , " _
                 & "          ''               as EXRATE , " _
                 & "          ''               as REMARK , " _
@@ -867,7 +867,7 @@ Public Class GBM00020EXRATE
             '国コード　完全一致
             If (Convert.ToString(BASEtbl.Rows(i)("HIDDEN")) = "0") AndAlso (txtCountryCodeEx.Text <> "") Then
                 Dim searchStr As String = Convert.ToString(BASEtbl.Rows(i)("COUNTRYCODE"))
-                If Not txtCountryCodeEx.Text = searchStr Then
+                If Not txtCountryCodeEx.Text.ToUpper = searchStr.ToUpper Then
                     BASEtbl.Rows(i)("HIDDEN") = 1
                 End If
             End If
