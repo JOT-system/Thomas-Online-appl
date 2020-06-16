@@ -10,10 +10,16 @@ Public Class GBT00001NEWBREAKER
     ''' VIEWSTATE名 選択輸送パターンの発着情報を保持
     ''' </summary>
     Private Const CONST_VS_POLPODCNT As String = "POLPODCNT"
+    Private Const CONST_VS_NAME_GBT00002RV As String = "GBT00002RValues"
     ''' <summary>
     ''' ログ出力(クラススコープ ロード時にNewします)
     ''' </summary>
     Private COA0003LogFile As COA0003LogFile
+    ''' <summary>
+    ''' ブレーカー検索結果画面情報
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property GBT00002RValues As GBT00002RESULT.GBT00002RValues
     ''' <summary>
     ''' ページロード時処理
     ''' </summary>
@@ -63,6 +69,7 @@ Public Class GBT00001NEWBREAKER
             'ポストバック時
             '**********************************************
             If IsPostBack Then
+                Me.GBT00002RValues = DirectCast(ViewState(CONST_VS_NAME_GBT00002RV), GBT00002RESULT.GBT00002RValues)
                 '**********************
                 ' テキストボックス変更判定
                 '**********************
@@ -1201,6 +1208,8 @@ Public Class GBT00001NEWBREAKER
         If TypeOf Page.PreviousPage Is GBT00002RESULT Then
             '検索画面の場合
             Dim prevObj As GBT00002RESULT = DirectCast(Page.PreviousPage, GBT00002RESULT)
+            Me.GBT00002RValues = prevObj.ThisScreenValues
+            ViewState(CONST_VS_NAME_GBT00002RV) = prevObj.ThisScreenValues
             Dim dicObjs As New Dictionary(Of String, HiddenField) From {{"hdnStYMD", Me.hdnStYMD},
                                                                         {"hdnEndYMD", Me.hdnEndYMD},
                                                                         {"hdnShipper", Me.hdnShipper},

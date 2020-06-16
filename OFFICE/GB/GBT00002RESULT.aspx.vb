@@ -21,6 +21,12 @@ Public Class GBT00002RESULT
     ''' </summary>
     Private COA0003LogFile As COA0003LogFile
     ''' <summary>
+    ''' 当画面情報保持
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property ThisScreenValues As GBT00002RESULT.GBT00002RValues
+
+    ''' <summary>
     ''' ページロード時処理
     ''' </summary>
     ''' <param name="sender"></param>
@@ -101,6 +107,8 @@ Public Class GBT00002RESULT
 
                     End If
 
+                    '■■■ 絞り込み ■■■
+                    SetnExtractDt(dt)
                     'グリッド用データをファイルに退避
                     With Nothing
                         Dim COA0021ListTable As New COA0021ListTable
@@ -1741,6 +1749,19 @@ Public Class GBT00002RESULT
         If COA0021ListTable.ERR <> C_MESSAGENO.NORMAL Then
             Return COA0021ListTable.ERR
         End If
+
+        '絞り込み条件保持
+        Me.ThisScreenValues = New GBT00002RValues
+        Me.ThisScreenValues.SearchShipper = Me.txtShipper.Text
+        Me.ThisScreenValues.SearchConsignee = Me.txtConsignee.Text
+        Me.ThisScreenValues.SearchProduct = Me.txtProduct.Text
+        Me.ThisScreenValues.SearchPOLCountry = Me.txtPOLCountry.Text
+        Me.ThisScreenValues.SearchPOL = Me.txtPOL.Text
+        Me.ThisScreenValues.SearchPODCountry = Me.txtPODCountry.Text
+        Me.ThisScreenValues.SearchPOD = Me.txtPOD.Text
+        Me.ThisScreenValues.SearchBreakerID = Me.txtBreaker.Text
+        Me.ThisScreenValues.SearchStatus = Me.txtApproval.Text
+
         Return C_MESSAGENO.NORMAL
     End Function
     ''' <summary>
@@ -2541,6 +2562,60 @@ Public Class GBT00002RESULT
             Return
         End If
 
+        '絞り込み処理を外だし
+        SetnExtractDt(dt)
+        ''フィルタでの絞り込みを利用するか確認
+        'Dim isFillterOff As Boolean = True
+        'If Me.txtBreaker.Text.Trim <> "" OrElse Me.txtPOL.Text.Trim <> "" OrElse
+        '        Me.txtPOD.Text.Trim <> "" OrElse Me.txtProduct.Text.Trim <> "" OrElse
+        '        Me.txtPOLCountry.Text.Trim <> "" OrElse Me.txtPODCountry.Text.Trim <> "" OrElse
+        '        Me.txtShipper.Text.Trim <> "" OrElse Me.txtConsignee.Text.Trim <> "" OrElse
+        '        Me.txtApproval.Text.Trim <> "" Then
+        '    isFillterOff = False
+        'End If
+
+        'For Each dr As DataRow In dt.Rows
+        '    dr.Item("HIDDEN") = 0 '一旦表示 HIDDENフィールドに0
+        '    'フィルタ使用時の場合
+        '    If isFillterOff = False Then
+        '        '条件に合致しない場合は非表示 HIDDENフィールドに1を立てる
+        '        If Not ((Me.txtBreaker.Text.Trim = "" OrElse Convert.ToString(dr("BRID")).ToUpper.StartsWith(Me.txtBreaker.Text.Trim.ToUpper)) _
+        '          AndAlso (Me.txtPOLCountry.Text.Trim = "" OrElse Convert.ToString(dr("POLCOUNTRY")).Trim.ToUpper.Equals(Me.txtPOLCountry.Text.Trim.ToUpper)) _
+        '          AndAlso (Me.txtPOL.Text.Trim = "" OrElse Convert.ToString(dr("POL")).Trim.ToUpper.Equals(Me.txtPOL.Text.Trim.ToUpper)) _
+        '          AndAlso (Me.txtPODCountry.Text.Trim = "" OrElse Convert.ToString(dr("PODCOUNTRY")).Trim.ToUpper.Equals(Me.txtPODCountry.Text.Trim.ToUpper)) _
+        '          AndAlso (Me.txtPOD.Text.Trim = "" OrElse Convert.ToString(dr("POD")).Trim.ToUpper.Equals(Me.txtPOD.Text.Trim.ToUpper)) _
+        '          AndAlso (Me.txtShipper.Text.Trim = "" OrElse (Me.lblShipperText.Text.Trim <> "" AndAlso Convert.ToString(dr("SHIPPER")).Trim.ToUpper.Equals(Me.lblShipperText.Text.Trim.ToUpper))) _
+        '          AndAlso (Me.txtConsignee.Text.Trim = "" OrElse (Me.lblConsigneeText.Text.Trim <> "" AndAlso Convert.ToString(dr("CONSIGNEE")).Trim.ToUpper.Equals(Me.lblConsigneeText.Text.Trim.ToUpper))) _
+        '          AndAlso (Me.txtProduct.Text.Trim = "" OrElse (Me.lblProductText.Text.Trim <> "" AndAlso Convert.ToString(dr("PRODUCTCODE")).Trim.ToUpper.Equals(Me.lblProductText.Text.Trim.ToUpper))) _
+        '          AndAlso (Me.txtApproval.Text.Trim = "" OrElse Convert.ToString(dr("STATUSIF")).Trim.ToUpper.Equals(Me.txtApproval.Text.Trim.ToUpper))
+        '        ) Then
+        '            dr.Item("HIDDEN") = 1
+        '        End If
+        '    End If
+        'Next
+        '画面先頭を表示
+        hdnListPosition.Value = "1"
+
+        '一覧表示データ保存
+        COA0021ListTable.FILEdir = hdnXMLsaveFile.Value
+        COA0021ListTable.TBLDATA = dt
+        COA0021ListTable.COA0021saveListTable()
+        If COA0021ListTable.ERR <> C_MESSAGENO.NORMAL Then
+            CommonFunctions.ShowMessage(COA0021ListTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+        Else
+            'メッセージ表示
+            CommonFunctions.ShowMessage(C_MESSAGENO.NORMALEXTRUCT, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
+        End If
+
+        'カーソル設定
+        Me.txtShipper.Focus()
+
+    End Sub
+    ''' <summary>
+    ''' 絞り込みDataTable更新
+    ''' </summary>
+    Private Sub SetnExtractDt(dt As DataTable)
+
         'フィルタでの絞り込みを利用するか確認
         Dim isFillterOff As Boolean = True
         If Me.txtBreaker.Text.Trim <> "" OrElse Me.txtPOL.Text.Trim <> "" OrElse
@@ -2570,22 +2645,6 @@ Public Class GBT00002RESULT
                 End If
             End If
         Next
-        '画面先頭を表示
-        hdnListPosition.Value = "1"
-
-        '一覧表示データ保存
-        COA0021ListTable.FILEdir = hdnXMLsaveFile.Value
-        COA0021ListTable.TBLDATA = dt
-        COA0021ListTable.COA0021saveListTable()
-        If COA0021ListTable.ERR <> C_MESSAGENO.NORMAL Then
-            CommonFunctions.ShowMessage(COA0021ListTable.ERR, Me.lblFooterMessage, pageObject:=Me)
-        Else
-            'メッセージ表示
-            CommonFunctions.ShowMessage(C_MESSAGENO.NORMALEXTRUCT, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
-        End If
-
-        'カーソル設定
-        Me.txtShipper.Focus()
 
     End Sub
     ''' <summary>
@@ -2640,6 +2699,17 @@ Public Class GBT00002RESULT
                     item.Value.Value = tmphdn.Value
                 End If
             Next
+            '絞り込み条件
+            Me.txtShipper.Text = prevObj.GBT00002RValues.SearchShipper
+            Me.txtConsignee.Text = prevObj.GBT00002RValues.SearchConsignee
+            Me.txtProduct.Text = prevObj.GBT00002RValues.SearchProduct
+            Me.txtPOLCountry.Text = prevObj.GBT00002RValues.SearchPOLCountry
+            Me.txtPOL.Text = prevObj.GBT00002RValues.SearchConsignee
+            Me.txtPODCountry.Text = prevObj.GBT00002RValues.SearchPODCountry
+            Me.txtPOD.Text = prevObj.GBT00002RValues.SearchPOD
+            Me.txtBreaker.Text = prevObj.GBT00002RValues.SearchBreakerID
+            Me.txtApproval.Text = prevObj.GBT00002RValues.SearchStatus
+
         ElseIf TypeOf Page.PreviousPage Is GBT00001BREAKER Then
             '単票画面の場合
             Dim prevObj As GBT00001BREAKER = DirectCast(Page.PreviousPage, GBT00001BREAKER)
@@ -2667,6 +2737,16 @@ Public Class GBT00002RESULT
                 Dim tmphdn As HiddenField = DirectCast(tmpXMLFile, HiddenField)
                 Me.hdnXMLsaveFileRet.Value = tmphdn.Value
             End If
+            '絞り込み条件
+            Me.txtShipper.Text = prevObj.GBT00002RValues.SearchShipper
+            Me.txtConsignee.Text = prevObj.GBT00002RValues.SearchConsignee
+            Me.txtProduct.Text = prevObj.GBT00002RValues.SearchProduct
+            Me.txtPOLCountry.Text = prevObj.GBT00002RValues.SearchPOLCountry
+            Me.txtPOL.Text = prevObj.GBT00002RValues.SearchConsignee
+            Me.txtPODCountry.Text = prevObj.GBT00002RValues.SearchPODCountry
+            Me.txtPOD.Text = prevObj.GBT00002RValues.SearchPOD
+            Me.txtBreaker.Text = prevObj.GBT00002RValues.SearchBreakerID
+            Me.txtApproval.Text = prevObj.GBT00002RValues.SearchStatus
 
         ElseIf TypeOf Page.PreviousPage Is GBT00002RESULT Then
             '同画面の場合
@@ -2696,7 +2776,28 @@ Public Class GBT00002RESULT
                 Me.hdnMsgId.Value = tmphdn.Value
             End If
 
+            '絞り込み条件
+            Me.txtShipper.Text = prevObj.ThisScreenValues.SearchShipper
+            Me.txtConsignee.Text = prevObj.ThisScreenValues.SearchConsignee
+            Me.txtProduct.Text = prevObj.ThisScreenValues.SearchProduct
+            Me.txtPOLCountry.Text = prevObj.ThisScreenValues.SearchPOLCountry
+            Me.txtPOL.Text = prevObj.ThisScreenValues.SearchConsignee
+            Me.txtPODCountry.Text = prevObj.ThisScreenValues.SearchPODCountry
+            Me.txtPOD.Text = prevObj.ThisScreenValues.SearchPOD
+            Me.txtBreaker.Text = prevObj.ThisScreenValues.SearchBreakerID
+            Me.txtApproval.Text = prevObj.ThisScreenValues.SearchStatus
+
         End If
+        '絞り込み条件名称更新
+        txtShipper_Change()
+        txtConsignee_Change()
+        txtProduct_Change()
+        txtPOLCountry_Change()
+        txtPOL_Change()
+        txtPODCountry_Change()
+        txtPOD_Change()
+        txtApproval_Change()
+
     End Sub
 
     ''' <summary>
@@ -3275,4 +3376,56 @@ Public Class GBT00002RESULT
         End If
     End Function
 
+    ''' <summary>
+    ''' 当画面情報保持クラス
+    ''' </summary>
+    <Serializable>
+    Public Class GBT00002RValues
+        ''' <summary>
+        ''' 絞り込み条件(Shipper)
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property SearchShipper As String = ""
+        ''' <summary>
+        ''' 絞り込み条件(Consignee)
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property SearchConsignee As String = ""
+        ''' <summary>
+        ''' 絞り込み条件(Consignee)
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property SearchProduct As String = ""
+        ''' <summary>
+        ''' 絞り込み条件(POLCountry)
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property SearchPOLCountry As String = ""
+        ''' <summary>
+        ''' 絞り込み条件(POL)
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property SearchPOL As String = ""
+        ''' <summary>
+        ''' 絞り込み条件(PODCountry)
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property SearchPODCountry As String = ""
+        ''' <summary>
+        ''' 絞り込み条件(POD)
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property SearchPOD As String = ""
+        ''' <summary>
+        ''' 絞り込み条件(Breaker ID)
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property SearchBreakerID As String = ""
+        ''' <summary>
+        ''' 絞り込み条件(Status)
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property SearchStatus As String = ""
+
+    End Class
 End Class

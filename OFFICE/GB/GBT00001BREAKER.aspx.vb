@@ -16,10 +16,19 @@ Public Class GBT00001BREAKER
     Private Const CONST_VS_CHANGE_PORTCODE As String = "CHANGE_PORTCODE"
     Private Const CONST_VS_CHANGE_PORTTEXTID As String = "CHANGE_PORTTEXTID"
     Private PreProcType As String = ""
+    'VIEWSTATE名
+    Private Const CONST_VS_NAME_GBT00002RV As String = "GBT00002RValues"
+
     ''' <summary>
     ''' ログ出力(クラススコープ ロード時にNewします)
     ''' </summary>
     Private COA0003LogFile As COA0003LogFile
+
+    ''' <summary>
+    ''' ブレーカー検索結果画面情報
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property GBT00002RValues As GBT00002RESULT.GBT00002RValues
     ''' <summary>
     ''' ページロード時処理
     ''' </summary>
@@ -151,6 +160,7 @@ Public Class GBT00001BREAKER
             'ポストバック時
             '**********************************************
             If IsPostBack Then
+                Me.GBT00002RValues = DirectCast(ViewState(CONST_VS_NAME_GBT00002RV), GBT00002RESULT.GBT00002RValues)
                 '**********************
                 ' テキストボックス変更判定
                 '**********************
@@ -2946,6 +2956,8 @@ Public Class GBT00001BREAKER
             '一覧からの遷移
             Dim brNo As String = ""
             Dim prevPage As GBT00002RESULT = DirectCast(Page.PreviousPage, GBT00002RESULT)
+            Me.GBT00002RValues = prevPage.ThisScreenValues
+            ViewState(CONST_VS_NAME_GBT00002RV) = prevPage.ThisScreenValues
             Dim hdnBrIdObj As HiddenField = Nothing
             hdnBrIdObj = DirectCast(prevPage.FindControl("hdnSelectedBrId"), HiddenField)
 
