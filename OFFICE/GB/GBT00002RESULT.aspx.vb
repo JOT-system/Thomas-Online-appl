@@ -2704,7 +2704,7 @@ Public Class GBT00002RESULT
             Me.txtConsignee.Text = prevObj.GBT00002RValues.SearchConsignee
             Me.txtProduct.Text = prevObj.GBT00002RValues.SearchProduct
             Me.txtPOLCountry.Text = prevObj.GBT00002RValues.SearchPOLCountry
-            Me.txtPOL.Text = prevObj.GBT00002RValues.SearchConsignee
+            Me.txtPOL.Text = prevObj.GBT00002RValues.SearchPOL
             Me.txtPODCountry.Text = prevObj.GBT00002RValues.SearchPODCountry
             Me.txtPOD.Text = prevObj.GBT00002RValues.SearchPOD
             Me.txtBreaker.Text = prevObj.GBT00002RValues.SearchBreakerID
@@ -2742,7 +2742,7 @@ Public Class GBT00002RESULT
             Me.txtConsignee.Text = prevObj.GBT00002RValues.SearchConsignee
             Me.txtProduct.Text = prevObj.GBT00002RValues.SearchProduct
             Me.txtPOLCountry.Text = prevObj.GBT00002RValues.SearchPOLCountry
-            Me.txtPOL.Text = prevObj.GBT00002RValues.SearchConsignee
+            Me.txtPOL.Text = prevObj.GBT00002RValues.SearchPOL
             Me.txtPODCountry.Text = prevObj.GBT00002RValues.SearchPODCountry
             Me.txtPOD.Text = prevObj.GBT00002RValues.SearchPOD
             Me.txtBreaker.Text = prevObj.GBT00002RValues.SearchBreakerID
@@ -2781,7 +2781,7 @@ Public Class GBT00002RESULT
             Me.txtConsignee.Text = prevObj.ThisScreenValues.SearchConsignee
             Me.txtProduct.Text = prevObj.ThisScreenValues.SearchProduct
             Me.txtPOLCountry.Text = prevObj.ThisScreenValues.SearchPOLCountry
-            Me.txtPOL.Text = prevObj.ThisScreenValues.SearchConsignee
+            Me.txtPOL.Text = prevObj.ThisScreenValues.SearchPOL
             Me.txtPODCountry.Text = prevObj.ThisScreenValues.SearchPODCountry
             Me.txtPOD.Text = prevObj.ThisScreenValues.SearchPOD
             Me.txtBreaker.Text = prevObj.ThisScreenValues.SearchBreakerID
