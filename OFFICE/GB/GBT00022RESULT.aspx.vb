@@ -406,6 +406,7 @@ Public Class GBT00022RESULT
         sqlStat.AppendLine("      ,bi.BRID AS BRID")
         sqlStat.AppendLine("      ,bb.TANKNO AS TANKNO")
         sqlStat.AppendLine("      ,bb.LASTORDERNO AS LASTORDERNO")
+        sqlStat.AppendLine("      ,ob.ORDERNO AS ORDERNO")
         'sqlStat.AppendLine("      ,ov.CONTRACTORFIX AS CONTRACTOR")
         sqlStat.AppendLine("      ,ov.COUNTRYCODE AS COUNTRYCODE")
         sqlStat.AppendLine("      ,ISNULL(ct.NAMES,'') AS COUNTRY")

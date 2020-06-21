@@ -3199,15 +3199,17 @@ Public Class GBT00004ORDER
         '*タンク充填状況及び例外的な顧客名取得 JOIN END
 
         '*速度改善
-        sqlStat.AppendLine("      LEFT JOIN ( ")
-        sqlStat.AppendLine("      SELECT DISTINCT ORDERNO ")
-        sqlStat.AppendLine("      FROM   GBT0005_ODR_VALUE ODVALETA ")
-        sqlStat.AppendLine("      WHERE ODVALETA.ACTIONID in " & etaActy & " ")
-        sqlStat.AppendLine("       AND ODVALETA.DELFLG   <> @DELFLG ")
-        sqlStat.AppendLine("       AND ((ODVALETA.SCHEDELDATE BETWEEN @ETAST AND @ETAEND) ")
-        sqlStat.AppendLine("       OR   (ODVALETA.SCHEDELDATE = '1900/01/01' and ODVALETA.SCHEDELDATEBR BETWEEN @ETAST AND @ETAEND))")
-        sqlStat.AppendLine("      ) ODVALETA_W ")
-        sqlStat.AppendLine("      ON ODVALETA_W.ORDERNO   = VL.ORDERNO ")
+        If Me.hdnETAStYMD.Value <> "" Then
+            sqlStat.AppendLine("      LEFT JOIN ( ")
+            sqlStat.AppendLine("      SELECT DISTINCT ORDERNO ")
+            sqlStat.AppendLine("      FROM   GBT0005_ODR_VALUE ODVALETA ")
+            sqlStat.AppendLine("      WHERE ODVALETA.ACTIONID in " & etaActy & " ")
+            sqlStat.AppendLine("       AND ODVALETA.DELFLG   <> @DELFLG ")
+            sqlStat.AppendLine("       AND ((ODVALETA.SCHEDELDATE BETWEEN @ETAST AND @ETAEND) ")
+            sqlStat.AppendLine("       OR   (ODVALETA.SCHEDELDATE = '1900/01/01' and ODVALETA.SCHEDELDATEBR BETWEEN @ETAST AND @ETAEND))")
+            sqlStat.AppendLine("      ) ODVALETA_W ")
+            sqlStat.AppendLine("      ON ODVALETA_W.ORDERNO   = VL.ORDERNO ")
+        End If
         '
 
         sqlStat.AppendLine(" WHERE VL.DTLPOLPOD <> @DTLPOLPOD")

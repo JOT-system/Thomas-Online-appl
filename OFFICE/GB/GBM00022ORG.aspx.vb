@@ -1709,6 +1709,25 @@ Public Class GBM00022ORG
                             txtobj.Focus()
                         End If
                     End If
+                Case Me.vLeftOrgLevel.ID 'アクティブなビューが組織レベル
+                    '組織レベル選択時
+                    targetObject = FindControl(Me.hdnTextDbClickField.Value)
+                    If targetObject IsNot Nothing Then
+                        Dim txtobj As TextBox = DirectCast(targetObject, TextBox)
+                        If Me.lbOrgLevel.SelectedItem IsNot Nothing Then
+                            txtobj.Text = Me.lbOrgLevel.SelectedItem.Value
+                            If Me.hdnTextDbClickField.Value = "txtOrgLevel" Then
+                                Me.lblOrgLevelText.Text = Me.lbOrgLevel.SelectedItem.Text
+                            End If
+                            txtobj.Focus()
+                        Else
+                            txtobj.Text = ""
+                            If Me.hdnTextDbClickField.Value = "txtOrgLevel" Then
+                                Me.lblOrgLevelText.Text = ""
+                            End If
+                            txtobj.Focus()
+                        End If
+                    End If
                 Case Me.vLeftDelFlg.ID 'アクティブなビューが削除フラグ
                     '削除フラグ選択時
                     targetObject = FindControl(Me.hdnTextDbClickField.Value)
