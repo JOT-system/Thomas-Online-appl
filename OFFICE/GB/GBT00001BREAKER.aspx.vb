@@ -2894,6 +2894,8 @@ Public Class GBT00001BREAKER
             brNo = prevPage.lblBrNo.Text
             Dim dicBrInfo As Dictionary(Of String, BreakerInfo) = GetBreakerInfo(brNo)
             ViewState("DICBRINFO") = dicBrInfo
+            Me.GBT00002RValues = prevPage.GBT00002RValues
+            ViewState(CONST_VS_NAME_GBT00002RV) = prevPage.GBT00002RValues
             Dim brInfoOrganizer As BreakerInfo = dicBrInfo("INFO")
             If brInfoOrganizer.BrType = C_BRTYPE.SALES Then
                 Me.hdnBrType.Value = "1"
