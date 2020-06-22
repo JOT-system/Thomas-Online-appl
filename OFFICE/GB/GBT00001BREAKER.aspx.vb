@@ -2585,6 +2585,8 @@ Public Class GBT00001BREAKER
             Dim dtBreakerBase As DataTable = Nothing
             Dim costDt As DataTable = Nothing
             Dim prevNewBreakerPage As GBT00001NEWBREAKER = DirectCast(Page.PreviousPage, GBT00001NEWBREAKER)
+            Me.GBT00002RValues = prevNewBreakerPage.GBT00002RValues
+            ViewState(CONST_VS_NAME_GBT00002RV) = prevNewBreakerPage.GBT00002RValues
             Dim hdnPrevMapVari As HiddenField = DirectCast(prevNewBreakerPage.FindControl("hdnThisMapVariant"), HiddenField)
             Dim initDate As Date = New Date(Date.Now.Year, Date.Now.Month, 1)
             initDate = initDate.AddMonths(2).AddDays(-1)
