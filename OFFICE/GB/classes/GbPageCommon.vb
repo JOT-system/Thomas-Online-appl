@@ -78,6 +78,9 @@ Public Class GbPageCommon
                     writeStyle.AppendLine("#divContensbox {")
                     writeStyle.AppendFormat("    background-color : {0} !important;", bgColorC).AppendLine()
                     writeStyle.AppendLine("}")
+                    writeStyle.AppendLine("#headerbox {")
+                    writeStyle.AppendFormat("    background-color : {0} !important;", bgColorC).AppendLine()
+                    writeStyle.AppendLine("}")
                 End If
                 styleHeader.InnerHtml = writeStyle.ToString
                 phCont.Controls.Add(styleHeader)
