@@ -1,0 +1,97 @@
+﻿
+
+/* 文言表示部分 lblで始まりTextで終わるSpan */
+#divContensbox span[id^="lbl"][id$="Text"] {
+    color: rgb(0,0,255);
+}
+#leaseTankInfo {
+    margin-left: 10px;
+    margin-right: 10px;
+    /*left: calc(100% - 220px);*/
+    left: 1150px;
+    height: 48px;
+    position: absolute;
+    z-index: 3;
+}#itemTable {
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 1px;
+    border: 1px solid #999999;
+    min-width: 150px;
+}
+    #itemTable th, #itemTable td {
+        height: 42px;
+        text-align: left;
+        vertical-align: middle;
+        border: 1px solid #999999;
+        padding: 1px;
+        white-space: nowrap;
+    }
+        #itemTable td:nth-child(1) {
+            width: 96px;
+            min-width: 96px;
+            background-color: rgb(149,179,215);
+        }
+        #itemTable td:nth-child(2) {
+            text-align: right;
+            width: 32px;
+            min-width: 32px;
+            background-color: #c8c8e8;
+        }
+        
+/* 共通関数で自動生成した表のスタイル */
+#WF_LISTAREA_H1 {
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 48px;
+    position: relative;
+    z-index: 4;
+}
+
+    #WF_LISTAREA_H1 div[id$="_HR"] table {
+        width: 950px !important;
+    }
+        #WF_LISTAREA_H1 div[id$="_HR"] table th:nth-child(1) {
+            width: 435px !important;
+        }
+        #WF_LISTAREA_H1 div[id$="_HR"] table th:nth-child(2) {
+            width: 385px !important;
+        }
+
+/* 共通関数で自動生成した表のスタイル */
+#WF_LISTAREA_H {
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 48px;
+    position: relative;
+    z-index: 5;
+    top:-1px;
+}
+
+    #WF_LISTAREA_H div[id$="_HL"] th:nth-child(3) {
+        border-top: hidden;
+    }
+    #WF_LISTAREA_H div[id$="_HR"] th:nth-child(19) {
+        border-top: hidden;
+    }
+/* 共通関数で自動生成した表のスタイル */
+#WF_LISTAREA {
+    margin-left: 10px;
+    margin-right: 10px;
+    min-height: 180px;
+    position: relative;
+    z-index: 6;
+    top:-2px;
+}
+
+#actionButtonsBox {
+    min-width:720px;
+} 
+#WF_LISTAREA_DL button{
+    cursor:pointer;
+} 
+#WF_LISTAREA_DL > table > tbody > tr[data-order-row] td:not([data-showcell]), #WF_LISTAREA_DR table tbody tr[data-order-row] td:not([data-showcell]) {
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
