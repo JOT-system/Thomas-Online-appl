@@ -478,7 +478,7 @@ Public Class GBT00030ORDERLIST
         sb.Append(", ob.ORDERNO ")
         sb.Append(", isnull(ov.TKALNUM, 0) as TKALNUM ")
         sb.Append(", isnull(ov2.TANKNUM, 0) as TANKNUM ")
-        sb.Append(", isnull(ST.ACTIONID,'ETYD') as ACTIONID ")
+        sb.Append(", isnull(ST.ACTIONID,'') as ACTIONID ")
         sb.Append(", ST.ACTUALDATE as ACTUALDATE ")
         sb.Append(", ob.VSL1 + ' ' + ob.VOY1 as VSLVOY ")
         sb.Append(", ob.TRANSIT1VSL1 + ' ' + ob.TRANSIT1VOY1 as TSVSLVOY ")
@@ -611,14 +611,14 @@ Public Class GBT00030ORDERLIST
         Select Case Me.hdnSelectedMode.Value
             Case "1"
             Case "2"
-                selAct = {"EETYD", "EETYC", "LESD", "TKAL", "DOUT", "LOAD", "CYIN"}
+                selAct = {"E", "TKAL", "DOUT", "LOAD", "CYIN"}
                 actyTitle = "輸入コンテナ　輸送手配"
             Case "3"
                 selAct = {"SHIP", "ARVD", "TRSH", "TRAV"}
                 actyTitle = "輸入コンテナ　海上輸送中"
             Case "4"
             Case "5"
-                selAct = {"ETYD", "ETYC", "DPIN", "DLRY", "ETKAL", "EDOUT", "ECYIN"}
+                selAct = {"", "DPIN", "DLRY", "ETKAL", "EDOUT", "ECYIN"}
                 actyTitle = "回送コンテナ　回送手配"
             Case "6"
                 selAct = {"ESHIP", "EARVD", "ETRSH", "ETRAV"}

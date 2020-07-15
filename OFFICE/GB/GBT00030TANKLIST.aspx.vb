@@ -475,6 +475,7 @@ Public Class GBT00030TANKLIST
         sb.Append("  , st.RECENT ")
         sb.Append("  , st.ACTIONID ")
         sb.Append("  , st.ACTUALDATE ")
+        sb.Append("  , case when ob.DISCHARGEPORT1 = 'JPSDJ' then 'I' else 'E' end as ROOT ")
         sb.Append("  , tk.NEXTINSPECTTYPE ")
         sb.Append("  , tk.NEXTINSPECTDATE ")
         sb.Append("  , '' as LASTIMPORTORDERNO ")
@@ -483,6 +484,8 @@ Public Class GBT00030TANKLIST
         '-- 対象リースタンク
         sb.Append("inner join GBV0002_LEASETANK as lt on lt.TANKNO=st.TANKNO and lt.SHIPPER= @SHIPPER and lt.PRODUCTCODE=@PRODUCTCODE ")
         '-- 輸送/回送判定
+        sb.Append("inner join GBT0004_ODR_BASE as ob on ob.ORDERNO= st.ORDERNO and ob.DELFLG <> @DELFLG ")
+        '-- 前回輸送判定
         sb.Append("left join ( ")
         sb.Append(" select ")
         sb.Append("  ORDERNO , '1' as ISIMPORT")
@@ -504,7 +507,7 @@ Public Class GBT00030TANKLIST
         sb.Append("  and   ENDYMD >= @ENDYMD ")
         sb.Append("  and   DELFLG <> @DELFLG ")
         sb.Append(") AS tk on tk.TANKNO = st.TANKNO ")
-        sb.Append("order by st.TANKNO ")
+        sb.Append("order by st.TANKNO, st.RECENT ")
 
         'DB接続
         Using sqlCon As New SqlConnection(COA0019Session.DBcon),
@@ -576,22 +579,24 @@ Public Class GBT00030TANKLIST
             Dim actDate As String = tank.First.Item("ACTUALDATE").ToString
             Dim inspecType As String = tank.First.Item("NEXTINSPECTTYPE").ToString
             Dim inspecDate As String = tank.First.Item("NEXTINSPECTDATE").ToString
+            Dim root As String = tank.First.Item("ROOT").ToString
             Dim isImport As String = tank.First.Item("ISIMPORT").ToString
 
             Dim lastOrderSerch As Boolean = False
 
             If Me.hdnSelectedMode.Value = "1" Then
-                If isImport = "1" OrElse unAllocate.Contains(lastAct) = False Then
+                If unAllocate.Contains(lastAct) AndAlso root = "E" Then
+                    lastOrderSerch = True
+                Else
                     Continue For
                 End If
-                lastOrderSerch = True
             ElseIf Me.hdnSelectedMode.Value = "4" Then
-                If isImport = "0" OrElse unAllocate.Contains(lastAct) = False Then
+                If unAllocate.Contains(lastAct) AndAlso root = "I" Then
+                    lastOrderSerch = True
+                Else
                     Continue For
                 End If
-                lastOrderSerch = True
             End If
-
 
             lineCnt += 1
             Dim newRow = retDt.NewRow
