@@ -9,6 +9,17 @@ Public Class GBT00030LIST
     Private Const CONST_MAPID As String = "GBT00030L" '自身のMAPID
     Private Const CONST_DSPROWCOUNT = 44                '指定数＋１が表示対象
     Private Const CONST_SCROLLROWCOUNT = 25              'マウススクロール時の増分
+
+    Public Class SelectedMode
+        Public Const ImportEmptyTank As String = "1"
+        Public Const ImportBeforeTransport As String = "2"
+        Public Const ImportInTransit As String = "3"
+        Public Const ExportEmptyTank As String = "4"
+        Public Const ExportBeforeTransport As String = "5"
+        Public Const ExportInTransit As String = "6"
+        Public Const StockTank As String = "9"
+    End Class
+
     ''' <summary>
     ''' ログ出力(クラススコープ ロード時にNewします)
     ''' </summary>
@@ -46,7 +57,7 @@ Public Class GBT00030LIST
                     Me.lblTitleText.Text = COA0031ProfMap.NAMES
                 Else
                     CommonFunctions.ShowMessage(C_MESSAGENO.SYSTEMADM, Me.lblFooterMessage,
-                                        messageParams:=New List(Of String) From {String.Format("CODE:{0}", COA0031ProfMap.ERR)})
+                                    messageParams:=New List(Of String) From {String.Format("CODE:{0}", COA0031ProfMap.ERR)})
                     Return
                 End If
                 '****************************************
@@ -73,7 +84,7 @@ Public Class GBT00030LIST
                         COA0021ListTable.COA0021saveListTable()
                         If COA0021ListTable.ERR <> C_MESSAGENO.NORMAL Then
                             CommonFunctions.ShowMessage(COA0021ListTable.ERR, Me.lblFooterMessage,
-                                            messageParams:=New List(Of String) From {String.Format("CODE:{0}", COA0021ListTable.ERR)})
+                                        messageParams:=New List(Of String) From {String.Format("CODE:{0}", COA0021ListTable.ERR)})
                             Return
                         End If
                     End With
@@ -173,14 +184,14 @@ Public Class GBT00030LIST
                 '**********************
                 ' 一覧表の行ダブルクリック判定
                 '**********************
-                If Me.hdnListDBclick.Value <> "" AndAlso Me.hdnListCellClick.Value = "" Then
+                If Me.hdnListDBclick.Value <> "" AndAlso Me.hdnListCellclick.Value = "" Then
                     Me.hdnListDBclick.Value = ""
                     'Return '単票ページにリダイレクトするため念のため処理は終わらせる
                 End If
                 '**********************
                 ' 一覧表のCellクリック判定
                 '**********************
-                If Me.hdnListDBclick.Value <> "" AndAlso Me.hdnListCellClick.Value <> "" Then
+                If Me.hdnListDBclick.Value <> "" AndAlso Me.hdnListCellclick.Value <> "" Then
                     ListCellClick()
                     Me.hdnListDBclick.Value = ""
                     Me.hdnListCellclick.Value = ""
@@ -211,7 +222,7 @@ Public Class GBT00030LIST
             Dim messageNo As String = C_MESSAGENO.EXCEPTION 'ここは適宜変えてください
             Dim NORMAL As String = ""
             CommonFunctions.ShowMessage(messageNo, Me.lblFooterMessage,
-                                        messageParams:=New List(Of String) From {String.Format("CODE:{0}", messageNo)})
+                                    messageParams:=New List(Of String) From {String.Format("CODE:{0}", messageNo)})
 
             COA0003LogFile.RUNKBN = C_RUNKBN.ONLINE
             COA0003LogFile.NIWEA = C_NAEIW.ABNORMAL
@@ -379,7 +390,7 @@ Public Class GBT00030LIST
 
         'DB接続
         Using sqlCon As New SqlConnection(COA0019Session.DBcon),
-              sqlCmd As New SqlCommand(sb.ToString, sqlCon)
+            sqlCmd As New SqlCommand(sb.ToString, sqlCon)
             sqlCon.Open() '接続オープン
             With sqlCmd.Parameters
                 .Add("@COMPCODE", SqlDbType.NVarChar, 20).Value = HttpContext.Current.Session("APSRVCamp")
@@ -515,11 +526,11 @@ Public Class GBT00030LIST
         retDt.Columns.Add("SELECT", GetType(Integer))             'DBの固定フィールド
         retDt.Columns.Add("HIDDEN", GetType(Integer))
         Dim colList As New List(Of String) From {"AREANAME", "BASEAREA",
-                                                 "EETYD", "TKAL", "DOUT", "LOAD", "CYIN", "SHIP", "TRAV", "TRSH", "ARVD",
-                                                 "ETYD", "ETKAL", "EDOUT", "ECYIN", "ESHIP", "ETRAV", "ETRSH", "EARVD",
-                                                 "STOK", "TOTAL",
-                                                 "LEASETANK", "LEASEOUT", "LEASETOTAL",
-                                                 "OUTPUTDATE"}
+                                                "EETYD", "TKAL", "DOUT", "LOAD", "CYIN", "SHIP", "TRAV", "TRSH", "ARVD",
+                                                "ETYD", "ETKAL", "EDOUT", "ECYIN", "ESHIP", "ETRAV", "ETRSH", "EARVD",
+                                                "STOK", "TOTAL",
+                                                "LEASETANK", "LEASEOUT", "LEASETOTAL",
+                                                "OUTPUTDATE"}
 
         For Each colName As String In colList
             retDt.Columns.Add(colName, GetType(String))
@@ -595,9 +606,9 @@ Public Class GBT00030LIST
                 tCol = tRow(act)
             Else
                 tCol = New TableRowItem With {
-                    .act = act,
-                    .root = root
-                }
+                .act = act,
+                .root = root
+            }
                 tRow(act) = tCol
             End If
 
@@ -612,24 +623,25 @@ Public Class GBT00030LIST
 
         'サマリー設定
         Dim summarySet = {
-            {"EETYD", "EETYC,EETYD,LESD"},
-            {"TKAL", "TKAL"},
-            {"DOUT", "DOUT"},
-            {"LOAD", "LOAD"},
-            {"CYIN", "CYIN"},
-            {"SHIP", "SHIP"},
-            {"TRAV", "TRAV, TRAV1,TRAV2"},
-            {"TRSH", "TRSH, TRSH1,TRSH2"},
-            {"ARVD", "ARVD"},
-            {"ETYD", "ETYC,ETYD,DPIN,DLRY"},
-            {"ETKAL", "ETKAL"},
-            {"EDOUT", "EDOUT"},
-            {"ECYIN", "ECYIN"},
-            {"ESHIP", "ESHIP"},
-            {"ETRAV", "ETRAV, ETRAV1,ETRAV2"},
-            {"ETRSH", "ETRSH, ETRSH1,ETRSH2"},
-            {"EARVD", "EARVD"}
-            }
+        {"EETYD", "EETYC,EETYD,LESD"},
+        {"TKAL", "TKAL"},
+        {"DOUT", "DOUT"},
+        {"LOAD", "LOAD"},
+        {"CYIN", "CYIN"},
+        {"SHIP", "SHIP"},
+        {"TRAV", "TRAV,TRAV1,TRAV2"},
+        {"TRSH", "TRSH,TRSH1,TRSH2"},
+        {"ARVD", "ARVD,DPIN,DLRY"},
+        {"ETYD", "ETYC,ETYD"},
+        {"ETKAL", "ETKAL"},
+        {"EDOUT", "EDOUT"},
+        {"ECYIN", "ECYIN"},
+        {"ESHIP", "ESHIP"},
+        {"ETRAV", "ETRAV,ETRAV1,ETRAV2"},
+        {"ETRSH", "ETRSH,ETRSH1,ETRSH2"},
+        {"EARVD", "EARVD"},
+        {"STOK", "STOK"}
+        }
 
         'サマリデータベーステーブル作成
         Dim retDt = CreateListDataTable()
@@ -732,13 +744,13 @@ Public Class GBT00030LIST
         Dim ScrollInt As Integer = CONST_SCROLLROWCOUNT
         '表示位置決定(次頁スクロール)
         If hdnMouseWheel.Value = "+" And
-        (ListPosition + ScrollInt) < DataCnt Then
+    (ListPosition + ScrollInt) < DataCnt Then
             ListPosition = ListPosition + ScrollInt
         End If
 
         '表示位置決定(前頁スクロール)
         If hdnMouseWheel.Value = "-" And
-        (ListPosition - ScrollInt) >= 0 Then
+    (ListPosition - ScrollInt) >= 0 Then
             ListPosition = ListPosition - ScrollInt
         End If
 
@@ -872,7 +884,7 @@ Public Class GBT00030LIST
             dt = COA0021ListTable.OUTTBL
         Else
             CommonFunctions.ShowMessage(C_MESSAGENO.SYSTEMADM, Me.lblFooterMessage,
-                                        messageParams:=New List(Of String) From {"CODE:" & COA0021ListTable.ERR & ""})
+                                    messageParams:=New List(Of String) From {"CODE:" & COA0021ListTable.ERR & ""})
             Return
         End If
 
@@ -887,56 +899,55 @@ Public Class GBT00030LIST
 
         '選択列特定
         Dim colNm As String = Me.hdnListCellclick.Value
-        Dim detailInfo As Integer = 0
+        Dim detailInfo As String = ""
         Select Case colNm
             Case "EETYD"
                 'ETYD（MY）
-                detailInfo = 1
+                detailInfo = SelectedMode.ImportEmptyTank
             Case "TKAL",
-                 "DOUT",
-                 "LOAD",
-                 "CYIN"
+                "DOUT",
+                "LOAD",
+                "CYIN"
                 'MY側　TKAL～CYIN
-                detailInfo = 2
+                detailInfo = SelectedMode.ImportBeforeTransport
             Case "SHIP",
-                 "TRAV",
-                 "TRSH",
-                 "ARVD"
+                "TRAV",
+                "TRSH",
+                "ARVD"
                 '輸送中（輸入）
-                detailInfo = 3
+                detailInfo = SelectedMode.ImportInTransit
             Case "ETYD"
                 'ETYD（JP）
-                detailInfo = 4
+                detailInfo = SelectedMode.ExportEmptyTank
             Case "ETKAL",
-                 "EDOUT",
-                 "ECYIN"
+                "EDOUT",
+                "ECYIN"
                 'JP側　(E)TKAL～(E)CYIN
-                detailInfo = 5
+                detailInfo = SelectedMode.ExportBeforeTransport
             Case "ESHIP",
-                 "ETRAV",
-                 "ETRSH",
-                 "EARVD"
+                "ETRAV",
+                "ETRSH",
+                "EARVD"
                 '輸送中（回送）
-                detailInfo = 6
+                detailInfo = SelectedMode.ExportInTransit
             Case "STOK"
-                Return
-                '未実装
-                'detailInfo = 9
+                detailInfo = SelectedMode.StockTank
             Case "TOTAL"
             Case Else
-
                 Return
         End Select
 
         Dim vari As String = Me.hdnThisMapVariant.Value
         'ETYD時はタンク一覧に遷移（それ以外はオーダー一覧）
-        If detailInfo = 1 OrElse detailInfo = 4 Then
+        If detailInfo = SelectedMode.ImportEmptyTank OrElse
+            detailInfo = SelectedMode.ExportEmptyTank OrElse
+            detailInfo = SelectedMode.StockTank Then
             vari &= "_ETYD"
         End If
 
         '次画面引継ぎ項目
         Me.hdnSelectedPort.Value = dt.Rows(rowId).Item("AREANAME").ToString
-        Me.hdnSelectedMode.Value = detailInfo.ToString
+        Me.hdnSelectedMode.Value = detailInfo
         Me.hdnSelectedActy.Value = colNm
 
         Dim selectedRow As DataRow = dt.Rows(rowId)

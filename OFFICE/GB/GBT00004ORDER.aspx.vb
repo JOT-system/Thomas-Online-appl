@@ -3370,6 +3370,7 @@ Public Class GBT00004ORDER
         sqlStat.AppendLine("      ,CASE VL.SCHEDELDATE   WHEN '1900/01/01' THEN '2099/12/31' ELSE FORMAT(VL.SCHEDELDATE,'yyyy/MM/dd')   END AS SCHEDELDATE")
         sqlStat.AppendLine("      ,CASE VL.ACTUALDATE    WHEN '1900/01/01' THEN '2099/12/31' ELSE FORMAT(VL.ACTUALDATE,'yyyy/MM/dd')    END AS ACTUALDATE")
         sqlStat.AppendLine("      ,CONVERT(varchar(36),VL.DATAID)     AS DATAID")
+        sqlStat.AppendLine("      ,VL.REQUIREDACT")
         sqlStat.AppendLine("  FROM GBT0005_ODR_VALUE VL")
         sqlStat.AppendLine(" WHERE VL.ORDERNO = @ORDERNO")
         sqlStat.AppendLine("   AND VL.TANKSEQ = @TANKSEQ")
@@ -8708,9 +8709,11 @@ Public Class GBT00004ORDER
                 Continue For
             End If
             '日付の連続性が無いデータの取得
+            '必須作業(CLASS6/REQUIREDACT)が1(必須)だけが対象
             Dim qErrorRow = From drAllCost In dtAllCost
                             Where (From subdrAllCost In dtAllCost
                                    Where CInt(drAllCost("DISPSEQ")) < CInt(subdrAllCost("DISPSEQ")) _
+                                 AndAlso Convert.ToString(drAllCost("REQUIREDACT")) = "1" _
                                  AndAlso Convert.ToString(drAllCost(changedDateField)) > Convert.ToString(subdrAllCost(changedDateField))).Any
                             Order By CInt(drAllCost("DISPSEQ"))
 

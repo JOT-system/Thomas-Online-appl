@@ -244,7 +244,9 @@ Public Class GBT00030TANKLIST
 
         Dim vari As String = Me.hdnThisMapVariant.Value
         'ETYD時はタンク一覧に遷移（それ以外はオーダー一覧）
-        If Me.hdnSelectedMode.Value = "1" OrElse Me.hdnSelectedMode.Value = "4" Then
+        If Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ImportEmptyTank OrElse
+            Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ExportEmptyTank OrElse
+            Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.StockTank Then
             vari &= "_ETYD"
         End If
 
@@ -258,7 +260,9 @@ Public Class GBT00030TANKLIST
             Return
         End If
         '次画面の変数セット
-        If Me.hdnSelectedMode.Value = "1" OrElse Me.hdnSelectedMode.Value = "4" Then
+        If Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ImportEmptyTank OrElse
+            Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ExportEmptyTank OrElse
+            Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.StockTank Then
             HttpContext.Current.Session("MAPvariant") = COA0011ReturnUrl.VARI_Return.Replace("_ETYD", "")
         Else
             HttpContext.Current.Session("MAPvariant") = COA0011ReturnUrl.VARI_Return
@@ -543,34 +547,43 @@ Public Class GBT00030TANKLIST
 
         Dim selAct As String() = {""}
         Select Case Me.hdnSelectedMode.Value
-            Case "1"
+            Case GBT00030LIST.SelectedMode.ImportEmptyTank
+                'ETYD（MY）
                 actyTitle = "輸入コンテナ　ETYD"
-            Case "2"
+            Case GBT00030LIST.SelectedMode.ImportBeforeTransport
+                'MY側　TKAL～CYIN
                 actyTitle = "輸入コンテナ　輸送手配"
-            Case "3"
+            Case GBT00030LIST.SelectedMode.ImportInTransit
+                '輸送中（輸入）
                 actyTitle = "輸入コンテナ　海上輸送中"
-            Case "4"
+            Case GBT00030LIST.SelectedMode.ExportEmptyTank
+                'ETYD（JP）
                 actyTitle = "回送コンテナ　ETYD"
-            Case "5"
+            Case GBT00030LIST.SelectedMode.ExportBeforeTransport
+                'JP側　(E)TKAL～(E)CYIN
                 actyTitle = "回送コンテナ　回送手配"
-            Case "6"
+            Case GBT00030LIST.SelectedMode.ExportInTransit
                 actyTitle = "回送コンテナ　海上輸送中"
+                '輸送中（回送）
+            Case GBT00030LIST.SelectedMode.StockTank
+                '仙台予備在庫
+                actyTitle = "仙台予備在庫"
             Case Else
-
         End Select
 
         '一覧表用データテーブル作成
         Dim retDt = CreateListDataTable()
         Dim lineCnt As Integer = 0
 
-        '対象ORDERNOのタンク一覧作成（タンクステータス履歴）
+        'タンク一覧作成（タンクステータス履歴）
         Dim tmpDt = dt.AsEnumerable
         If Me.hdnSelectedOrderNo.Value <> "" Then
+            '対象ORDERNO限定
             tmpDt = tmpDt.Where(Function(a) a.Item("ORDERNO").ToString = Me.hdnSelectedOrderNo.Value)
-        Else
         End If
-        Dim tankDt = tmpDt.GroupBy(Function(a) a.Item("TANKNO").ToString)
 
+        'タンク毎に処理
+        Dim tankDt = tmpDt.GroupBy(Function(a) a.Item("TANKNO").ToString)
         For Each tank In tankDt
             Dim orderNo As String = tank.First.Item("ORDERNO").ToString
             Dim tankNo As String = tank.First.Item("TANKNO").ToString
@@ -582,17 +595,23 @@ Public Class GBT00030TANKLIST
             Dim root As String = tank.First.Item("ROOT").ToString
             Dim isImport As String = tank.First.Item("ISIMPORT").ToString
 
+            '前回輸送オーダー検索有無
             Dim lastOrderSerch As Boolean = False
 
-            If Me.hdnSelectedMode.Value = "1" Then
+            If Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ImportEmptyTank Then
                 If unAllocate.Contains(lastAct) AndAlso root = "E" Then
                     lastOrderSerch = True
                 Else
                     Continue For
                 End If
-            ElseIf Me.hdnSelectedMode.Value = "4" Then
+            ElseIf Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ExportEmptyTank Then
                 If unAllocate.Contains(lastAct) AndAlso root = "I" Then
                     lastOrderSerch = True
+                Else
+                    Continue For
+                End If
+            ElseIf Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.StockTank Then
+                If lastAct = "STOK" Then
                 Else
                     Continue For
                 End If
@@ -636,6 +655,8 @@ Public Class GBT00030TANKLIST
                             Exit For
                         End If
                         newRow(act) = FormatDateContrySettings(actCol("ACTUALDATE").ToString, "yyyy/MM/dd")
+                    Case "STOK"
+                        Exit For
                     Case Else
                 End Select
             Next
@@ -814,22 +835,24 @@ Public Class GBT00030TANKLIST
         '画面表示項目設定
         Dim vari As String = Me.hdnThisMapVariant.Value
         Select Case Me.hdnSelectedMode.Value
-            Case "1"
+            Case GBT00030LIST.SelectedMode.ImportEmptyTank
                 'ETYD（MY）
                 vari &= "_ETYD"
-            Case "2"
+            Case GBT00030LIST.SelectedMode.ImportBeforeTransport
                 'MY側　TKAL～CYIN
                 vari &= "_IMP"
-            Case "3"
+            Case GBT00030LIST.SelectedMode.ImportInTransit
                 '輸送中（輸入）
-            Case "4"
+            Case GBT00030LIST.SelectedMode.ExportEmptyTank
                 'ETYD（JP）
                 vari &= "_ETYD"
-            Case "5"
+            Case GBT00030LIST.SelectedMode.ExportBeforeTransport
                 'JP側　(E)TKAL～(E)CYIN
                 vari &= "_EXP"
-            Case "6"
+            Case GBT00030LIST.SelectedMode.ExportInTransit
                 '輸送中（回送）
+            Case GBT00030LIST.SelectedMode.StockTank
+                '仙台予備在庫
             Case Else
         End Select
         Me.hdnThisViewVariant.Value = vari

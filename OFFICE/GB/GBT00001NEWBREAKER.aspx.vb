@@ -666,6 +666,7 @@ Public Class GBT00001NEWBREAKER
         sqlStat.AppendLine("     , ISNULL(SUB.AGENTPOD1,'') AS AGENTPOD1")
         sqlStat.AppendLine("     , ISNULL(SUB.AGENTPOL2,'') AS AGENTPOL2")
         sqlStat.AppendLine("     , ISNULL(SUB.AGENTPOD2,'') AS AGENTPOD2")
+        sqlStat.AppendLine("     , ISNULL(SUB.USINGLEASETANK,'') AS USINGLEASETANK")
         sqlStat.AppendLine("  FROM GBM0009_TRPATTERN MAIN ")
         sqlStat.AppendLine("      LEFT OUTER JOIN GBM0029_TRPATTERNSUB SUB")
         sqlStat.AppendLine("        ON  SUB.COMPCODE = MAIN.COMPCODE")
@@ -685,7 +686,7 @@ Public Class GBT00001NEWBREAKER
         sqlStat.AppendLine("   AND MAIN.DELFLG      <> @DELFLG")
         sqlStat.AppendLine("GROUP BY MAIN.USETYPE, MAIN.NAMES")
         sqlStat.AppendLine(" ,SUB.LOADPORT1 ,SUB.DISCHARGEPORT1 ,SUB.LOADPORT2 ,SUB.DISCHARGEPORT2 ,SUB.SHIPPER ")
-        sqlStat.AppendLine(" ,SUB.INVOICEDBY ,SUB.BILLINGCATEGORY ,SUB.CONSIGNEE ,SUB.PRODUCTCODE ,SUB.AGENTPOL1 ,SUB.AGENTPOD1 ,SUB.AGENTPOL2 ,SUB.AGENTPOD2 ")
+        sqlStat.AppendLine(" ,SUB.INVOICEDBY ,SUB.BILLINGCATEGORY ,SUB.CONSIGNEE ,SUB.PRODUCTCODE ,SUB.AGENTPOL1 ,SUB.AGENTPOD1 ,SUB.AGENTPOL2 ,SUB.AGENTPOD2 ,SUB.USINGLEASETANK ")
         sqlStat.AppendLine("ORDER BY MAIN.USETYPE ")
         'DB接続
         Using sqlCon As New SqlConnection(COA0019Session.DBcon),
@@ -1109,6 +1110,11 @@ Public Class GBT00001NEWBREAKER
         If Convert.ToString(dt.Rows(0).Item("SHIPPER")) <> "" Then
             Me.txtShipper.Text = HttpUtility.HtmlEncode(Convert.ToString(dt.Rows(0).Item("SHIPPER")))
             txtShipper_Change()
+        End If
+        If Convert.ToString(dt.Rows(0).Item("USINGLEASETANK")) = "1" Then
+            Me.chkLeaseTankUse.Checked = True
+        Else
+            Me.chkLeaseTankUse.Checked = False
         End If
         Me.hdnInitInvoicedBy.Value = Convert.ToString(dt.Rows(0).Item("INVOICEDBY"))
         Me.hdnInitBillingCategory.Value = Convert.ToString(dt.Rows(0).Item("BILLINGCATEGORY"))

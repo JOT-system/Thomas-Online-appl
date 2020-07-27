@@ -1482,7 +1482,8 @@ Public Class GBT00004NEWORDER
             sqlStat.AppendLine("     , ISNULL(TRP.CLASS5,'')        AS LASTACT")
             sqlStat.AppendLine("     , ISNULL(TRP.CLASS6,'')        AS REQUIREDACT")
             sqlStat.AppendLine("     , ISNULL(TRP.CLASS7,'')        AS ORIGINDESTINATION")
-            sqlStat.AppendLine("     , ''                           AS BRADDEDCOST")
+            'sqlStat.AppendLine("     , ''                           AS BRADDEDCOST")
+            sqlStat.AppendLine("     , ISNULL((CASE WHEN TRP.ACTIONID <> '' THEN '0' ELSE '' END ),'') AS BRADDEDCOST ")
             sqlStat.AppendLine("     , ''                           AS PERBL")
             sqlStat.AppendLine("     , '0'                          AS TAXATION") '課税フラグ デマレコード一旦は0固定
             'sqlStat.AppendLine("     , ISNULL(BS.INVOICEDBY,'')     AS INVOICEDBY")
