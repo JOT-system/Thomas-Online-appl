@@ -718,6 +718,8 @@ Public Class GBT00014BL
                     End If
 
                 End If
+                dt.Rows(0).Item("DRQUANTITYPACKAGES") = dt.Rows(0).Item("CONTAINERPKGS").ToString.Replace(" ONLY.-", "")
+                dt.Rows(0).Item("DRQUANTITYPACKAGES") = dt.Rows(0).Item("DRQUANTITYPACKAGES").ToString.Replace("SAY:", "")
 
 
                 '改ページ有
@@ -2218,6 +2220,7 @@ Public Class GBT00014BL
         sqlStat.AppendLine("      ,OB.CARRIER1 AS CARRIER1")
         sqlStat.AppendLine("      ,US.STAFFNAMES AS STAFFNAMES")
         sqlStat.AppendLine("      ,FV1.VALUE4 AS GITERM")
+        sqlStat.AppendLine("      ,'' AS DRQUANTITYPACKAGES")
 
         sqlStat.AppendLine("  FROM GBT0004_ODR_BASE OB ")
 
@@ -2563,6 +2566,8 @@ Public Class GBT00014BL
         retDt.Columns.Add("STAFFNAMES", GetType(String))
         retDt.Columns.Add("CARRIER1", GetType(String))
         retDt.Columns.Add("GITERM", GetType(String))
+
+        retDt.Columns.Add("DRQUANTITYPACKAGES", GetType(String))
 
         retDt.Columns.Add("FACYTRUCKER", GetType(String))
         retDt.Columns.Add("FACYTRUCKERTELFAX", GetType(String))
