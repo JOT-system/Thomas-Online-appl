@@ -2878,9 +2878,9 @@ Public Class GBM00021CLIENT
         End If
 
     End Sub
-    ''' <summary>
-    ''' 取引先コードリストアイテムを設定
-    ''' </summary>
+    '''' <summary>
+    '''' 取引先コードリストアイテムを設定
+    '''' </summary>
     'Private Sub SetToriCodeListItem(Optional selectedValue As String = "")
     '    Dim COA0017FixValue As New COA0017FixValue
 
