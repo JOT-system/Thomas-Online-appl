@@ -1115,6 +1115,27 @@ Public Class GBT00014BL
 
             End If
 
+            With Nothing
+                Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
+
+                COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
+                COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
+                COA0027ReportTable.FILETYPE = filetype                             'PARAM03:出力ファイル形式
+                COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
+                COA0027ReportTable.COA0027ReportTable()
+
+                If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
+                    CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
+                Else
+                    CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                    Return
+                End If
+
+                tmpFile = COA0027ReportTable.FILEpath
+                outUrl = COA0027ReportTable.URL
+
+            End With
+
 #End Region
         ElseIf reportId = "ArrivalNotice" Then
 #Region "<< ArrivalNotice >>"
@@ -1189,7 +1210,7 @@ Public Class GBT00014BL
 
                 For i As Integer = 0 To notfText.Count - 1
 
-                    If i > 3 Then
+                    If i > 2 Then
                         Exit For
                     End If
 
@@ -2134,6 +2155,8 @@ Public Class GBT00014BL
         sqlStat.AppendLine("      ,CASE WHEN @TRANCLS = '1' THEN OB.NOTIFYTEXT ELSE OB.NOTIFYTEXT2 END AS NOTIFYTEXT1")
         sqlStat.AppendLine("      ,'' AS NOTIFYTEXT2")
         sqlStat.AppendLine("      ,'' AS NOTIFYTEXT3")
+        sqlStat.AppendLine("      ,'' AS NOTIFYTEXT4")
+        sqlStat.AppendLine("      ,'' AS NOTIFYTEXT5")
         sqlStat.AppendLine("      ,(SELECT CONVERT(NVARCHAR ,CONVERT(money, SUM(GROSSWEIGHT)), 1) ")
         sqlStat.AppendLine("      FROM GBT0007_ODR_VALUE2 ")
         sqlStat.AppendLine("      WHERE ORDERNO    = @ORDERNO ")
@@ -2486,6 +2509,8 @@ Public Class GBT00014BL
         retDt.Columns.Add("NOTIFYTEXT1", GetType(String))
         retDt.Columns.Add("NOTIFYTEXT2", GetType(String))
         retDt.Columns.Add("NOTIFYTEXT3", GetType(String))
+        retDt.Columns.Add("NOTIFYTEXT4", GetType(String))
+        retDt.Columns.Add("NOTIFYTEXT5", GetType(String))
         retDt.Columns.Add("GROSSWEIGHT", GetType(String))
         retDt.Columns.Add("NETWEIGHT", GetType(String))
         retDt.Columns.Add("TIP", GetType(String))

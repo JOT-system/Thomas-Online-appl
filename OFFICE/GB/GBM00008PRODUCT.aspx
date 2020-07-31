@@ -13,14 +13,14 @@
     <link href="~/css/masterCommon.css" rel="stylesheet" type="text/css" />
     <link href="css/GBM00008PRODUCT.css" rel="stylesheet" type="text/css" />
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+<%--    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
       gtag('config', 'UA-162522994-1');
-    </script>
+    </script>--%>
     <%--共通利用するJavaScript --%>
     <script src='<%= ResolveUrl("~/script/common.js") %>' type="text/javascript" charset="utf-8"></script>
     <%--マスタ登録で共通利用するJavaScript --%>
