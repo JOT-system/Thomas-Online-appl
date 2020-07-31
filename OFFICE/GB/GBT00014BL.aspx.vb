@@ -718,8 +718,7 @@ Public Class GBT00014BL
                     End If
 
                 End If
-                dt.Rows(0).Item("DRQUANTITYPACKAGES") = dt.Rows(0).Item("CONTAINERPKGS").ToString.Replace(" ONLY.-", "")
-                dt.Rows(0).Item("DRQUANTITYPACKAGES") = dt.Rows(0).Item("DRQUANTITYPACKAGES").ToString.Replace("SAY:", "")
+                dt.Rows(0).Item("DRQUANTITYPACKAGES") = dt.Rows(0).Item("DRQUANTITYPACKAGES").ToString.Replace(" ONLY", "")
 
 
                 '改ページ有
@@ -1852,10 +1851,6 @@ Public Class GBT00014BL
                     Case Else
                 End Select
 
-                Dim culture = New System.Globalization.CultureInfo("ja-JP", True)
-                culture.DateTimeFormat.Calendar = New System.Globalization.JapaneseCalendar()
-                dtRow.Item("OUTPUTDATE") = Today().ToString("ggy年M月d日", culture)
-
                 'TankNoについて
                 '出力先が15行及び3カラムしかないので
                 '1行に最大4つのTankNoを編集して最大60TankNo出力
@@ -2220,7 +2215,10 @@ Public Class GBT00014BL
         sqlStat.AppendLine("      ,OB.CARRIER1 AS CARRIER1")
         sqlStat.AppendLine("      ,US.STAFFNAMES AS STAFFNAMES")
         sqlStat.AppendLine("      ,FV1.VALUE4 AS GITERM")
-        sqlStat.AppendLine("      ,'' AS DRQUANTITYPACKAGES")
+        sqlStat.AppendLine("      ,CASE WHEN OB.CONTAINERPKGS = '' THEN '' ELSE OB.CONTAINERPKGS END AS DRQUANTITYPACKAGES")
+        sqlStat.AppendLine("      ,CASE WHEN ETD.ACTDATE = '1900/01/01' THEN '' ELSE FORMAT(ETD.ACTDATE,'yyyy/MM/dd') END AS FNETDACTDATE ")
+        sqlStat.AppendLine("      ,CASE WHEN ETA.ACTDATE = '1900/01/01' THEN '' ELSE FORMAT(ETA.ACTDATE,'yyyy/MM/dd') END AS FNETAACTDATE ")
+        sqlStat.AppendLine("      ,FORMAT(GETDATE (),'yyyy/MM/dd') AS FNOUTPUTDATE ")
 
         sqlStat.AppendLine("  FROM GBT0004_ODR_BASE OB ")
 
@@ -2571,6 +2569,9 @@ Public Class GBT00014BL
 
         retDt.Columns.Add("FACYTRUCKER", GetType(String))
         retDt.Columns.Add("FACYTRUCKERTELFAX", GetType(String))
+        retDt.Columns.Add("FNETDACTDATE", GetType(String))
+        retDt.Columns.Add("FNETAACTDATE", GetType(String))
+        retDt.Columns.Add("FNOUTPUTDATE", GetType(String))
         '検討中
         retDt.Columns.Add("DUMMY", GetType(String))
         retDt.Columns.Add("DUMMY2", GetType(String))
