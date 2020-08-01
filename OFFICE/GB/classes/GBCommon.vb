@@ -6046,6 +6046,11 @@ Public Structure GBA00012TankInfo
     ''' </summary>
     ''' <returns></returns>
     Public Property REPFLG As String
+    ''' <summary>
+    ''' [IN]発地港
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property POLPORT As String
 
     ''' <summary>
     ''' <para>タンクリスト取得</para>
@@ -6133,6 +6138,10 @@ Public Structure GBA00012TankInfo
             If Me.REPFLG Is Nothing Then
                 Me.REPFLG = ""
             End If
+            If Me.POLPORT Is Nothing Then
+                Me.POLPORT = ""
+            End If
+
             'SQL文の作成
             Dim sqlStat As New System.Text.StringBuilder
             '共通テーブル定義START
@@ -6376,6 +6385,7 @@ Public Structure GBA00012TankInfo
             'タンクステータス
             sqlStat.AppendLine("select B.TANKNO,")
             sqlStat.AppendLine("       isnull(ST.ACTIONID,'') as ACTY,")
+            sqlStat.AppendLine("       isnull(convert(char,ST.ACTUALDATE,111),'') as RECENTDATE,")
             sqlStat.AppendLine("       B.REPAIRSTAT AS CANPROVISION,")
             sqlStat.AppendLine("       B.T2_5ACT AS A2_5YTEST,")
             sqlStat.AppendLine("       B.T5ACT AS A5YTEST,")
@@ -6628,7 +6638,13 @@ Public Structure GBA00012TankInfo
                 'リース起因セールス、オペタンク引当(未実装)
                 sqlStat.AppendLine("  and (")
                 sqlStat.AppendLine("       (")
-                sqlStat.AppendLine("           (isnull(ST.ACTIONID,'') in (@AllocActionId1,@AllocActionId2,@AllocActionIdLeaseOut))")
+                If Not String.IsNullOrEmpty(Me.POLPORT) Then 'リース輸送時はSHIP以降も対象
+                    sqlStat.AppendLine("          ((isnull(ST.ACTIONID,'') in (@AllocActionId1,@AllocActionId2,@AllocActionIdLeaseOut))")
+                    sqlStat.AppendLine("           or (isnull(ST.ACTIONID,'') in (@AllocActionId3,@AllocActionId4,@AllocActionId5,@AllocActionId6)")
+                    sqlStat.AppendLine("              and B.POD_POLPORT = @POLPORT))")
+                Else
+                    sqlStat.AppendLine("           (isnull(ST.ACTIONID,'') in (@AllocActionId1,@AllocActionId2,@AllocActionIdLeaseOut))")
+                End If
                 sqlStat.AppendLine("    and    LESD.ACTUALDATE is not null ") 'リースアウトが存在していることが前提
                 sqlStat.AppendLine("    and    LESD.ACTUALDATE >= isnull(LEIN.ACTUALDATE,@initdate) ") 'リースアウト日付 >= リースイン日付（現在の状態がリースアウトである）
                 sqlStat.AppendLine("    and    exists (select 1  ") '使用可能なリース契約タンク
@@ -6746,6 +6762,11 @@ Public Structure GBA00012TankInfo
                     '.Add("@AllocActionId3", SqlDbType.NVarChar).Value = "TKAL"
                     '.Add("@AllocActionId4", SqlDbType.NVarChar).Value = "TAEC"
                     '.Add("@AllocActionId5", SqlDbType.NVarChar).Value = "TAED"
+                    'HISリース引当時のオーダーの際に表示するALLOCATEのACTIONID
+                    .Add("@AllocActionId3", SqlDbType.NVarChar).Value = "SHIP"
+                    .Add("@AllocActionId4", SqlDbType.NVarChar).Value = "TRAV"
+                    .Add("@AllocActionId5", SqlDbType.NVarChar).Value = "TRSH"
+                    .Add("@AllocActionId6", SqlDbType.NVarChar).Value = "ARVD"
 
                     '引当対象のオーダーNo
                     .Add("@AllocateOrderNo", SqlDbType.NVarChar).Value = Me.ALLOCATEORDERNO
@@ -6754,6 +6775,7 @@ Public Structure GBA00012TankInfo
                     .Add("@PRODUCTCODE", SqlDbType.NVarChar).Value = Me.PRODUCTCODE
                     .Add("@ORGANIZER", SqlDbType.NVarChar).Value = Me.AGENTORGANIZER
                     .Add("@AllocActionIdLeaseOut", SqlDbType.NVarChar).Value = "LESD"
+                    .Add("@POLPORT", SqlDbType.NVarChar).Value = Me.POLPORT
                 End With
                 sqlConn.Open()
                 sqlCmd.CommandTimeout = 180

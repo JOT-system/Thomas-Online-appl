@@ -14,11 +14,7 @@ Public Class GBT00030ORDERLIST
     ''' 当リストデータ保存用
     ''' </summary>
     Private SavedDt As DataTable = Nothing
-    ''' <summary>
-    ''' 画面退避用アイテム
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property DisplayItems As GBT00030DITEMS
+
     ''' <summary>
     ''' ログ出力(クラススコープ ロード時にNewします)
     ''' </summary>
@@ -109,7 +105,7 @@ Public Class GBT00030ORDERLIST
                         .VARI = hdnThisViewVariant.Value
                         .SRCDATA = dt
                         .TBLOBJ = WF_LISTAREA
-                        .SCROLLTYPE = "2"
+                        .SCROLLTYPE = ""
                         .LEVENT = If(Me.hdnListEvent.Value = "", Nothing, Me.hdnListEvent.Value)
                         .LFUNC = If(Me.hdnListFunc.Value = "", Nothing, Me.hdnListFunc.Value)
                         .TITLEOPT = True
@@ -609,18 +605,18 @@ Public Class GBT00030ORDERLIST
 
         Dim selAct As String() = {""}
         Select Case Me.hdnSelectedMode.Value
-            Case "1"
-            Case "2"
+            Case GBT00030LIST.SelectedMode.ImportEmptyTank
+            Case GBT00030LIST.SelectedMode.ImportBeforeTransport
                 selAct = {"E", "TKAL", "DOUT", "LOAD", "CYIN"}
                 actyTitle = "輸入コンテナ　輸送手配"
-            Case "3"
-                selAct = {"SHIP", "ARVD", "TRSH", "TRAV"}
+            Case GBT00030LIST.SelectedMode.ImportInTransit
+                selAct = {"SHIP", "ARVD", "TRSH", "TRAV", "DPIN", "DLRY"}
                 actyTitle = "輸入コンテナ　海上輸送中"
-            Case "4"
-            Case "5"
-                selAct = {"", "DPIN", "DLRY", "ETKAL", "EDOUT", "ECYIN"}
+            Case GBT00030LIST.SelectedMode.ExportEmptyTank
+            Case GBT00030LIST.SelectedMode.ExportBeforeTransport
+                selAct = {"", "ETKAL", "EDOUT", "ECYIN"}
                 actyTitle = "回送コンテナ　回送手配"
-            Case "6"
+            Case GBT00030LIST.SelectedMode.ExportInTransit
                 selAct = {"ESHIP", "EARVD", "ETRSH", "ETRAV"}
                 actyTitle = "回送コンテナ　海上輸送中"
             Case Else
@@ -649,7 +645,8 @@ Public Class GBT00030ORDERLIST
             newRow("AREANAME") = tRow("AREANAME").ToString
             newRow("BASEAREA") = tRow("BASEAREA").ToString
             newRow("ORDERNO") = tRow("ORDERNO").ToString
-            If Me.hdnSelectedMode.Value = "2" OrElse Me.hdnSelectedMode.Value = "5" Then
+            If Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ImportBeforeTransport OrElse
+                Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ExportBeforeTransport Then
                 newRow("TANKNUM") = tRow("TKALNUM").ToString & " / " & tRow("TANKNUM").ToString
             Else
                 newRow("TANKNUM") = tRow("TANKNUM").ToString
@@ -846,18 +843,18 @@ Public Class GBT00030ORDERLIST
         '画面表示項目設定
         Dim vari As String = Me.hdnThisMapVariant.Value
         Select Case Me.hdnSelectedMode.Value
-            Case "1"
+            Case GBT00030LIST.SelectedMode.ImportEmptyTank
                 'ETYD（MY）
-            Case "2"
+            Case GBT00030LIST.SelectedMode.ImportBeforeTransport
                 'MY側　TKAL～CYIN
-            Case "3"
+            Case GBT00030LIST.SelectedMode.ImportInTransit
                 '輸送中（輸入）
                 vari &= "_SHIP"
-            Case "4"
+            Case GBT00030LIST.SelectedMode.ExportEmptyTank
                 'ETYD（JP）
-            Case "5"
+            Case GBT00030LIST.SelectedMode.ExportBeforeTransport
                 'JP側　(E)TKAL～(E)CYIN
-            Case "6"
+            Case GBT00030LIST.SelectedMode.ExportInTransit
                 '輸送中（回送）
                 vari &= "_ESHIP"
             Case Else
@@ -918,8 +915,8 @@ Public Class GBT00030ORDERLIST
         Dim ScrollInt As Integer = CONST_SCROLLROWCOUNT
         '表示位置決定(次頁スクロール)
         If hdnMouseWheel.Value = "+" And
-        (ListPosition + ScrollInt) <DataCnt Then
-            ListPosition= ListPosition + ScrollInt
+        (ListPosition + ScrollInt) < DataCnt Then
+            ListPosition = ListPosition + ScrollInt
         End If
 
         '表示位置決定(前頁スクロール)
@@ -936,7 +933,7 @@ Public Class GBT00030ORDERLIST
         COA0013TableObject.VARI = Me.hdnThisViewVariant.Value
         COA0013TableObject.SRCDATA = listData
         COA0013TableObject.TBLOBJ = Me.WF_LISTAREA
-        COA0013TableObject.SCROLLTYPE = "2"
+        COA0013TableObject.SCROLLTYPE = ""
         COA0013TableObject.LEVENT = If(Me.hdnListEvent.Value = "", Nothing, Me.hdnListEvent.Value)
         COA0013TableObject.LFUNC = If(Me.hdnListFunc.Value = "", Nothing, Me.hdnListFunc.Value)
         COA0013TableObject.TITLEOPT = True
@@ -1094,30 +1091,4 @@ Public Class GBT00030ORDERLIST
         Return retDt
     End Function
 
-    ''' <summary>
-    ''' 当画面の保持必要情報を保持し退避用クラスを生成
-    ''' </summary>
-    ''' <returns></returns>
-    Public Function GetGbt00006items() As GBT00030DITEMS
-        Dim item As New GBT00030DITEMS
-        item.OrderInfo = DirectCast(ViewState("ORDERINFO"), GBT00030LIST.GBT00030OrderInfo)
-        Return item
-    End Function
-    ''' <summary>
-    ''' 退避情報を画面に戻す
-    ''' </summary>
-    ''' <param name="item"></param>
-    Private Sub SetGbt00006items(item As GBT00030DITEMS)
-        Me.DisplayItems = item
-        ViewState("ORDERINFO") = item.OrderInfo
-    End Sub
-
-    ''' <summary>
-    ''' 画面情報退避用クラス
-    ''' </summary>
-    <Serializable>
-    Public Class GBT00030DITEMS
-        Public Property OrderInfo As GBT00030LIST.GBT00030OrderInfo
-
-    End Class
 End Class

@@ -658,15 +658,16 @@ Public Class GBT00014BL
 
                     For Each tank As DataRow In tankDt.Rows
 
-                        If tankDt.Rows.Count > 12 Then
+                        If tankDt.Rows.Count > 7 Then
                             If tankTexts.Length <> 0 Then
                                 tankTexts += vbCrLf
                             End If
+                            Dim editSealNoString = EditSealNo(tank, ",", False)
 
-                            tankText = String.Format("{0,15} / {1,5} / {2,10} / {3,10} / {4,10} / {5,10} / {6,10} / {7,10} / {8,10}",
+                            tankText = String.Format("{0,-15} / {1,-5} / {2,-20} / {3,10} / {4,10} / {5,10} / {6,10} / {7,10} / {8,10}",
                                                  tank.Item("TANKNO").ToString(),
                                                  "20'TK",
-                                                 tank.Item("SEALNO1").ToString(),
+                                                 editSealNoString,
                                                  "",
                                                  Convert.ToDecimal(tank.Item("NETWEIGHT")).ToString("#,##0"),
                                                  Convert.ToDecimal(tank.Item("TAREWEIGHT")).ToString("#,##0"),
@@ -675,19 +676,21 @@ Public Class GBT00014BL
                                                  "")
                             tankTexts &= tankText
                         Else
+                            Dim editSealNoString = EditSealNo(tank, ",", True)
+
                             If tankNo.Length <> 0 Then
 
-                                tankNo += vbCrLf
-                                tankType += vbCrLf
+                                tankNo += vbCrLf + vbCrLf
+                                tankType += vbCrLf + vbCrLf
                                 sealNo += vbCrLf
-                                netWeight += vbCrLf
-                                tareWeight += vbCrLf
-                                grossWeight += vbCrLf
+                                netWeight += vbCrLf + vbCrLf
+                                tareWeight += vbCrLf + vbCrLf
+                                grossWeight += vbCrLf + vbCrLf
                             End If
 
                             tankNo &= tank.Item("TANKNO").ToString()
                             tankType &= "20'TN"
-                            sealNo &= tank.Item("SEALNO1").ToString()
+                            sealNo &= editSealNoString
                             netWeight &= Convert.ToDecimal(tank.Item("NETWEIGHT")).ToString("#,##0")
                             tareWeight &= Convert.ToDecimal(tank.Item("TAREWEIGHT")).ToString("#,##0")
                             grossWeight &= Convert.ToDecimal(tank.Item("GROSSWEIGHT")).ToString("#,##0")
@@ -696,7 +699,7 @@ Public Class GBT00014BL
                     Next
 
                     '改ページ有無の判定
-                    If tankDt.Rows.Count > 12 Then
+                    If tankDt.Rows.Count > 7 Then
 
                         dt.Rows(0).Item("TANKINFO") = "AS PER" & vbCrLf & " ATTACHED SHEET"
                         attMarksText = "[CONTAINER NO.]" & vbCrLf & vbCrLf & tankTexts
@@ -1020,7 +1023,7 @@ Public Class GBT00014BL
 
                     'タンク情報編集
                     newRow.Item("CONTAINERNO") = tank.Item("TANKNO").ToString()
-                    newRow.Item("SEALNO") = tank.Item("SEALNO1").ToString()
+                    newRow.Item("SEALNO") = EditSealNo(tank, "/")
                     newRow.Item("GROSSWEIGHT") = Convert.ToDecimal(tank.Item("GROSSWEIGHT")).ToString("#,##0")
                     newDt.Rows.Add(newRow)
 
@@ -2231,6 +2234,7 @@ Public Class GBT00014BL
         sqlStat.AppendLine("      ,ISNULL(TD2.CONTACTMAIL,'') AS AGENTPOLMAIL")
         sqlStat.AppendLine("      ,CASE WHEN ETD.ACTDATE = '1900/01/01' THEN '' ELSE FORMAT(ETD.ACTDATE,'MM/dd') END AS BIETDACTDATE ")
 
+        sqlStat.AppendLine("      ,ISNULL(PTTS.AREANAME, '') AS TRANSITPORT")
         sqlStat.AppendLine("      ,CASE WHEN @TRANCLS = '1' THEN OB.TRANSIT1VSL1 ELSE OB.TRANSIT1VSL2 END AS TRANSIT1VSL")
         sqlStat.AppendLine("      ,CASE WHEN @TRANCLS = '1' THEN OB.TRANSIT1VOY1 ELSE OB.TRANSIT1VOY2 END AS TRANSIT1VOY")
         sqlStat.AppendLine("      ,CASE WHEN @TRANCLS = '1' THEN OB.TRANSIT2VSL1 ELSE OB.TRANSIT2VSL2 END AS TRANSIT2VSL")
@@ -8120,6 +8124,37 @@ Public Class GBT00014BL
         End If
 
         Return True
+    End Function
+
+    ''' <summary>
+    ''' SEALNO編集
+    ''' </summary>
+    ''' <param name="dtRow">TANKデータ(GetOrderValue)</param>
+    ''' <param name="sep">連結時セパレータ</param>
+    ''' <param name="br">SEALNO1と2以降に改行有無(TRUE:改行あり)</param>
+    ''' <returns>編集後SEALNO</returns>
+    ''' <remarks>SEALNO2以降は数字部分の下３桁のみ編集</remarks>
+    Private Function EditSealNo(ByRef dtRow As DataRow, sep As String, Optional br As Boolean = False) As String
+
+        'SEALNO2～4を省略編集
+        '数字部分から下３桁を編集
+        Dim seal = New List(Of String)
+        Dim reg As New System.Text.RegularExpressions.Regex("[^\d]")
+        For i As Integer = 1 To 4
+            Dim editItem As String = dtRow.Item("SEALNO" & i).ToString()
+            If i > 1 Then
+                editItem = reg.Replace(editItem, "")
+                If String.IsNullOrEmpty(editItem) Then Continue For
+                editItem = editItem.PadLeft(3, "0"c)
+                editItem = editItem.Substring(editItem.Length - 3)
+            Else
+                If br Then
+                    editItem += vbCrLf
+                End If
+            End If
+            seal.Add(editItem)
+        Next
+        Return String.Join(sep, seal)
     End Function
 
 End Class
