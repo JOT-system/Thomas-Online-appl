@@ -41,6 +41,15 @@ Partial Public Class GBT00007RESULT
     Protected WithEvents lblTitleText As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
+    '''lblTitleCompany コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblTitleCompany As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
     '''lblTitleOffice コントロール。
     '''</summary>
     '''<remarks>

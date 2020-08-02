@@ -390,8 +390,6 @@ Public Class GBM00020EXRATE
                 & "   AND  CT.STYMD <= tbl1.TARGETYM " _
                 & "   AND  CT.ENDYMD >= tbl1.TARGETYM " _
                 & "   WHERE tbl1.DELFLG    <> '" & CONST_FLAG_YES & "'  " _
-                & "   AND   tbl1.STYMD     <= @P1 " _
-                & "   AND   tbl1.ENDYMD    >= @P2 " _
                 & "   AND   NOT EXISTS( "
             '承認画面から遷移の場合
             If Page.PreviousPage Is Nothing Then
@@ -432,8 +430,6 @@ Public Class GBM00020EXRATE
                 & "   AND  CT.STYMD <= tbl3.TARGETYM " _
                 & "   AND  CT.ENDYMD >= tbl3.TARGETYM " _
                 & " WHERE tbl3.DELFLG    <> '" & CONST_FLAG_YES & "'  " _
-                & "   AND   tbl3.STYMD     <= @P1 " _
-                & "   AND   tbl3.ENDYMD    >= @P2 " _
                 & " UNION " _
                 & " SELECT * FROM( " _
                 & "   SELECT ''               as APPLYID , " _

@@ -11,7 +11,50 @@ Public Class GBT00014BL
     Private Const CONST_PREPAID As String = "PREPAID"
     Private Const CONST_COLLECT As String = "COLLECT"
     Private Const CONST_FILETYPE_EXCEL As String = "XLSX"
+    Private Const CONST_FILETYPE_EXCEL_OLD As String = "XLS"
     Private Const CONST_FILETYPE_PDF As String = "PDF"
+    Private Const CONST_HOUSEBLISSUE_TRUE As String = "YES"
+    Private Const CONST_HOUSEBLISSUE_FALSE As String = "NO (=BCO)"
+    Private Const CONST_SENDTYPE_CARRIER As String = "1 CARRIER（代行）"
+    Private Const CONST_SENDTYPE_SELF As String = "2 SELF（自社）"
+
+    Private Const CONST_BOOKING_ONE_SHEET As String = "DRY(RAD)"
+    Private Class CONST_REPORT_ID
+        Public Class ARRIVAL_NOTICE
+            Public Const PREFIX As String = "JOTAN_"
+
+            Public Const ID As String = "JOTAN_ArrivalNotice"
+        End Class
+        Public Class BOOKING
+            Public Const PREFIX As String = "JOTBI_"
+
+            Public Const ONE As String = "JOTBI_BookingONE"
+            Public Const OOCL As String = "JOTBI_BookingOOCL"
+        End Class
+        Public Class SHIPPING_INSTRUCTION
+            Public Const PREFIX As String = "JOTSI_"
+
+            Public Const ID As String = "JOTSI_ShippingInstruction"
+        End Class
+        Public Class DOCK_RECEIPT
+            Public Const PREFIX As String = "JOTDR_"
+
+            Public Const ONE As String = "JOTDR_BLInstructionONE"
+            Public Const OOCL As String = "JOTDR_DockReceiptOOCL"
+        End Class
+        Public Class GATE_IN_SLIP
+            Public Const PREFIX As String = "JOTGI_"
+
+            Public Const ID As String = "JOTGI_GateInSlip"
+            Public Const ONE As String = "JOTGI_GateInSlipONE"
+            Public Const OOCL As String = "JOTGI_GateInSlipOOCL"
+        End Class
+        Public Class FORWARDING_NOTICE
+            Public Const PREFIX As String = "JOTFN_"
+
+            Public Const ID As String = "JOTFN_ForwardingNotice"
+        End Class
+    End Class
 
     ''' <summary>
     ''' ログ出力(クラススコープ ロード時にNewします)
@@ -137,10 +180,10 @@ Public Class GBT00014BL
                     CommonFunctions.ShowMessage(hdnMsgId.Value, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
                 End If
             End If
-                '**********************************************
-                'ポストバック時
-                '**********************************************
-                If IsPostBack Then
+            '**********************************************
+            'ポストバック時
+            '**********************************************
+            If IsPostBack Then
                 '**********************
                 ' テキストボックス変更判定
                 '**********************
@@ -434,7 +477,7 @@ Public Class GBT00014BL
         End If
         Dim reportId As String = Me.lbRightListPrint.SelectedItem.Value
 
-        Dim reportMapId As String = ""
+        Dim reportMapId As String = "GBT00014Print"
 
         '帳票出力
         Dim tmpFile As String = ""
@@ -445,7 +488,6 @@ Public Class GBT00014BL
         Dim pageCnt As Integer = 0
         Dim atchFlg As Boolean = False
         Dim breakPageFlg As Boolean = False
-        reportMapId = "GBT00014Print"
         Dim attMarksText As String = ""
         Dim attMarks As New List(Of String)
         Dim attachedText As String = "AS PER ATTACHED SHEET"
@@ -453,8 +495,9 @@ Public Class GBT00014BL
 
         dt = CollectDisplayReportInfoPrint(Me.hdnOrderNo.Value, Me.hdnWhichTrans.Value)
 
-
-        If reportId = "B/L" OrElse Left(reportId, 6) = "JOTBL_" Then
+        '帳票編集
+        If reportId = "B/L" Then
+#Region "<< B/L >>"
             'Dim colSet = {New With {Key .col = "SHIPPERTEXT", .chara = 45, .line = 5, .itemText = "[Shipper]"},
             '              New With {Key .col = "CONSIGNEETEXT", .chara = 45, .line = 5, .itemText = "[Consignee]"},
             '              New With {Key .col = "NOTIFYTEXT", .chara = 45, .line = 5, .itemText = "[Notify Party]"},
@@ -467,19 +510,18 @@ Public Class GBT00014BL
             '              New With {Key .col = "PREPAID", .chara = 13, .line = 9, .itemText = "[Prepaid]"},
             '              New With {Key .col = "COLLECT", .chara = 15, .line = 9, .itemText = "[Collect]"}}
             Dim colSet = {
-                        New With {Key .col = "SHIPPERTEXT", .chara = 45, .line = 5, .itemText = "[Shipper]"},
-                        New With {Key .col = "CONSIGNEETEXT", .chara = 45, .line = 5, .itemText = "[Consignee]"},
-                        New With {Key .col = "NOTIFYTEXT", .chara = 45, .line = 5, .itemText = "[Notify Party]"},
-                        New With {Key .col = "MARKSANDNUMBERS", .chara = 25, .line = 7, .itemText = "[Marks & Numbers]"},
-                        New With {Key .col = "TANKINFO", .chara = 50, .line = 9, .itemText = "[Container No.]"},
-                        New With {Key .col = "GOODSPKGS", .chara = 40, .line = 18, .itemText = "[Description of Goods]"},
-                        New With {Key .col = "REVENUETONS", .chara = 11, .line = 9, .itemText = "[Revenue Tons]"},
-                        New With {Key .col = "RATE", .chara = 6, .line = 9, .itemText = "[Rate]"},
-                        New With {Key .col = "PER", .chara = 6, .line = 9, .itemText = "[Per]"},
-                        New With {Key .col = "PREPAID", .chara = 13, .line = 9, .itemText = "[Prepaid]"},
-                        New With {Key .col = "COLLECT", .chara = 15, .line = 9, .itemText = "[Collect]"},
-                        New With {Key .col = "FREIGHTANDCHARGES", .chara = 18, .line = 9, .itemText = "[Freight and Charges]"}}
-
+                    New With {Key .col = "SHIPPERTEXT", .chara = 45, .line = 5, .itemText = "[Shipper]"},
+                    New With {Key .col = "CONSIGNEETEXT", .chara = 45, .line = 5, .itemText = "[Consignee]"},
+                    New With {Key .col = "NOTIFYTEXT", .chara = 45, .line = 5, .itemText = "[Notify Party]"},
+                    New With {Key .col = "MARKSANDNUMBERS", .chara = 25, .line = 7, .itemText = "[Marks & Numbers]"},
+                    New With {Key .col = "TANKINFO", .chara = 50, .line = 9, .itemText = "[Container No.]"},
+                    New With {Key .col = "GOODSPKGS", .chara = 40, .line = 18, .itemText = "[Description of Goods]"},
+                    New With {Key .col = "REVENUETONS", .chara = 11, .line = 9, .itemText = "[Revenue Tons]"},
+                    New With {Key .col = "RATE", .chara = 6, .line = 9, .itemText = "[Rate]"},
+                    New With {Key .col = "PER", .chara = 6, .line = 9, .itemText = "[Per]"},
+                    New With {Key .col = "PREPAID", .chara = 13, .line = 9, .itemText = "[Prepaid]"},
+                    New With {Key .col = "COLLECT", .chara = 15, .line = 9, .itemText = "[Collect]"},
+                    New With {Key .col = "FREIGHTANDCHARGES", .chara = 18, .line = 9, .itemText = "[Freight and Charges]"}}
             For Each col In colSet
 
                 '改ページ有無の判定
@@ -596,8 +638,440 @@ Public Class GBT00014BL
                 End With
 
             Next
+#End Region
+        ElseIf reportId = CONST_REPORT_ID.DOCK_RECEIPT.OOCL Then
+#Region "<< DockReceipt >>"
 
-        ElseIf reportId = "ShippingAdvice" OrElse Left(reportId, 6) = "JOTSA_" Then
+            If dt.Rows.Count > 0 Then
+                If dt.Rows(0).Item("TANKINFO").ToString <> "" Then
+                    'タンク情報編集
+                    Dim tankDt As DataTable = GetOrderValue(Me.hdnOrderNo.Value)
+
+                    Dim tankTexts As String = ""
+                    Dim tankText As String = ""
+                    Dim tankNo As String = ""
+                    Dim tankType As String = ""
+                    Dim sealNo As String = ""
+                    Dim netWeight As String = ""
+                    Dim tareWeight As String = ""
+                    Dim grossWeight As String = ""
+
+                    For Each tank As DataRow In tankDt.Rows
+
+                        If tankDt.Rows.Count > 7 Then
+                            If tankTexts.Length <> 0 Then
+                                tankTexts += vbCrLf
+                            End If
+                            Dim editSealNoString = EditSealNo(tank, ",", False)
+
+                            tankText = String.Format("{0,-15} / {1,-5} / {2,-20} / {3,10} / {4,10} / {5,10} / {6,10} / {7,10} / {8,10}",
+                                                 tank.Item("TANKNO").ToString(),
+                                                 "20'TK",
+                                                 editSealNoString,
+                                                 "",
+                                                 Convert.ToDecimal(tank.Item("NETWEIGHT")).ToString("#,##0"),
+                                                 Convert.ToDecimal(tank.Item("TAREWEIGHT")).ToString("#,##0"),
+                                                 Convert.ToDecimal(tank.Item("GROSSWEIGHT")).ToString("#,##0"),
+                                                 "",
+                                                 "")
+                            tankTexts &= tankText
+                        Else
+                            Dim editSealNoString = EditSealNo(tank, ",", True)
+
+                            If tankNo.Length <> 0 Then
+
+                                tankNo += vbCrLf + vbCrLf
+                                tankType += vbCrLf + vbCrLf
+                                sealNo += vbCrLf
+                                netWeight += vbCrLf + vbCrLf
+                                tareWeight += vbCrLf + vbCrLf
+                                grossWeight += vbCrLf + vbCrLf
+                            End If
+
+                            tankNo &= tank.Item("TANKNO").ToString()
+                            tankType &= "20'TN"
+                            sealNo &= editSealNoString
+                            netWeight &= Convert.ToDecimal(tank.Item("NETWEIGHT")).ToString("#,##0")
+                            tareWeight &= Convert.ToDecimal(tank.Item("TAREWEIGHT")).ToString("#,##0")
+                            grossWeight &= Convert.ToDecimal(tank.Item("GROSSWEIGHT")).ToString("#,##0")
+                        End If
+
+                    Next
+
+                    '改ページ有無の判定
+                    If tankDt.Rows.Count > 7 Then
+
+                        dt.Rows(0).Item("TANKINFO") = "AS PER" & vbCrLf & " ATTACHED SHEET"
+                        attMarksText = "[CONTAINER NO.]" & vbCrLf & vbCrLf & tankTexts
+
+                        breakPageFlg = True
+                    Else
+                        dt.Columns.Add("TYPE")
+                        dt.Columns.Add("SEALNO")
+                        dt.Columns.Add("CARGOWT")
+                        dt.Columns.Add("TAREWT")
+                        dt.Columns.Add("GROSSWT")
+
+                        dt.Rows(0).Item("TANKINFO") = tankNo
+                        dt.Rows(0).Item("TYPE") = tankType
+                        dt.Rows(0).Item("SEALNO") = sealNo
+                        dt.Rows(0).Item("CARGOWT") = netWeight
+                        dt.Rows(0).Item("TAREWT") = tareWeight
+                        dt.Rows(0).Item("GROSSWT") = grossWeight
+                    End If
+
+                End If
+                dt.Rows(0).Item("DRQUANTITYPACKAGES") = dt.Rows(0).Item("DRQUANTITYPACKAGES").ToString.Replace(" ONLY", "")
+
+
+                '改ページ有
+                If breakPageFlg Then
+
+                    Dim attMarksTexts As String() = Nothing
+                    Dim attPageText As String
+                    Dim atchLine As Integer
+
+                    attMarksTexts = Split(attMarksText, vbLf)
+                    attPageText = ""
+
+                    For Each LineText In attMarksTexts
+                        atchLine = atchLine + 1
+                        If atchLine > ATTACHLINE Then
+                            attMarks.Add(attPageText)
+                            pageCnt = pageCnt + 1
+                            atchLine = 1
+                            attPageText = LineText & vbLf
+                        Else
+                            attPageText = attPageText & LineText & vbLf
+                        End If
+                    Next
+
+                    If atchLine <> 0 Then
+                        attMarks.Add(attPageText)
+                        atchLine = 0
+                        pageCnt = pageCnt + 1
+                    End If
+
+                End If
+
+                For i As Integer = 0 To pageCnt
+
+                    If atchFlg Then
+                        reportId = "Attached"
+
+                        If dt.Rows(0).Item("BLID").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("BLID") = "B/L No. : " & Convert.ToString(dt.Rows(0).Item("BLID"))
+                        End If
+
+                        If dt.Rows(0).Item("VOY").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("VOY") = "Voyage No. : " & Convert.ToString(dt.Rows(0).Item("VOY"))
+                        End If
+
+                        If dt.Rows(0).Item("VSL").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("VSL") = "Vessel Name : " & Convert.ToString(dt.Rows(0).Item("VSL"))
+                        End If
+
+                        If attMarks(i - 1) <> "" Then
+
+                            dt.Rows(0).Item("ATTMARKS") = attMarks(i - 1)
+
+                        End If
+
+                    End If
+
+
+                    With Nothing
+                        Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
+
+                        COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
+                        COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
+
+                        If breakPageFlg = True AndAlso i <> pageCnt OrElse filetype = CONST_FILETYPE_EXCEL Then
+                            COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL_OLD         'PARAM03:出力ファイル形式
+                        Else
+                            COA0027ReportTable.FILETYPE = filetype                         'PARAM03:出力ファイル形式
+                        End If
+                        COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
+                        If atchFlg Then
+                            COA0027ReportTable.ADDSHEET = "Attached Sheet"                 'PARAM07:追記シート（任意）
+                            COA0027ReportTable.ADDSHEETNO = i.ToString                     'PARAM08:追記シートNO（任意）
+                            If tmpFile <> "" Then
+                                COA0027ReportTable.ADDFILE = tmpFile                       'PARAM06:追記ファイル（フルパス（O_FILEpath））
+                            End If
+                        End If
+
+                        COA0027ReportTable.COA0027ReportTable()
+
+                        dt.Columns.Remove("ROWKEY")
+                        dt.Columns.Remove("CELLNO")
+                        dt.Columns.Remove("ROWCNT")
+
+                        If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
+                            CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
+                        Else
+                            CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                            Return
+                        End If
+
+                        atchFlg = True
+                        tmpFile = COA0027ReportTable.FILEpath
+                        outUrl = COA0027ReportTable.URL
+
+                    End With
+
+                Next
+            End If
+
+#End Region
+        ElseIf reportId = CONST_REPORT_ID.DOCK_RECEIPT.ONE Then
+#Region "<< B/L Instruction >>"
+            Const CONTAINERNLINE = 8         '本紙 Sheetのコンテナ出力行数
+            Const CLPLINE As Integer = 22    'CLP Sheetのコンテナ出力行数
+            Const CLP_REPORT_ID = "JOTDR_BLInstructionONE_CLP"
+
+            If dt.Rows.Count > 0 Then
+                Dim dtRow = dt.Rows(0)
+
+                'タンク情報取得
+                Dim tankDt As DataTable = GetOrderValue(Me.hdnOrderNo.Value)
+                '改ページ有無の判定
+                If tankDt.Rows.Count > CONTAINERNLINE Then
+                    pageCnt = Convert.ToInt16(Math.Ceiling(tankDt.Rows.Count / CLPLINE))
+                    breakPageFlg = True
+                End If
+
+                Dim dtCnt As Integer = 0
+                Dim addColCnt As Integer = 0
+                For i As Integer = 0 To pageCnt
+
+                    'タンク情報編集
+                    If tankDt.Rows.Count > 0 Then
+                        For rowNum As Integer = 1 To CLPLINE
+                            If breakPageFlg = False AndAlso rowNum > CONTAINERNLINE Then
+                                Exit For
+                            End If
+                            If rowNum > addColCnt Then
+                                addColCnt += 1
+                                dt.Columns.Add("CONTAINERNO" & addColCnt)
+                                dt.Columns.Add("SEALNO" & addColCnt)
+                                dt.Columns.Add("SIZE" & addColCnt)
+                                dt.Columns.Add("TYPE" & addColCnt)
+                                dt.Columns.Add("TAREWT" & addColCnt)
+                            Else
+                                dtRow.Item("CONTAINERNO" & rowNum) = ""
+                                dtRow.Item("SEALNO" & rowNum) = ""
+                                dtRow.Item("SIZE" & rowNum) = ""
+                                dtRow.Item("TYPE" & rowNum) = ""
+                                dtRow.Item("TAREWT" & rowNum) = ""
+                            End If
+
+                            If breakPageFlg = True AndAlso i = 0 Then
+                                '本紙は8行しか項目ない為、超える場合は全件CLPへ編集、その場合は本紙1行目にその旨を記載
+                                dtRow.Item("CONTAINERNO" & 1) = attachedText
+                                Exit For
+                            End If
+                            If dtCnt < tankDt.Rows.Count Then
+                                Dim tank As DataRow = tankDt.Rows(dtCnt)
+                                dtRow.Item("CONTAINERNO" & rowNum) = tank.Item("TANKNO").ToString()
+                                dtRow.Item("SEALNO" & rowNum) = tank.Item("SEALNO1").ToString()
+                                dtRow.Item("SIZE" & rowNum) = tank.Item("TANKTYPE").ToString()
+                                dtRow.Item("TYPE" & rowNum) = "TNK"
+                                If Not String.IsNullOrEmpty(tank.Item("TAREWEIGHT").ToString()) Then
+                                    dtRow.Item("TAREWT" & rowNum) = Convert.ToDecimal(tank.Item("TAREWEIGHT")).ToString("#,##0")
+                                End If
+                                dtCnt += 1
+                            End If
+
+                        Next
+
+                    End If
+
+
+                    If atchFlg Then
+                        reportId = CLP_REPORT_ID
+                    End If
+
+                    With Nothing
+                        Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
+
+                        COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
+                        COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
+
+                        If breakPageFlg = True AndAlso i <> pageCnt Then
+                            COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL             'PARAM03:出力ファイル形式
+                        Else
+                            COA0027ReportTable.FILETYPE = filetype                         'PARAM03:出力ファイル形式
+                        End If
+                        COA0027ReportTable.ADDSHEET = "BL INSTRUCTIONS"
+                        COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
+                        If atchFlg Then
+                            COA0027ReportTable.ADDSHEET = "SUPPLIMENTAL SHEET (CLP) "                 'PARAM07:追記シート（任意）
+                            COA0027ReportTable.ADDSHEETNO = i.ToString                     'PARAM08:追記シートNO（任意）
+                            If tmpFile <> "" Then
+                                COA0027ReportTable.ADDFILE = tmpFile                       'PARAM06:追記ファイル（フルパス（O_FILEpath））
+                            End If
+                        End If
+
+                        COA0027ReportTable.COA0027ReportTable()
+
+                        dt.Columns.Remove("ROWKEY")
+                        dt.Columns.Remove("CELLNO")
+                        dt.Columns.Remove("ROWCNT")
+
+                        If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
+                            CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
+                        Else
+                            CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                            Return
+                        End If
+
+                        atchFlg = True
+                        tmpFile = COA0027ReportTable.FILEpath
+                        outUrl = COA0027ReportTable.URL
+
+                    End With
+
+                Next
+            End If
+
+#End Region
+        ElseIf reportId = CONST_REPORT_ID.GATE_IN_SLIP.ID Then
+#Region "<< CY搬入票 >>"
+            Const sheetName = "塩竈港運送"
+            If dt.Rows.Count > 0 Then
+                Dim dtRow = dt.Rows(0)
+
+                'タンク情報取得
+                Dim tankDt As DataTable = GetOrderValue(Me.hdnOrderNo.Value)
+                pageCnt = tankDt.Rows.Count
+
+                Dim newDt As DataTable = New DataTable
+                newDt.Columns.Add("VSL")
+                newDt.Columns.Add("VOY")
+                newDt.Columns.Add("BOOKINGNO")
+                newDt.Columns.Add("CONTAINERNO")
+                newDt.Columns.Add("SEALNO")
+                newDt.Columns.Add("GROSSWEIGHT")
+                newDt.Columns.Add("PORTOFDISCHARGE")
+                newDt.Columns.Add("PRODUCT")
+                newDt.Columns.Add("GITERM")
+                newDt.Columns.Add("EMPTY")
+                newDt.Columns.Add("CHKOOCL")
+                newDt.Columns.Add("CHKKMTC")
+                newDt.Columns.Add("CHKONE")
+
+                newDt.Columns.Add("OUTPUT_YEAR1")
+                newDt.Columns.Add("OUTPUT_YEAR2")
+                newDt.Columns.Add("OUTPUT_YEAR3")
+                newDt.Columns.Add("OUTPUT_YEAR4")
+                newDt.Columns.Add("OUTPUT_MONTH1")
+                newDt.Columns.Add("OUTPUT_MONTH2")
+                newDt.Columns.Add("OUTPUT_DAY1")
+                newDt.Columns.Add("OUTPUT_DAY2")
+
+                Dim product As String = ""
+                product &= dtRow.Item("PRODUCTNAME").ToString()
+                product &= " / " & dtRow.Item("IMDGCODE").ToString()
+                product &= " / " & dtRow.Item("UNNO").ToString()
+
+                '船社チェック欄
+                Dim chkOOCL As String = ""
+                Dim chkKMTC As String = ""
+                Dim chkONE As String = ""
+                Select Case dtRow.Item("CARRIER1").ToString()
+                    Case "JPT00223", "JPT00227"
+                        chkOOCL = "✔"
+                    Case "JPC00060"
+                        chkKMTC = "✔"
+                    Case "JPC00083"
+                        chkONE = "✔"
+                    Case Else
+                End Select
+
+                Dim outputDate As String = Today().ToString("yyyyMMdd")
+
+                atchFlg = True
+                Dim dtCnt As Integer = 0
+                For i As Integer = 0 To pageCnt - 1
+                    newDt.Clear()
+                    Dim tank = tankDt.Rows(i)
+                    Dim newRow = newDt.NewRow
+                    '共通情報編集
+                    newRow.Item("VSL") = dtRow.Item("VSL").ToString()
+                    newRow.Item("VOY") = "Voy No. " & dtRow.Item("VOY").ToString()
+                    newRow.Item("BOOKINGNO") = dtRow.Item("BOOKINGNO").ToString()
+                    newRow.Item("PORTOFDISCHARGE") = dtRow.Item("PORTOFDISCHARGE").ToString()
+                    newRow.Item("PRODUCT") = product
+                    newRow.Item("GITERM") = dtRow.Item("GITERM").ToString()
+                    newRow.Item("EMPTY") = ""
+                    newRow.Item("CHKOOCL") = chkOOCL
+                    newRow.Item("CHKKMTC") = chkKMTC
+                    newRow.Item("CHKONE") = chkONE
+
+                    newRow.Item("OUTPUT_YEAR1") = outputDate(0)
+                    newRow.Item("OUTPUT_YEAR2") = outputDate(1)
+                    newRow.Item("OUTPUT_YEAR3") = outputDate(2)
+                    newRow.Item("OUTPUT_YEAR4") = outputDate(3)
+                    newRow.Item("OUTPUT_MONTH1") = outputDate(4)
+                    newRow.Item("OUTPUT_MONTH2") = outputDate(5)
+                    newRow.Item("OUTPUT_DAY1") = outputDate(6)
+                    newRow.Item("OUTPUT_DAY2") = outputDate(7)
+
+
+                    'タンク情報編集
+                    newRow.Item("CONTAINERNO") = tank.Item("TANKNO").ToString()
+                    newRow.Item("SEALNO") = EditSealNo(tank, "/")
+                    newRow.Item("GROSSWEIGHT") = Convert.ToDecimal(tank.Item("GROSSWEIGHT")).ToString("#,##0")
+                    newDt.Rows.Add(newRow)
+
+                    With Nothing
+                        Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
+
+                        COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
+                        COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
+
+                        If breakPageFlg = True AndAlso i <> pageCnt Then
+                            COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL             'PARAM03:出力ファイル形式
+                        Else
+                            COA0027ReportTable.FILETYPE = filetype                         'PARAM03:出力ファイル形式
+                        End If
+                        COA0027ReportTable.TBLDATA = newDt                                    'PARAM04:データ参照tabledata
+                        If atchFlg Then
+                            COA0027ReportTable.ADDSHEET = sheetName                 'PARAM07:追記シート（任意）
+                            COA0027ReportTable.ADDSHEETNO = (i + 1).ToString                     'PARAM08:追記シートNO（任意）
+                            If tmpFile <> "" Then
+                                COA0027ReportTable.ADDFILE = tmpFile                       'PARAM06:追記ファイル（フルパス（O_FILEpath））
+                            End If
+                        End If
+
+                        COA0027ReportTable.COA0027ReportTable()
+
+                        newDt.Columns.Remove("ROWKEY")
+                        newDt.Columns.Remove("CELLNO")
+                        newDt.Columns.Remove("ROWCNT")
+
+                        If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
+                            CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
+                        Else
+                            CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                            Return
+                        End If
+
+                        atchFlg = True
+                        tmpFile = COA0027ReportTable.FILEpath
+                        outUrl = COA0027ReportTable.URL
+
+                    End With
+
+                Next
+            End If
+
+#End Region
+        ElseIf reportId = "ShippingAdvice" Then
+#Region "<< ShippingAdvice >>"
             If dt.Rows.Count > 0 Then
 
                 Dim shipText As String() = Nothing
@@ -644,13 +1118,36 @@ Public Class GBT00014BL
 
             End If
 
+            With Nothing
+                Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
 
-        ElseIf reportId = "ArrivalNotice" OrElse Left(reportId, 6) = "JOTAN_" Then
+                COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
+                COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
+                COA0027ReportTable.FILETYPE = filetype                             'PARAM03:出力ファイル形式
+                COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
+                COA0027ReportTable.COA0027ReportTable()
+
+                If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
+                    CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
+                Else
+                    CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                    Return
+                End If
+
+                tmpFile = COA0027ReportTable.FILEpath
+                outUrl = COA0027ReportTable.URL
+
+            End With
+
+#End Region
+        ElseIf reportId = "ArrivalNotice" Then
+#Region "<< ArrivalNotice >>"
+
             If dt.Rows.Count > 0 Then
 
                 Dim colSet = {
-                        New With {Key .col = "TANKNO", .chara = 11, .line = 1, .itemText = "[TANK NOS ]"}
-                }
+                            New With {Key .col = "TANKNO", .chara = 11, .line = 1, .itemText = "[TANK NOS ]"}
+                    }
                 'New With {Key .col = "TANKNO", .chara = 59, .line = 1, .itemText = "[TANK NOS ]"}
 
                 For Each col In colSet
@@ -673,9 +1170,13 @@ Public Class GBT00014BL
 
                 ' 取得データ補正
                 If reportId = "ArrivalNotice" Then
-                    dt.Rows(0).Item("CONSIGNEENAME") = "TO: " & Convert.ToString(dt.Rows(0).Item("CONSIGNEENAME"))
+                    dt.Rows(0).Item("CONSIGNEENAME") = "To:  " & Convert.ToString(dt.Rows(0).Item("CONSIGNEENAME"))
                 Else
-                    dt.Rows(0).Item("CONSIGNEENAME") = "To: " & Convert.ToString(dt.Rows(0).Item("CONSIGNEENAME"))
+                    dt.Rows(0).Item("GROSSWEIGHT") = Convert.ToString(dt.Rows(0).Item("GROSSWEIGHT")) & " KGS"
+                    dt.Rows(0).Item("NETWEIGHT") = Convert.ToString(dt.Rows(0).Item("NETWEIGHT")) & " KGS"
+
+                    dt.Rows(0).Item("DEMURUSRATE1") = "USD. " & NumberFormat(Convert.ToString(dt.Rows(0).Item("DEMURUSRATE1")), "", "#,##0.00")
+                    dt.Rows(0).Item("DEMURUSRATE2") = "USD. " & NumberFormat(Convert.ToString(dt.Rows(0).Item("DEMURUSRATE2")), "", "#,##0.00")
                 End If
 
                 Dim shipText As String() = Nothing
@@ -712,7 +1213,7 @@ Public Class GBT00014BL
 
                 For i As Integer = 0 To notfText.Count - 1
 
-                    If i > 1 Then
+                    If i > 2 Then
                         Exit For
                     End If
 
@@ -767,6 +1268,440 @@ Public Class GBT00014BL
                     If atchFlg Then
                         reportId = "Attached"
 
+                        If dt.Rows(0).Item("BLID").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("BLID") = "B/L No. : " & Convert.ToString(dt.Rows(0).Item("BLID"))
+                        End If
+
+                        If dt.Rows(0).Item("VOY").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("VOY") = "Voyage No. : " & Convert.ToString(dt.Rows(0).Item("VOY"))
+                        End If
+
+                        If dt.Rows(0).Item("VSL").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("VSL") = "Vessel Name : " & Convert.ToString(dt.Rows(0).Item("VSL"))
+                        End If
+
+                        If attMarks(i - 1) <> "" Then
+
+                            dt.Rows(0).Item("ATTMARKS") = Replace(attMarks(i - 1), ",", vbCrLf)
+
+                        End If
+
+                    End If
+
+                    With Nothing
+                        Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
+
+                        COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
+                        COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
+                        'If breakPageFlg = True AndAlso atchFlg = False Then
+                        If breakPageFlg = True AndAlso i <> pageCnt Then
+                            COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL             'PARAM03:出力ファイル形式
+                        Else
+                            COA0027ReportTable.FILETYPE = filetype                         'PARAM03:出力ファイル形式
+                        End If
+                        COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
+                        If atchFlg Then
+                            COA0027ReportTable.ADDSHEET = "Attached Sheet"                 'PARAM07:追記シート（任意）
+                            COA0027ReportTable.ADDSHEETNO = i.ToString                     'PARAM08:追記シートNO（任意）
+                            If tmpFile <> "" Then
+                                COA0027ReportTable.ADDFILE = tmpFile                       'PARAM06:追記ファイル（フルパス（O_FILEpath））
+                            End If
+                        End If
+
+                        COA0027ReportTable.COA0027ReportTable()
+
+                        dt.Columns.Remove("ROWKEY")
+                        dt.Columns.Remove("CELLNO")
+                        dt.Columns.Remove("ROWCNT")
+
+                        If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
+                            CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
+                        Else
+                            CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                            Return
+                        End If
+
+                        atchFlg = True
+                        tmpFile = COA0027ReportTable.FILEpath
+                        outUrl = COA0027ReportTable.URL
+
+                    End With
+
+                Next
+
+            End If
+#End Region
+        ElseIf reportId.StartsWith(CONST_REPORT_ID.ARRIVAL_NOTICE.ID) Then
+#Region "<< JOT ArrivalNotice >>"
+
+            If dt.Rows.Count > 0 Then
+
+                Dim colSet = {
+                            New With {Key .col = "TANKNO", .chara = 11, .line = 1, .itemText = "[TANK NOS ]"}
+                    }
+                'New With {Key .col = "TANKNO", .chara = 59, .line = 1, .itemText = "[TANK NOS ]"}
+
+                For Each col In colSet
+
+                    '改ページ有無の判定
+                    If indentionCheck(col.chara, col.line, Convert.ToString(dt.Rows(0).Item(col.col))) Then
+
+                        If attMarksText <> "" Then
+                            attMarksText = attMarksText & vbCrLf & vbCrLf
+                        End If
+
+                        attMarksText = attMarksText & col.itemText & vbCrLf & vbCrLf & Convert.ToString(dt.Rows(0).Item(col.col))
+
+                        dt.Rows(0).Item(col.col) = attachedText
+
+                        breakPageFlg = True
+
+                    End If
+                Next
+
+                ' 取得データ補正
+                If reportId = "ArrivalNotice" Then
+                    dt.Rows(0).Item("CONSIGNEENAME") = "To:  " & Convert.ToString(dt.Rows(0).Item("CONSIGNEENAME"))
+                Else
+                    dt.Rows(0).Item("GROSSWEIGHT") = Convert.ToString(dt.Rows(0).Item("GROSSWEIGHT")) & " KGS"
+                    dt.Rows(0).Item("NETWEIGHT") = Convert.ToString(dt.Rows(0).Item("NETWEIGHT")) & " KGS"
+
+                    dt.Rows(0).Item("DEMURUSRATE1") = "USD. " & NumberFormat(Convert.ToString(dt.Rows(0).Item("DEMURUSRATE1")), "", "#,##0.00")
+                    dt.Rows(0).Item("DEMURUSRATE2") = "USD. " & NumberFormat(Convert.ToString(dt.Rows(0).Item("DEMURUSRATE2")), "", "#,##0.00")
+                End If
+
+                Dim shipText As String() = Nothing
+
+                shipText = Split(dt.Rows(0).Item("SHIPPERTEXT1").ToString, vbCrLf)
+
+                For i As Integer = 0 To shipText.Count - 1
+
+                    If i > 3 Then
+                        Exit For
+                    End If
+
+                    dt.Rows(0).Item("SHIPPERTEXT" & (i + 1).ToString) = shipText(i)
+
+                Next
+
+                Dim consText As String() = Nothing
+
+                consText = Split(dt.Rows(0).Item("CONSIGNEETEXT1").ToString, vbCrLf)
+
+                For i As Integer = 0 To consText.Count - 1
+
+                    If i > 3 Then
+                        Exit For
+                    End If
+
+                    dt.Rows(0).Item("CONSIGNEETEXT" & (i + 1).ToString) = consText(i)
+
+                Next
+
+                Dim notfText As String() = Nothing
+
+                notfText = Split(dt.Rows(0).Item("NOTIFYTEXT1").ToString, vbCrLf)
+
+                For i As Integer = 0 To notfText.Count - 1
+
+                    If i > 3 Then
+                        Exit For
+                    End If
+
+                    dt.Rows(0).Item("NOTIFYTEXT" & (i + 1).ToString) = notfText(i)
+
+                Next
+
+                Dim freAndChg As String = Nothing
+
+                freAndChg = dt.Rows(0).Item("FREIGHTANDCHARGES").ToString
+
+                If freAndChg.ToUpper.Contains(CONST_PREPAID) Then
+                    dt.Rows(0).Item("FREIGHTANDCHARGES") = CONST_PREPAID
+                ElseIf freAndChg.ToUpper.Contains(CONST_COLLECT) Then
+                    dt.Rows(0).Item("FREIGHTANDCHARGES") = CONST_COLLECT
+                Else
+                    dt.Rows(0).Item("FREIGHTANDCHARGES") = ""
+                End If
+
+                '改ページ有
+                If breakPageFlg Then
+
+                    Dim attMarksTexts As String() = Nothing
+                    Dim attPageText As String
+                    Dim atchLine As Integer
+
+                    attMarksTexts = Split(attMarksText, vbLf)
+                    attPageText = ""
+
+                    For Each LineText In attMarksTexts
+                        atchLine = atchLine + 1
+                        If atchLine > ATTACHLINE Then
+                            attMarks.Add(attPageText)
+                            pageCnt = pageCnt + 1
+                            atchLine = 1
+                            attPageText = LineText & vbLf
+                        Else
+                            attPageText = attPageText & LineText & vbLf
+                        End If
+                    Next
+
+                    If atchLine <> 0 Then
+                        attMarks.Add(attPageText)
+                        atchLine = 0
+                        pageCnt = pageCnt + 1
+                    End If
+
+                End If
+
+                For i As Integer = 0 To pageCnt
+
+                    If atchFlg Then
+                        reportId = "Attached"
+
+                        If dt.Rows(0).Item("BLID").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("BLID") = "B/L No. : " & Convert.ToString(dt.Rows(0).Item("BLID"))
+                        End If
+
+                        If dt.Rows(0).Item("VOY").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("VOY") = "Voyage No. : " & Convert.ToString(dt.Rows(0).Item("VOY"))
+                        End If
+
+                        If dt.Rows(0).Item("VSL").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("VSL") = "Vessel Name : " & Convert.ToString(dt.Rows(0).Item("VSL"))
+                        End If
+
+                        If attMarks(i - 1) <> "" Then
+
+                            dt.Rows(0).Item("ATTMARKS") = Replace(attMarks(i - 1), ",", vbCrLf)
+
+                        End If
+
+                    End If
+
+                    With Nothing
+                        Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
+
+                        COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
+                        COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
+                        'If breakPageFlg = True AndAlso atchFlg = False Then
+                        If breakPageFlg = True AndAlso i <> pageCnt Then
+                            COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL             'PARAM03:出力ファイル形式
+                        Else
+                            COA0027ReportTable.FILETYPE = filetype                         'PARAM03:出力ファイル形式
+                        End If
+                        COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
+                        If atchFlg Then
+                            COA0027ReportTable.ADDSHEET = "Attached Sheet"                 'PARAM07:追記シート（任意）
+                            COA0027ReportTable.ADDSHEETNO = i.ToString                     'PARAM08:追記シートNO（任意）
+                            If tmpFile <> "" Then
+                                COA0027ReportTable.ADDFILE = tmpFile                       'PARAM06:追記ファイル（フルパス（O_FILEpath））
+                            End If
+                        End If
+
+                        COA0027ReportTable.COA0027ReportTable()
+
+                        dt.Columns.Remove("ROWKEY")
+                        dt.Columns.Remove("CELLNO")
+                        dt.Columns.Remove("ROWCNT")
+
+                        If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
+                            CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
+                        Else
+                            CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                            Return
+                        End If
+
+                        atchFlg = True
+                        tmpFile = COA0027ReportTable.FILEpath
+                        outUrl = COA0027ReportTable.URL
+
+                    End With
+
+                Next
+
+            End If
+#End Region
+        ElseIf reportId = "ShippingInstruction" OrElse reportId.StartsWith(CONST_REPORT_ID.SHIPPING_INSTRUCTION.ID) Then
+#Region "<< ShippingInstruction >>"
+            If dt.Rows.Count > 0 Then
+
+                Dim colSet = {
+                            New With {Key .col = "TANKNO", .chara = 11, .line = 9, .itemText = "[TANK NOS ]"}
+                    }
+                For Each col In colSet
+
+                    '改ページ有無の判定
+                    If indentionCheck(col.chara, col.line, Convert.ToString(dt.Rows(0).Item(col.col))) Then
+
+                        If attMarksText <> "" Then
+                            attMarksText = attMarksText & vbCrLf & vbCrLf
+                        End If
+
+                        attMarksText = attMarksText & col.itemText & vbCrLf & vbCrLf & Convert.ToString(dt.Rows(0).Item(col.col))
+
+                        dt.Rows(0).Item(col.col) = attachedText
+
+                        breakPageFlg = True
+
+                    End If
+                Next
+
+                ' 取得データ補正
+                Dim shipText As String() = Nothing
+
+                shipText = Split(dt.Rows(0).Item("AGENTPOLTEXT1").ToString, vbCrLf)
+
+                For i As Integer = 0 To shipText.Count - 1
+
+                    If i > 2 Then
+                        Exit For
+                    End If
+
+                    dt.Rows(0).Item("AGENTPOLTEXT" & (i + 1).ToString) = shipText(i)
+
+                Next
+
+                Dim consText As String() = Nothing
+
+                consText = Split(dt.Rows(0).Item("AGENTPODTEXT1").ToString, vbCrLf)
+
+                For i As Integer = 0 To consText.Count - 1
+
+                    If i > 4 Then
+                        Exit For
+                    End If
+
+                    dt.Rows(0).Item("AGENTPODTEXT" & (i + 1).ToString) = consText(i)
+
+                Next
+
+                Dim notfText As String() = Nothing
+
+                notfText = Split(dt.Rows(0).Item("AGENTNOTIFYTEXT1").ToString, vbCrLf)
+
+                For i As Integer = 0 To notfText.Count - 1
+
+                    If i > 4 Then
+                        Exit For
+                    End If
+
+                    dt.Rows(0).Item("AGENTNOTIFYTEXT" & (i + 1).ToString) = notfText(i)
+
+                Next
+
+                'タンク
+                If dt.Rows(0).Item("TANKNO").ToString <> "" Then
+
+                    Dim tankText As String() = Nothing
+                    Dim tankNo As String = ""
+                    Dim tareWeight As String = ""
+                    Dim capacity As String = ""
+
+                    If dt.Rows(0).Item("TANKNO").ToString = attachedText Then
+                        tankText = Split(Split(attMarksText, vbCrLf)(2), ",")
+                    Else
+                        tankText = Split(dt.Rows(0).Item("TANKNO").ToString, ",")
+                    End If
+
+
+                    For i As Integer = 0 To tankText.Count - 1
+
+                        If i <> 0 Then
+                            tankNo += vbCrLf
+                            tareWeight += vbCrLf
+                            capacity += vbCrLf
+                        End If
+
+                        Dim tankDt As DataTable = GetTank(tankText(i))
+
+                        If dt.Rows(0).Item("TANKNO").ToString = attachedText Then
+                            tankNo += tankText(i) + " " + Convert.ToDecimal(tankDt.Rows(0).Item("TAREWEIGHT")).ToString("#,##0") & " KGS"
+                        Else
+                            tankNo += tankText(i)
+                            tareWeight += Convert.ToDecimal(tankDt.Rows(0).Item("TAREWEIGHT")).ToString("#,##0") & " KGS"
+                            capacity += Convert.ToDecimal(tankDt.Rows(0).Item("TANKCAPACITY")).ToString("#,##0") & " LTR"
+                        End If
+
+
+                    Next
+
+                    If dt.Rows(0).Item("TANKNO").ToString = attachedText Then
+                        attMarksText = Split(attMarksText, vbCrLf)(0) + vbCrLf + vbCrLf + tankNo
+                    Else
+                        dt.Rows(0).Item("TANKNO") = tankNo
+                        dt.Rows(0).Item("SHIPTAREWEIGHT") = tareWeight
+                        dt.Rows(0).Item("TANKCAPACITY") = capacity
+                    End If
+                End If
+
+                Dim freAndChg As String = Nothing
+
+                freAndChg = dt.Rows(0).Item("FREIGHTANDCHARGES").ToString
+
+                If freAndChg.ToUpper.Contains(CONST_PREPAID) Then
+                    dt.Rows(0).Item("FREIGHT") = CONST_PREPAID
+                ElseIf freAndChg.ToUpper.Contains(CONST_COLLECT) Then
+                    dt.Rows(0).Item("FREIGHT") = CONST_COLLECT
+                Else
+                    dt.Rows(0).Item("FREIGHT") = ""
+                End If
+                '改ページ有
+                If breakPageFlg Then
+
+                    Dim attMarksTexts As String() = Nothing
+                    Dim attPageText As String
+                    Dim atchLine As Integer
+
+                    attMarksTexts = Split(attMarksText, vbLf)
+                    attPageText = ""
+
+                    For Each LineText In attMarksTexts
+                        atchLine = atchLine + 1
+                        If atchLine > ATTACHLINE Then
+                            attMarks.Add(attPageText)
+                            pageCnt = pageCnt + 1
+                            atchLine = 1
+                            attPageText = LineText & vbLf
+                        Else
+                            attPageText = attPageText & LineText & vbLf
+                        End If
+                    Next
+
+                    If atchLine <> 0 Then
+                        attMarks.Add(attPageText)
+                        atchLine = 0
+                        pageCnt = pageCnt + 1
+                    End If
+
+                End If
+
+                For i As Integer = 0 To pageCnt
+
+                    If atchFlg Then
+                        reportId = "Attached"
+
+                        If dt.Rows(0).Item("BLID").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("BLID") = "B/L No. : " & Convert.ToString(dt.Rows(0).Item("BLID"))
+                        End If
+
+                        If dt.Rows(0).Item("VOY").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("VOY") = "Voyage No. : " & Convert.ToString(dt.Rows(0).Item("VOY"))
+                        End If
+
+                        If dt.Rows(0).Item("VSL").ToString <> "" AndAlso i = 1 Then
+
+                            dt.Rows(0).Item("VSL") = "Vessel Name : " & Convert.ToString(dt.Rows(0).Item("VSL"))
+                        End If
+
                         If attMarks(i - 1) <> "" Then
 
                             dt.Rows(0).Item("ATTMARKS") = attMarks(i - 1)
@@ -817,8 +1752,9 @@ Public Class GBT00014BL
                 Next
 
             End If
-
-        ElseIf reportId = "ShippingInstruction" OrElse Left(reportId, 6) = "JOTSI_" Then
+#End Region
+        ElseIf reportId.StartsWith(CONST_REPORT_ID.BOOKING.PREFIX) Then
+#Region "<< Booking >>"
             If dt.Rows.Count > 0 Then
 
                 Dim shipText As String() = Nothing
@@ -862,38 +1798,6 @@ Public Class GBT00014BL
                     dt.Rows(0).Item("AGENTNOTIFYTEXT" & (i + 1).ToString) = notfText(i)
 
                 Next
-
-                'タンク
-                If dt.Rows(0).Item("TANKNO").ToString <> "" Then
-
-                    Dim tankText As String() = Nothing
-                    Dim tankNo As String = ""
-                    Dim tareWeight As String = ""
-                    Dim capacity As String = ""
-
-                    tankText = Split(dt.Rows(0).Item("TANKNO").ToString, ",")
-
-                    For i As Integer = 0 To tankText.Count - 1
-
-                        If i <> 0 Then
-                            tankNo += vbCrLf
-                            tareWeight += vbCrLf
-                            capacity += vbCrLf
-                        End If
-
-                        tankNo += tankText(i)
-
-                        Dim tankDt As DataTable = GetTank(tankText(i))
-                        tareWeight += Convert.ToDecimal(tankDt.Rows(0).Item("TAREWEIGHT")).ToString("#,##0") & " KGS"
-                        capacity += Convert.ToDecimal(tankDt.Rows(0).Item("TANKCAPACITY")).ToString("#,##0") & " LTR"
-
-                    Next
-
-                    dt.Rows(0).Item("TANKNO") = tankNo
-                    dt.Rows(0).Item("SHIPTAREWEIGHT") = tareWeight
-                    dt.Rows(0).Item("TANKCAPACITY") = capacity
-
-                End If
 
                 Dim freAndChg As String = Nothing
 
@@ -907,105 +1811,34 @@ Public Class GBT00014BL
                     dt.Rows(0).Item("FREIGHT") = ""
                 End If
 
-            End If
-        ElseIf reportId = "B/LInstruction" OrElse Left(reportId, 6) = "JOTBI_" Then
-            If dt.Rows.Count > 0 Then
-
-                Dim shipText As String() = Nothing
-
-                shipText = Split(dt.Rows(0).Item("AGENTPOLTEXT1").ToString, vbCrLf)
-
-                For i As Integer = 0 To shipText.Count - 1
-
-                    If i > 2 Then
-                        Exit For
+                If reportId = CONST_REPORT_ID.BOOKING.OOCL Then
+                    If dt.Rows(0).Item("FREIGHT").ToString.Contains(CONST_PREPAID) Then
+                        dt.Rows(0).Item("FREIGHT") = CONST_PREPAID(0) + CONST_PREPAID.Substring(1).ToLower()
                     End If
-
-                    dt.Rows(0).Item("AGENTPOLTEXT" & (i + 1).ToString) = shipText(i)
-
-                Next
-
-                Dim consText As String() = Nothing
-
-                consText = Split(dt.Rows(0).Item("AGENTPODTEXT1").ToString, vbCrLf)
-
-                For i As Integer = 0 To consText.Count - 1
-
-                    If i > 4 Then
-                        Exit For
+                    If dt.Rows(0).Item("PORTOFDISCHARGE").ToString.Contains("PORT KELANG") Then
+                        dt.Rows(0).Item("BIPODTERMINAL") = "PORT KELANG WEST PORT"
                     End If
+                ElseIf reportId = CONST_REPORT_ID.BOOKING.ONE Then
+                    dt.Rows(0).Item("BIHOUSEBLISSUE") = CONST_HOUSEBLISSUE_TRUE
+                    dt.Rows(0).Item("BIAMSSENDTYPE") = CONST_SENDTYPE_SELF
+                    dt.Rows(0).Item("BIACISENDTYPE") = CONST_SENDTYPE_CARRIER
+                End If
 
-                    dt.Rows(0).Item("AGENTPODTEXT" & (i + 1).ToString) = consText(i)
-
-                Next
-
-                Dim notfText As String() = Nothing
-
-                notfText = Split(dt.Rows(0).Item("AGENTNOTIFYTEXT1").ToString, vbCrLf)
-
-                For i As Integer = 0 To notfText.Count - 1
-
-                    If i > 4 Then
-                        Exit For
-                    End If
-
-                    dt.Rows(0).Item("AGENTNOTIFYTEXT" & (i + 1).ToString) = notfText(i)
-
-                Next
-
-                'For i As Integer = 0 To pageCnt
-
-                '    If atchFlg Then
-                '        reportId = "Attached"
-
-                '        If dt.Rows(0).Item("BLID").ToString <> "" AndAlso i = 1 Then
-
-                '            dt.Rows(0).Item("BLID") = "B/L No. : " & Convert.ToString(dt.Rows(0).Item("BLID"))
-                '        End If
-
-                '        If dt.Rows(0).Item("VOY").ToString <> "" AndAlso i = 1 Then
-
-                '            dt.Rows(0).Item("VOY") = "Voyage No. : " & Convert.ToString(dt.Rows(0).Item("VOY"))
-                '        End If
-
-                '        If dt.Rows(0).Item("VSL").ToString <> "" AndAlso i = 1 Then
-
-                '            dt.Rows(0).Item("VSL") = "Vessel Name : " & Convert.ToString(dt.Rows(0).Item("VSL"))
-                '        End If
-
-                '        If attMarks(i - 1) <> "" Then
-
-                '            dt.Rows(0).Item("ATTMARKS") = attMarks(i - 1)
-
-                '        End If
-
-                '    End If
 
                 With Nothing
-                        Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
+                    Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
 
-                        COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
-                        COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
-                    'If breakPageFlg = True AndAlso atchFlg = False Then
-                    'If breakPageFlg = True AndAlso i <> pageCnt Then
-                    COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL             'PARAM03:出力ファイル形式
-                    'Else
-                    '    COA0027ReportTable.FILETYPE = filetype                         'PARAM03:出力ファイル形式
-                    'End If
+                    COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
+                    COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
+                    COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL                 'PARAM03:出力ファイル形式
                     COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
-                    'If atchFlg Then
-                    '    COA0027ReportTable.ADDSHEET = "Attached Sheet"                 'PARAM07:追記シート（任意）
-                    '    COA0027ReportTable.ADDSHEETNO = i.ToString                     'PARAM08:追記シートNO（任意）
-                    '    If tmpFile <> "" Then
-                    '        COA0027ReportTable.ADDFILE = tmpFile                       'PARAM06:追記ファイル（フルパス（O_FILEpath））
-                    '    End If
-                    'End If
+                    If reportId = CONST_REPORT_ID.BOOKING.OOCL Then
+                        COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL_OLD
+                    ElseIf reportId = CONST_REPORT_ID.BOOKING.ONE Then
+                        COA0027ReportTable.ADDSHEET = CONST_BOOKING_ONE_SHEET
+                    End If
 
                     COA0027ReportTable.COA0027ReportTable()
-
-                    'dt.Columns.Remove("ROWKEY")
-                    'dt.Columns.Remove("CELLNO")
-                    'dt.Columns.Remove("ROWCNT")
 
                     If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
                         CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
@@ -1014,99 +1847,113 @@ Public Class GBT00014BL
                         Return
                     End If
 
-                    'atchFlg = True
+                    tmpFile = COA0027ReportTable.FILEpath
+                    outUrl = COA0027ReportTable.URL
+
+                End With
+            End If
+#End Region
+        ElseIf reportId.StartsWith(CONST_REPORT_ID.FORWARDING_NOTICE.ID) Then
+#Region "<< ForwardingNotice >>"
+
+            If dt.Rows.Count > 0 Then
+                Dim dtRow As DataRow = dt.Rows(0)
+
+                Select Case dtRow.Item("CARRIER1").ToString()
+                    'OOCL
+                    Case "JPT00223", "JPT00227"
+                        dtRow.Item("FACYTRUCKER") = "塩竃港運株式会社 "
+                        dtRow.Item("FACYTRUCKERTELFAX") = "TEL: 022-254-0948 / FAX ; 022-254-2983"
+                    'KMTC
+                    Case "JPC00060"
+                        dtRow.Item("FACYTRUCKER") = "塩竃港運株式会社 "
+                        dtRow.Item("FACYTRUCKERTELFAX") = "TEL: 022-254-0948 / FAX ; 022-254-2983"
+                    'ONE
+                    Case "JPC00083"
+                        dtRow.Item("FACYTRUCKER") = "三陸運輸株式会社"
+                        dtRow.Item("FACYTRUCKERTELFAX") = "TEL: 022-254-2101 / FAX: 022-254-2005"
+                    Case Else
+                End Select
+
+                'TankNoについて
+                '出力先が15行及び3カラムしかないので
+                '1行に最大4つのTankNoを編集して最大60TankNo出力
+                Dim tankNos As String = dtRow.Item("TANKNO").ToString
+                Dim tanks As String() = Split(tankNos, ",")
+                Dim rowNo As Integer = 0
+                Dim colTankCnt As Integer = 0
+                Dim tankText As String = ""
+                For Each tankNo In tanks
+                    '行先頭ではなければ"/"で連結
+                    If colTankCnt <> 0 Then
+                        tankText &= " / "
+                    End If
+                    tankText &= tankNo
+                    colTankCnt += 1
+
+                    If colTankCnt = 4 OrElse tankNo = tanks.Last Then
+                        rowNo += 1
+                        dt.Columns.Add("CONTAINERNO" & rowNo)
+                        dtRow.Item("CONTAINERNO" & rowNo) = tankText
+                        tankText = ""
+                        colTankCnt = 0
+                    End If
+                Next
+
+                With Nothing
+                    Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
+
+                    COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
+                    COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
+                    COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL                 'PARAM03:出力ファイル形式
+                    COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
+                    COA0027ReportTable.COA0027ReportTable()
+
+                    If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
+                        CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
+                    Else
+                        CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                        Return
+                    End If
+
                     tmpFile = COA0027ReportTable.FILEpath
                     outUrl = COA0027ReportTable.URL
 
                 End With
 
-                'Next
-
-                'タンク
-                If dt.Rows(0).Item("TANKNO").ToString <> "" Then
-
-                    Dim tankText As String() = Nothing
-                    Dim tankNo As String = ""
-                    Dim tareWeight As String = ""
-                    Dim capacity As String = ""
-
-                    tankText = Split(dt.Rows(0).Item("TANKNO").ToString, ",")
-
-                    For i As Integer = 0 To tankText.Count - 1
-
-                        If i <> 0 Then
-                            tankNo += vbCrLf
-                            tareWeight += vbCrLf
-                            capacity += vbCrLf
-                        End If
-
-                        tankNo += tankText(i)
-
-                        Dim tankDt As DataTable = GetTank(tankText(i))
-                        tareWeight += Convert.ToDecimal(tankDt.Rows(0).Item("TAREWEIGHT")).ToString("#,##0") & " KGS"
-                        capacity += Convert.ToDecimal(tankDt.Rows(0).Item("TANKCAPACITY")).ToString("#,##0") & " LTR"
-
-                    Next
-
-                    dt.Rows(0).Item("TANKNO") = tankNo
-                    dt.Rows(0).Item("SHIPTAREWEIGHT") = tareWeight
-                    dt.Rows(0).Item("TANKCAPACITY") = capacity
-
-                End If
-
-                Dim freAndChg As String = Nothing
-
-                freAndChg = dt.Rows(0).Item("FREIGHTANDCHARGES").ToString
-
-                If freAndChg.ToUpper.Contains(CONST_PREPAID) Then
-                    dt.Rows(0).Item("FREIGHT") = CONST_PREPAID
-                ElseIf freAndChg.ToUpper.Contains(CONST_COLLECT) Then
-                    dt.Rows(0).Item("FREIGHT") = CONST_COLLECT
-                Else
-                    dt.Rows(0).Item("FREIGHT") = ""
-                End If
-
             End If
+#End Region
+        ElseIf reportId <> "B/L" AndAlso reportId <> "Attached" Then
+#Region "<< その他 >>"
 
+            With Nothing
+                Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
 
+                COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
+                COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
+                COA0027ReportTable.FILETYPE = filetype                             'PARAM03:出力ファイル形式
+                COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
+                COA0027ReportTable.COA0027ReportTable()
+
+                If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
+                    CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
+                Else
+                    CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                    Return
+                End If
+
+                tmpFile = COA0027ReportTable.FILEpath
+                outUrl = COA0027ReportTable.URL
+
+            End With
+#End Region
         End If
 
-        'Select Case reportId
-        '    Case "B/L"
-        '    Case "ShippingAdvice"
-        '    Case "ArrivalNotice"
-        '    Case "ShippingInstruction"
-        'End Select
-
-        'If reportId <> "B/L" AndAlso reportId <> "Attached" Then
-
-        '    With Nothing
-        '        Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
-
-        '        COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
-        '        COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
-        '        COA0027ReportTable.FILETYPE = filetype                             'PARAM03:出力ファイル形式
-        '        COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
-        '        COA0027ReportTable.COA0027ReportTable()
-
-        '        If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
-        '            CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
-        '        Else
-        '            CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
-        '            Return
-        '        End If
-
-        '        tmpFile = COA0027ReportTable.FILEpath
-        '        outUrl = COA0027ReportTable.URL
-
-        '    End With
-
-        'End If
 
         '別画面でExcelを表示
         hdnPrintURL.Value = outUrl
 
-        If filetype = CONST_FILETYPE_EXCEL Then
+        If filetype = CONST_FILETYPE_EXCEL Or filetype = CONST_FILETYPE_EXCEL_OLD Then
             ClientScript.RegisterStartupScript(Me.GetType(), "key", "f_ExcelPrint()", True)
         ElseIf filetype = CONST_FILETYPE_PDF Then
             ClientScript.RegisterStartupScript(Me.GetType(), "key", "f_PDFPrint()", True)
@@ -1277,7 +2124,7 @@ Public Class GBT00014BL
         sqlStat.AppendLine("      ,(SELECT REPLACE(TRIM((SELECT OV.TANKNO AS [data()]  FROM GBT0007_ODR_VALUE2 OV2 ")
         sqlStat.AppendLine("        LEFT JOIN GBT0005_ODR_VALUE OV ON OV.ORDERNO  = OV2.ORDERNO ")
         sqlStat.AppendLine("        Where TRILATERAL = @TRANCLS and OV2.ORDERNO = @ORDERNO ")
-        sqlStat.AppendLine("        GROUP BY TANKNO FOR XML PATH(''))),' ',',')) AS TANKNO")
+        sqlStat.AppendLine("        GROUP BY TANKNO ORDER BY TANKNO FOR XML PATH('') )),' ',',')) AS TANKNO")
         sqlStat.AppendLine("      ,trim(PD.PRODUCTNAME) AS PRODUCTNAME")
         sqlStat.AppendLine("      ,CASE WHEN trim(PD.UNNO) = '' THEN 'NON' ELSE trim(PD.UNNO) END AS UNNO")
         sqlStat.AppendLine("      ,CASE WHEN trim(PD.HAZARDCLASS) = '' THEN 'NON' ELSE trim(PD.HAZARDCLASS) END AS IMDGCODE")
@@ -1311,6 +2158,8 @@ Public Class GBT00014BL
         sqlStat.AppendLine("      ,CASE WHEN @TRANCLS = '1' THEN OB.NOTIFYTEXT ELSE OB.NOTIFYTEXT2 END AS NOTIFYTEXT1")
         sqlStat.AppendLine("      ,'' AS NOTIFYTEXT2")
         sqlStat.AppendLine("      ,'' AS NOTIFYTEXT3")
+        sqlStat.AppendLine("      ,'' AS NOTIFYTEXT4")
+        sqlStat.AppendLine("      ,'' AS NOTIFYTEXT5")
         sqlStat.AppendLine("      ,(SELECT CONVERT(NVARCHAR ,CONVERT(money, SUM(GROSSWEIGHT)), 1) ")
         sqlStat.AppendLine("      FROM GBT0007_ODR_VALUE2 ")
         sqlStat.AppendLine("      WHERE ORDERNO    = @ORDERNO ")
@@ -1326,7 +2175,7 @@ Public Class GBT00014BL
         sqlStat.AppendLine("      ,OB.TIP AS TIP")
         sqlStat.AppendLine("      ,'1 TO ' + CONVERT(NVARCHAR ,OB.DEMURTO) + 'DAYS AT' AS DEMURTO1")
         sqlStat.AppendLine("      ,OB.DEMURUSRATE1 AS DEMURUSRATE1")
-        sqlStat.AppendLine("      ,CONVERT(NVARCHAR ,OB.DEMURTO) + 'DAYS AT' AS DEMURTO2")
+        sqlStat.AppendLine("      ,CONVERT(NVARCHAR ,OB.DEMURTO + 1) + ' DAYS ONWARDS AT' AS DEMURTO2")
         sqlStat.AppendLine("      ,OB.DEMURUSRATE2 AS DEMURUSRATE2")
         sqlStat.AppendLine("      , 'EX.' + ISNULL(EX.CURRENCYCODE,'') AS SALOCALCURRENCY")
         sqlStat.AppendLine("      ,REPLACE(ISNULL((SELECT TOP 1 EXSHIPRATE FROM (SELECT * FROM GBT0007_ODR_VALUE2 ")
@@ -1368,9 +2217,10 @@ Public Class GBT00014BL
         sqlStat.AppendLine("      ,'ON BOARD' AS BLDATE")
         sqlStat.AppendLine("      ,ISNULL(SP.CITY,'') + ', ' + ISNULL(CT2.NAMES,'') AS ISSUEAT")
         sqlStat.AppendLine("      ,'' AS FREIGHT")
-        sqlStat.AppendLine("      ,'' AS CYCUT")
         sqlStat.AppendLine("      ,FORMAT(GETDATE (),'dd') + ' ' + FV4.VALUE1 + ', ' + FORMAT(GETDATE (),'yyyy') AS OUTPUTDATE ")
         sqlStat.AppendLine("      ,CASE WHEN ETA.ACTDATE = '1900/01/01' THEN '' ELSE '(' + FORMAT(ETA.ACTDATE,'dd') + ' ' + FV3.VALUE1 + ', ' + FORMAT(ETA.ACTDATE,'yyyy') + ')' END AS SIETAACTDATE ")
+        sqlStat.AppendLine("      ,CASE WHEN ETD.ACTDATE = '1900/01/01' THEN '' ELSE '(' + FORMAT(DATEADD(DAY, -1, ETD.ACTDATE),'dd') + ' ' + FV5.VALUE1 + ', ' + FORMAT(DATEADD(DAY, -1, ETD.ACTDATE),'yyyy') + ')' END AS CYCUT ")
+        sqlStat.AppendLine("      ,CASE WHEN ETD.ACTDATE = '1900/01/01' THEN '' ELSE '(' + FORMAT(DATEADD(DAY, -1, ETD.ACTDATE),'dd') + ' ' + FV5.VALUE1 + ', ' + FORMAT(DATEADD(DAY, -1, ETD.ACTDATE),'yyyy') + ')' END AS DOCCUT ")
         sqlStat.AppendLine("      ,CASE WHEN trim(PD.HAZARDCLASS) = '' THEN '(NON-HAZ)' ELSE '(' + trim(PD.HAZARDCLASS) + ')' END AS SIIMDGCODE")
         sqlStat.AppendLine("      ,OB.NOOFPACKAGE + CASE WHEN OB.NOOFPACKAGE = '' THEN '' ELSE ' SOC TANK CONTAINERS' END AS SINOOFPACKAGE")
         sqlStat.AppendLine("      ,CASE WHEN @TRANCLS = '1' THEN CASE WHEN OB.CARRIERBLTYPE = '' THEN '' ELSE '""' + OB.CARRIERBLTYPE + '""' END ELSE CASE WHEN OB.CARRIERBLTYPE2 = '' THEN '' ELSE '""' + OB.CARRIERBLTYPE2 + '""' END END AS SICARRIERBLTYPE")
@@ -1381,10 +2231,21 @@ Public Class GBT00014BL
         sqlStat.AppendLine("      ,FV1.VALUE3 AS POLTYPE")
         sqlStat.AppendLine("      ,FV1.VALUE4 AS PODTYPE")
 
+        sqlStat.AppendLine("      ,ISNULL(TD2.CONTACTMAIL,'') AS AGENTPOLMAIL")
+        sqlStat.AppendLine("      ,CASE WHEN ETD.ACTDATE = '1900/01/01' THEN '' ELSE FORMAT(ETD.ACTDATE,'MM/dd') END AS BIETDACTDATE ")
+
+        sqlStat.AppendLine("      ,ISNULL(PTTS.AREANAME, '') AS TRANSITPORT")
         sqlStat.AppendLine("      ,CASE WHEN @TRANCLS = '1' THEN OB.TRANSIT1VSL1 ELSE OB.TRANSIT1VSL2 END AS TRANSIT1VSL")
         sqlStat.AppendLine("      ,CASE WHEN @TRANCLS = '1' THEN OB.TRANSIT1VOY1 ELSE OB.TRANSIT1VOY2 END AS TRANSIT1VOY")
         sqlStat.AppendLine("      ,CASE WHEN @TRANCLS = '1' THEN OB.TRANSIT2VSL1 ELSE OB.TRANSIT2VSL2 END AS TRANSIT2VSL")
         sqlStat.AppendLine("      ,CASE WHEN @TRANCLS = '1' THEN OB.TRANSIT2VOY1 ELSE OB.TRANSIT2VOY2 END AS TRANSIT2VOY")
+        sqlStat.AppendLine("      ,OB.CARRIER1 AS CARRIER1")
+        sqlStat.AppendLine("      ,US.STAFFNAMES AS STAFFNAMES")
+        sqlStat.AppendLine("      ,FV1.VALUE4 AS GITERM")
+        sqlStat.AppendLine("      ,CASE WHEN OB.CONTAINERPKGS = '' THEN '' ELSE OB.CONTAINERPKGS END AS DRQUANTITYPACKAGES")
+        sqlStat.AppendLine("      ,CASE WHEN ETD.ACTDATE = '1900/01/01' THEN '' ELSE FORMAT(ETD.ACTDATE,'yyyy/MM/dd') END AS FNETDACTDATE ")
+        sqlStat.AppendLine("      ,CASE WHEN ETA.ACTDATE = '1900/01/01' THEN '' ELSE FORMAT(ETA.ACTDATE,'yyyy/MM/dd') END AS FNETAACTDATE ")
+        sqlStat.AppendLine("      ,FORMAT(GETDATE (),'yyyy/MM/dd') AS FNOUTPUTDATE ")
 
         sqlStat.AppendLine("  FROM GBT0004_ODR_BASE OB ")
 
@@ -1492,6 +2353,11 @@ Public Class GBT00014BL
         sqlStat.AppendLine("   AND FV4.ENDYMD   >= @ENDYMD")
         sqlStat.AppendLine("   AND FV4.DELFLG   <> @DELFLG")
 
+        sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FV5 ")
+        sqlStat.AppendLine("    ON FV5.KEYCODE   = FORMAT(DATEADD(DAY, -1, ETD.ACTDATE),'MM') ")
+        sqlStat.AppendLine("   AND FV5.CLASS     = 'MONTH'")
+        sqlStat.AppendLine("   AND FV5.DELFLG   <> @DELFLG")
+
         sqlStat.AppendLine("  LEFT JOIN GBM0004_CUSTOMER CN ")
         sqlStat.AppendLine("    ON CN.CUSTOMERCODE   = OB.CONSIGNEE")
         sqlStat.AppendLine("   AND CN.STYMD         <= @STYMD")
@@ -1503,6 +2369,19 @@ Public Class GBT00014BL
         sqlStat.AppendLine("   AND SP.STYMD         <= @STYMD")
         sqlStat.AppendLine("   AND SP.ENDYMD        >= @ENDYMD")
         sqlStat.AppendLine("   AND SP.DELFLG        <> @DELFLG")
+
+        sqlStat.AppendLine("  LEFT JOIN (Select TOP 1 ORDERNO, CONTRACTORBR AS PORTCODE FROM GBT0005_ODR_VALUE WHERE ORDERNO = @ORDERNO AND DTLPOLPOD = (CASE WHEN @TRANCLS = '1' THEN 'POL1' ELSE 'POL2' END) AND ACTIONID = 'TRAV' AND DELFLG <> @DELFLG) AS TS")
+        sqlStat.AppendLine("    ON TS.ORDERNO = OB.ORDERNO")
+        sqlStat.AppendLine("  LEFT JOIN GBM0002_PORT PTTS ")
+        sqlStat.AppendLine("    ON PTTS.PORTCODE   = TS.PORTCODE")
+        sqlStat.AppendLine("   AND PTTS.STYMD         <= @STYMD")
+        sqlStat.AppendLine("   AND PTTS.ENDYMD        >= @ENDYMD")
+        sqlStat.AppendLine("   AND PTTS.DELFLG        <> @DELFLG")
+        sqlStat.AppendLine("  LEFT JOIN COS0005_USER US ")
+        sqlStat.AppendLine("    ON US.USERID       = OB.UPDUSER")
+        sqlStat.AppendLine("   AND US.STYMD         <= @STYMD")
+        sqlStat.AppendLine("   AND US.ENDYMD        >= @ENDYMD")
+        sqlStat.AppendLine("   AND US.DELFLG        <> @DELFLG")
 
         sqlStat.AppendLine(" WHERE OB.ORDERNO  = @ORDERNO ")
         sqlStat.AppendLine("   AND OB.DELFLG  <> @DELFLG ")
@@ -1539,7 +2418,9 @@ Public Class GBT00014BL
                     End If
                     retDt = CreateOrderInfoTable()
                     For Each col As DataColumn In dt.Columns
-                        retDt.Rows(0)(col.ColumnName) = Convert.ToString(dt.Rows(0)(col.ColumnName))
+                        If retDt.Columns.Contains(col.ColumnName) Then
+                            retDt.Rows(0)(col.ColumnName) = Convert.ToString(dt.Rows(0)(col.ColumnName))
+                        End If
                     Next
 
                 End Using
@@ -1632,6 +2513,8 @@ Public Class GBT00014BL
         retDt.Columns.Add("NOTIFYTEXT1", GetType(String))
         retDt.Columns.Add("NOTIFYTEXT2", GetType(String))
         retDt.Columns.Add("NOTIFYTEXT3", GetType(String))
+        retDt.Columns.Add("NOTIFYTEXT4", GetType(String))
+        retDt.Columns.Add("NOTIFYTEXT5", GetType(String))
         retDt.Columns.Add("GROSSWEIGHT", GetType(String))
         retDt.Columns.Add("NETWEIGHT", GetType(String))
         retDt.Columns.Add("TIP", GetType(String))
@@ -1685,6 +2568,7 @@ Public Class GBT00014BL
         retDt.Columns.Add("ISSUEAT", GetType(String))
         retDt.Columns.Add("FREIGHT", GetType(String))
         retDt.Columns.Add("CYCUT", GetType(String))
+        retDt.Columns.Add("DOCCUT", GetType(String))
 
         '
         retDt.Columns.Add("POLAREA", GetType(String))
@@ -1692,11 +2576,31 @@ Public Class GBT00014BL
         retDt.Columns.Add("POLTYPE", GetType(String))
         retDt.Columns.Add("PODTYPE", GetType(String))
 
+
+        retDt.Columns.Add("AGENTPOLMAIL", GetType(String))
+        retDt.Columns.Add("BIHOUSEBLISSUE", GetType(String))
+        retDt.Columns.Add("BIAMSSENDTYPE", GetType(String))
+        retDt.Columns.Add("BIACISENDTYPE", GetType(String))
+        retDt.Columns.Add("BIETDACTDATE", GetType(String))
+        retDt.Columns.Add("BIPODTERMINAL", GetType(String))
+
+        retDt.Columns.Add("TRANSITPORT", GetType(String))
         retDt.Columns.Add("TRANSIT1VSL", GetType(String))
         retDt.Columns.Add("TRANSIT1VOY", GetType(String))
         retDt.Columns.Add("TRANSIT2VSL", GetType(String))
         retDt.Columns.Add("TRANSIT2VOY", GetType(String))
 
+        retDt.Columns.Add("STAFFNAMES", GetType(String))
+        retDt.Columns.Add("CARRIER1", GetType(String))
+        retDt.Columns.Add("GITERM", GetType(String))
+
+        retDt.Columns.Add("DRQUANTITYPACKAGES", GetType(String))
+
+        retDt.Columns.Add("FACYTRUCKER", GetType(String))
+        retDt.Columns.Add("FACYTRUCKERTELFAX", GetType(String))
+        retDt.Columns.Add("FNETDACTDATE", GetType(String))
+        retDt.Columns.Add("FNETAACTDATE", GetType(String))
+        retDt.Columns.Add("FNOUTPUTDATE", GetType(String))
         '検討中
         retDt.Columns.Add("DUMMY", GetType(String))
         retDt.Columns.Add("DUMMY2", GetType(String))
@@ -3083,7 +3987,7 @@ Public Class GBT00014BL
             Try
                 Dim listBoxObj As ListBox = DirectCast(COA0022ProfXls.REPORTOBJ, ListBox)
                 For Each listItem As ListItem In listBoxObj.Items
-                    If listItem.Value <> "Attached" Then
+                    If listItem.Value <> "Attached" AndAlso listItem.Value <> "JOTDR_BLInstructionONE_CLP" Then
                         Me.lbRightListPrint.Items.Add(listItem)
                     End If
                 Next
@@ -7221,4 +8125,36 @@ Public Class GBT00014BL
 
         Return True
     End Function
+
+    ''' <summary>
+    ''' SEALNO編集
+    ''' </summary>
+    ''' <param name="dtRow">TANKデータ(GetOrderValue)</param>
+    ''' <param name="sep">連結時セパレータ</param>
+    ''' <param name="br">SEALNO1と2以降に改行有無(TRUE:改行あり)</param>
+    ''' <returns>編集後SEALNO</returns>
+    ''' <remarks>SEALNO2以降は数字部分の下３桁のみ編集</remarks>
+    Private Function EditSealNo(ByRef dtRow As DataRow, sep As String, Optional br As Boolean = False) As String
+
+        'SEALNO2～4を省略編集
+        '数字部分から下３桁を編集
+        Dim seal = New List(Of String)
+        Dim reg As New System.Text.RegularExpressions.Regex("[^\d]")
+        For i As Integer = 1 To 4
+            Dim editItem As String = dtRow.Item("SEALNO" & i).ToString()
+            If i > 1 Then
+                editItem = reg.Replace(editItem, "")
+                If String.IsNullOrEmpty(editItem) Then Continue For
+                editItem = editItem.PadLeft(3, "0"c)
+                editItem = editItem.Substring(editItem.Length - 3)
+            Else
+                If br Then
+                    editItem += vbCrLf
+                End If
+            End If
+            seal.Add(editItem)
+        Next
+        Return String.Join(sep, seal)
+    End Function
+
 End Class

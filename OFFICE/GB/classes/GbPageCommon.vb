@@ -57,7 +57,8 @@ Public Class GbPageCommon
             'Webコンフィグに上帯またはタイトル文言が設定されている場合、動的スタイルをヘッダーに追加
             Dim bgColor As String = Convert.ToString(ConfigurationManager.AppSettings("HtmlHeaderBgColor"))
             Dim prefixText As String = Convert.ToString(ConfigurationManager.AppSettings("HtmlHeaderTextPrefix"))
-            If bgColor <> "" OrElse prefixText <> "" Then
+            Dim bgColorC As String = Convert.ToString(ConfigurationManager.AppSettings("HtmlContensBgColor"))
+            If bgColor <> "" OrElse prefixText <> "" OrElse bgColorC <> "" Then
                 Dim styleHeader As New HtmlGenericControl("STYLE")
                 styleHeader.Attributes.Add("type", "text/css")
                 Dim writeStyle As New StringBuilder
@@ -71,6 +72,14 @@ Public Class GbPageCommon
                     writeStyle.AppendFormat("    content : ""{0} "";", prefixText).AppendLine()
                     writeStyle.AppendLine("    color:red;")
                     writeStyle.AppendLine("    font-weight:bolder;")
+                    writeStyle.AppendLine("}")
+                End If
+                If bgColorC <> "" Then
+                    writeStyle.AppendLine("#divContensbox {")
+                    writeStyle.AppendFormat("    background-color : {0} !important;", bgColorC).AppendLine()
+                    writeStyle.AppendLine("}")
+                    writeStyle.AppendLine("#headerbox {")
+                    writeStyle.AppendFormat("    background-color : {0} !important;", bgColorC).AppendLine()
                     writeStyle.AppendLine("}")
                 End If
                 styleHeader.InnerHtml = writeStyle.ToString
