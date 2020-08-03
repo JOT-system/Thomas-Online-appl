@@ -488,6 +488,7 @@ Public Class GBT00030ORDERLIST
         sb.Append(", trav.ACTUALDATE as TSATA ")
         sb.Append("from GBT0004_ODR_BASE as ob ")
         sb.Append("inner join GBT0002_BR_BASE as br on br.BRID=ob.BRID and br.DELFLG<>@DELFLG and br.USINGLEASETANK='1' ")
+        sb.Append("inner join GBM0004_CUSTOMER as cs on cs.CUSTOMERCODE=ob.SHIPPER and cs.DELFLG<>@DELFLG and cs.COMPCODE='01' and cs.INCTORICODE=@INCTORICODE ")
         sb.Append("inner join ( ")
         sb.Append(" select ")
         sb.Append("  ORDERNO ")
@@ -553,7 +554,6 @@ Public Class GBT00030ORDERLIST
         sb.Append(" group by ORDERNO, ACTIONID ")
         sb.Append(") as trav ON trav.ORDERNO=ob.ORDERNO ")
         sb.Append("where 1=1 ")
-        sb.Append("and (ob.SHIPPER in (@SHIPPER1, @SHIPPER2) or ob.CONSIGNEE in (@SHIPPER1,@SHIPPER2)) ")
         sb.Append("and ob.STYMD  <= @STYMD and ob.ENDYMD >= @ENDYMD and ob.DELFLG <> @DELFLG ")
         sb.Append("and (ST.ACTIONID is not null or ov.TKALNUM is null) ")
         sb.Append(") as B ")
@@ -579,8 +579,7 @@ Public Class GBT00030ORDERLIST
                 .Add("@INITDATE", SqlDbType.Date).Value = "1900/01/01"
                 .Add("@STYMD", SqlDbType.Date).Value = Now()
                 .Add("@ENDYMD", SqlDbType.Date).Value = Now()
-                .Add("@SHIPPER1", SqlDbType.NVarChar, 20).Value = "JPC01082"
-                .Add("@SHIPPER2", SqlDbType.NVarChar, 20).Value = "JPC01084"
+                .Add("@INCTORICODE", SqlDbType.NVarChar, 20).Value = "0439000010"
 
             End With
             Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -689,8 +688,8 @@ Public Class GBT00030ORDERLIST
             End If
             newRow("TSATA") = editDate
 
-            scheduleDate = FormatDateContrySettings(tRow("TSEATA").ToString, "yyyy/MM/dd")
-            actualDate = FormatDateContrySettings(tRow("TSATA").ToString, "yyyy/MM/dd")
+            scheduleDate = FormatDateContrySettings(tRow("TSEATD").ToString, "yyyy/MM/dd")
+            actualDate = FormatDateContrySettings(tRow("TSATD").ToString, "yyyy/MM/dd")
             If scheduleDate <> "1900/01/01" AndAlso actualDate = "1900/01/01" Then
                 editDate = "( " & scheduleDate & " )"
             ElseIf actualDate <> "1900/01/01" Then
@@ -698,7 +697,7 @@ Public Class GBT00030ORDERLIST
             Else
                 editDate = ""
             End If
-            newRow("TSATA") = editDate
+            newRow("TSATD") = editDate
 
             newRow("VSLVOY") = tRow("VSLVOY").ToString
             newRow("TSVSLVOY") = tRow("TSVSLVOY").ToString
