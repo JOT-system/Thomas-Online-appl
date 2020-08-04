@@ -11,8 +11,8 @@
     <link href="~/css/commonStyle.css" rel="stylesheet" type="text/css" />
     <%--個別のスタイルは以下に記載 OR 外部ファイルに逃す --%>
     <link href="~/css/masterCommon.css" rel="stylesheet" type="text/css" />
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-<%--    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
+<%--    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
