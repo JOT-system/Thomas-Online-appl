@@ -2786,55 +2786,71 @@ Public Class GBT00001BREAKER
                     dr.Item("ISTRILATERAL") = DirectCast(.FindControl("hdnIsTrilateral"), HiddenField).Value
 
                     '発地1
+                    Dim prevPolPort1 As String = dr.Item("RECIEPTPORT1").ToString
                     dr.Item("RECIEPTCOUNTRY1") = DirectCast(.FindControl("hdnPolCountry1"), HiddenField).Value
                     dr.Item("RECIEPTPORT1") = DirectCast(.FindControl("txtPolPort1"), TextBox).Text
                     dr.Item("LOADCOUNTRY1") = dr.Item("RECIEPTCOUNTRY1")
                     dr.Item("LOADPORT1") = dr.Item("RECIEPTPORT1")
                     '着地1
+                    Dim prevPodPort1 As String = dr.Item("DISCHARGEPORT1").ToString
                     dr.Item("DISCHARGECOUNTRY1") = DirectCast(.FindControl("hdnPodCountry1"), HiddenField).Value
                     dr.Item("DISCHARGEPORT1") = DirectCast(.FindControl("txtPodPort1"), TextBox).Text
                     dr.Item("DELIVERYCOUNTRY1") = dr.Item("DISCHARGECOUNTRY1")
                     dr.Item("DELIVERYPORT1") = dr.Item("DISCHARGEPORT1")
 
                     'AgentPol1
-                    'dr.Item("AGENTPOL1") = dr.Item("RECIEPTCOUNTRY1") & "A" & "00001"
-                    GBA00006PortRelated.PORTCODE = Convert.ToString(dr.Item("LOADPORT1"))
-                    GBA00006PortRelated.LISTBOX_OFFICE = dummyList
-                    GBA00006PortRelated.GBA00006getLeftListOffice()
-                    dr.Item("AGENTPOL1") = GBA00006PortRelated.OfficeKeyValue.First.Key
-
-                    'AgentPod1
-                    'dr.Item("AGENTPOD1") = dr.Item("DISCHARGECOUNTRY1") & "A" & "00001"
-                    GBA00006PortRelated.PORTCODE = Convert.ToString(dr.Item("DISCHARGEPORT1"))
-                    GBA00006PortRelated.LISTBOX_OFFICE = dummyList
-                    GBA00006PortRelated.GBA00006getLeftListOffice()
-                    If GBA00006PortRelated.OfficeKeyValue.Count > 0 Then
-                        dr.Item("AGENTPOD1") = GBA00006PortRelated.OfficeKeyValue.First.Key
+                    'コピー元から港が変更されていたら管轄代理店を取得
+                    If prevPolPort1 <> dr.Item("LOADPORT1").ToString Then
+                        'dr.Item("AGENTPOL1") = dr.Item("RECIEPTCOUNTRY1") & "A" & "00001"
+                        GBA00006PortRelated.PORTCODE = Convert.ToString(dr.Item("LOADPORT1"))
+                        GBA00006PortRelated.LISTBOX_OFFICE = dummyList
+                        GBA00006PortRelated.GBA00006getLeftListOffice()
+                        dr.Item("AGENTPOL1") = GBA00006PortRelated.OfficeKeyValue.First.Key
                     End If
+                    'AgentPod1
+                    'コピー元から港が変更されていたら管轄代理店を取得
+                    If prevPodPort1 <> dr.Item("DISCHARGEPORT1").ToString Then
+                        'dr.Item("AGENTPOD1") = dr.Item("DISCHARGECOUNTRY1") & "A" & "00001"
+                        GBA00006PortRelated.PORTCODE = Convert.ToString(dr.Item("DISCHARGEPORT1"))
+                        GBA00006PortRelated.LISTBOX_OFFICE = dummyList
+                        GBA00006PortRelated.GBA00006getLeftListOffice()
+                        If GBA00006PortRelated.OfficeKeyValue.Count > 0 Then
+                            dr.Item("AGENTPOD1") = GBA00006PortRelated.OfficeKeyValue.First.Key
+                        End If
+                    End If
+
                     If Convert.ToString(dr.Item("ISTRILATERAL")) = "1" Then
                         '発地2
+                        Dim prevPolPort2 As String = dr.Item("RECIEPTPORT2").ToString
                         dr.Item("RECIEPTCOUNTRY2") = DirectCast(.FindControl("hdnPolCountry2"), HiddenField).Value
                         dr.Item("RECIEPTPORT2") = DirectCast(.FindControl("txtPolPort2"), TextBox).Text
                         dr.Item("LOADCOUNTRY2") = dr.Item("RECIEPTCOUNTRY2")
                         dr.Item("LOADPORT2") = dr.Item("RECIEPTPORT2")
                         '着地2
+                        Dim prevPodPort2 As String = dr.Item("DISCHARGEPORT2").ToString
                         dr.Item("DISCHARGECOUNTRY2") = DirectCast(.FindControl("hdnPodCountry2"), HiddenField).Value
                         dr.Item("DISCHARGEPORT2") = DirectCast(.FindControl("txtPodPort2"), TextBox).Text
                         dr.Item("DELIVERYCOUNTRY2") = dr.Item("DISCHARGECOUNTRY2")
                         dr.Item("DELIVERYPORT2") = dr.Item("DISCHARGEPORT2")
 
                         'AgentPol2
-                        'dr.Item("AGENTPOL2") = dr.Item("RECIEPTCOUNTRY2") & "A" & "00001"
-                        GBA00006PortRelated.PORTCODE = Convert.ToString(dr.Item("LOADPORT2"))
-                        GBA00006PortRelated.LISTBOX_OFFICE = dummyList
-                        GBA00006PortRelated.GBA00006getLeftListOffice()
-                        dr.Item("AGENTPOL2") = GBA00006PortRelated.OfficeKeyValue.First.Key
+                        'コピー元から港が変更されていたら管轄代理店を取得
+                        If prevPolPort2 <> dr.Item("LOADPORT2").ToString Then
+                            'dr.Item("AGENTPOL2") = dr.Item("RECIEPTCOUNTRY2") & "A" & "00001"
+                            GBA00006PortRelated.PORTCODE = Convert.ToString(dr.Item("LOADPORT2"))
+                            GBA00006PortRelated.LISTBOX_OFFICE = dummyList
+                            GBA00006PortRelated.GBA00006getLeftListOffice()
+                            dr.Item("AGENTPOL2") = GBA00006PortRelated.OfficeKeyValue.First.Key
+                        End If
                         'AgentPod2
-                        'dr.Item("AGENTPOD2") = dr.Item("DISCHARGECOUNTRY2") & "A" & "00001"
-                        GBA00006PortRelated.PORTCODE = Convert.ToString(dr.Item("DISCHARGEPORT2"))
-                        GBA00006PortRelated.LISTBOX_OFFICE = dummyList
-                        GBA00006PortRelated.GBA00006getLeftListOffice()
-                        dr.Item("AGENTPOD2") = GBA00006PortRelated.OfficeKeyValue.First.Key
+                        'コピー元から港が変更されていたら管轄代理店を取得
+                        If prevPodPort2 <> dr.Item("DISCHARGEPORT2").ToString Then
+                            'dr.Item("AGENTPOD2") = dr.Item("DISCHARGECOUNTRY2") & "A" & "00001"
+                            GBA00006PortRelated.PORTCODE = Convert.ToString(dr.Item("DISCHARGEPORT2"))
+                            GBA00006PortRelated.LISTBOX_OFFICE = dummyList
+                            GBA00006PortRelated.GBA00006getLeftListOffice()
+                            dr.Item("AGENTPOD2") = GBA00006PortRelated.OfficeKeyValue.First.Key
+                        End If
 
                     End If
                     dr.Item("SHIPPER") = DirectCast(.FindControl("txtShipper"), TextBox).Text
