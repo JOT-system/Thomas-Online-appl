@@ -1111,7 +1111,7 @@ Public Class GBT00001NEWBREAKER
             Me.txtShipper.Text = HttpUtility.HtmlEncode(Convert.ToString(dt.Rows(0).Item("SHIPPER")))
             txtShipper_Change()
         End If
-        If Convert.ToString(dt.Rows(0).Item("USINGLEASETANK")) = "1" Then
+        If Convert.ToString(dt.Rows(0).Item("USINGLEASETANK")) = CONST_FLAG_YES Then
             Me.chkLeaseTankUse.Checked = True
         Else
             Me.chkLeaseTankUse.Checked = False
@@ -1308,7 +1308,7 @@ Public Class GBT00001NEWBREAKER
             Me.txtPodPort2.Text = Convert.ToString(dr.Item("DISCHARGEPORT2"))
             txtPodPort2_Change()
             'リースタンク利用チェックボックス
-            If dr.Item("USINGLEASETANK").Equals("1") Then
+            If dr.Item("USINGLEASETANK").Equals(CONST_FLAG_YES) Then
                 Me.chkLeaseTankUse.Checked = True
             End If
         End If

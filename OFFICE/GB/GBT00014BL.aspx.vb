@@ -11,7 +11,6 @@ Public Class GBT00014BL
     Private Const CONST_PREPAID As String = "PREPAID"
     Private Const CONST_COLLECT As String = "COLLECT"
     Private Const CONST_FILETYPE_EXCEL As String = "XLSX"
-    Private Const CONST_FILETYPE_EXCEL_OLD As String = "XLS"
     Private Const CONST_FILETYPE_PDF As String = "PDF"
     Private Const CONST_HOUSEBLISSUE_TRUE As String = "YES"
     Private Const CONST_HOUSEBLISSUE_FALSE As String = "NO (=BCO)"
@@ -790,7 +789,7 @@ Public Class GBT00014BL
                         COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
 
                         If breakPageFlg = True AndAlso i <> pageCnt OrElse filetype = CONST_FILETYPE_EXCEL Then
-                            COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL_OLD         'PARAM03:出力ファイル形式
+                            COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL             'PARAM03:出力ファイル形式
                         Else
                             COA0027ReportTable.FILETYPE = filetype                         'PARAM03:出力ファイル形式
                         End If
@@ -1832,11 +1831,7 @@ Public Class GBT00014BL
                     COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
                     COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL                 'PARAM03:出力ファイル形式
                     COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
-                    If reportId = CONST_REPORT_ID.BOOKING.OOCL Then
-                        COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL_OLD
-                    ElseIf reportId = CONST_REPORT_ID.BOOKING.ONE Then
-                        COA0027ReportTable.ADDSHEET = CONST_BOOKING_ONE_SHEET
-                    End If
+                    COA0027ReportTable.ADDSHEET = CONST_BOOKING_ONE_SHEET
 
                     COA0027ReportTable.COA0027ReportTable()
 
@@ -1953,7 +1948,7 @@ Public Class GBT00014BL
         '別画面でExcelを表示
         hdnPrintURL.Value = outUrl
 
-        If filetype = CONST_FILETYPE_EXCEL Or filetype = CONST_FILETYPE_EXCEL_OLD Then
+        If filetype = CONST_FILETYPE_EXCEL Then
             ClientScript.RegisterStartupScript(Me.GetType(), "key", "f_ExcelPrint()", True)
         ElseIf filetype = CONST_FILETYPE_PDF Then
             ClientScript.RegisterStartupScript(Me.GetType(), "key", "f_PDFPrint()", True)

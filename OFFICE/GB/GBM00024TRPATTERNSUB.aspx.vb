@@ -3791,7 +3791,11 @@ Public Class GBM00024TRPATTERNSUB
                         workBaseRow("AGENTPOD1") = drInput("AGENTPOD1")
                         workBaseRow("AGENTPOL2") = drInput("AGENTPOL2")
                         workBaseRow("AGENTPOD2") = drInput("AGENTPOD2")
-                        workBaseRow("USINGLEASETANK") = drInput("USINGLEASETANK")
+                        If Convert.ToString(drInput("USINGLEASETANK")) = "" Then
+                            workBaseRow("USINGLEASETANK") = BaseDllCommon.CONST_FLAG_NO
+                        Else
+                            workBaseRow("USINGLEASETANK") = drInput("USINGLEASETANK")
+                        End If
                         If Convert.ToString(drInput("DELFLG")) = "" Then
                             workBaseRow("DELFLG") = BaseDllCommon.CONST_FLAG_NO
                         Else
