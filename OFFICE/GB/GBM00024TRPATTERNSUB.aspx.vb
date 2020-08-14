@@ -12,7 +12,7 @@ Public Class GBM00024TRPATTERNSUB
     Private Const CONST_BASEDATATABLE = "GBM00024TBL"
     Private Const CONST_INPDATATABLE = "GBM00024INPTBL"
     Private Const CONST_UPDDATATABLE = "GBM00024UPDTBL"
-    Private Const CONST_DSPROWCOUNT = 500               '指定数＋１が表示対象
+    Private Const CONST_DSPROWCOUNT = 44                '指定数＋１が表示対象
     Private Const CONST_SCROLLROWCOUNT = 6              'マウススクロール時の増分
     Private Const CONST_TBLMASTER = "GBM0029_TRPATTERNSUB"
 
@@ -405,6 +405,7 @@ Public Class GBM00024TRPATTERNSUB
                 & "       isnull(rtrim(AGENTPOD1),'')                as AGENTPOD1 , " _
                 & "       isnull(rtrim(AGENTPOL2),'')                as AGENTPOL2 , " _
                 & "       isnull(rtrim(AGENTPOD2),'')                as AGENTPOD2 , " _
+                & "       isnull(rtrim(USINGLEASETANK),'')           as USINGLEASETANK , " _
                 & "       isnull(rtrim(DELFLG),'')                   as DELFLG , " _
                 & "       isnull(convert(nvarchar, INITYMD, 120),'') as INITYMD , " _
                 & "       isnull(convert(nvarchar, UPDYMD , 120),'') as UPDYMD , " _
@@ -661,6 +662,10 @@ Public Class GBM00024TRPATTERNSUB
                 Case Me.vLeftProduct.ID
                     Dim lstCtr = GetRepObjects(WF_DViewRep1, Me.hdnTextDbClickField.Value)
                     SetProductListItem(DirectCast(lstCtr(0), TextBox).Text)
+                'リースタンク利用ビュー表示切替
+                Case Me.vLeftUsingLeaseTank.ID
+                    Dim lstCtr = GetRepObjects(WF_DViewRep1, Me.hdnTextDbClickField.Value)
+                    SetUsingLeaseTankListItem(DirectCast(lstCtr(0), TextBox).Text)
                 '削除フラグビュー表示切替
                 Case Me.vLeftDelFlg.ID
                     SetDelFlgListItem(Me.txtDelFlg.Text)
@@ -952,6 +957,7 @@ Public Class GBM00024TRPATTERNSUB
                                  & "        AGENTPOD1 = @AGENTPOD1, " _
                                  & "        AGENTPOL2 = @AGENTPOL2, " _
                                  & "        AGENTPOD2 = @AGENTPOD2, " _
+                                 & "        USINGLEASETANK = @USINGLEASETANK, " _
                                  & "        DELFLG = @DELFLG, " _
                                  & "        INITYMD = @INITYMD, " _
                                  & "        UPDYMD = @UPDYMD, " _
@@ -983,6 +989,7 @@ Public Class GBM00024TRPATTERNSUB
                                  & "        AGENTPOD1 , " _
                                  & "        AGENTPOL2 , " _
                                  & "        AGENTPOD2 , " _
+                                 & "        USINGLEASETANK , " _
                                  & "        DELFLG , " _
                                  & "        INITYMD , " _
                                  & "        UPDYMD , " _
@@ -993,7 +1000,7 @@ Public Class GBM00024TRPATTERNSUB
                         SQLStr = SQLStr & "    @COMPCODE,@ORG,@USETYPE,@STYMD,@ENDYMD, " _
                                  & "           @INVOICEDBY,@BILLINGCATEGORY,@LOADPORT1,@DISCHARGEPORT1,@LOADPORT2, " _
                                  & "           @DISCHARGEPORT2,@SHIPPER,@CONSIGNEE,@PRODUCTCODE,@AGENTPOL1, " _
-                                 & "           @AGENTPOD1,@AGENTPOL2,@AGENTPOD2,@DELFLG, " _
+                                 & "           @AGENTPOD1,@AGENTPOL2,@AGENTPOD2,@USINGLEASETANK,@DELFLG, " _
                                  & "           @INITYMD,@UPDYMD,@UPDUSER,@UPDTERMID,@RECEIVEYMD); " _
                                  & " CLOSE timestamp ; " _
                                  & " DEALLOCATE timestamp ; "
@@ -1018,6 +1025,7 @@ Public Class GBM00024TRPATTERNSUB
                             .Add("@AGENTPOD1", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("AGENTPOD1")
                             .Add("@AGENTPOL2", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("AGENTPOL2")
                             .Add("@AGENTPOD2", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("AGENTPOD2")
+                            .Add("@USINGLEASETANK", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("USINGLEASETANK")
 
                             .Add("@DELFLG", System.Data.SqlDbType.NVarChar).Value = BASEtbl.Rows(i)("DELFLG")
                             .Add("@INITYMD", System.Data.SqlDbType.DateTime).Value = nowDate
@@ -1812,6 +1820,22 @@ Public Class GBM00024TRPATTERNSUB
                             End If
                         End If
                     End If
+                Case Me.vLeftUsingLeaseTank.ID 'アクティブなビューがリースタンク利用
+                    'リースタンク利用選択時
+                    targetObject = FindControl(Me.hdnTextDbClickField.Value)
+                    If targetObject IsNot Nothing Then
+                    Else
+                        'リピーター リースタンク利用
+                        If Me.lbUsingLeaseTank.SelectedItem IsNot Nothing AndAlso
+                            Me.hdnTextDbClickField.Value IsNot Nothing Then
+                            Dim lstCtr = GetRepObjects(WF_DViewRep1, Me.hdnTextDbClickField.Value)
+                            If lstCtr IsNot Nothing Then
+                                DirectCast(lstCtr(0), TextBox).Text = Me.lbUsingLeaseTank.SelectedItem.Value
+                                DirectCast(lstCtr(1), Label).Text = Me.lbUsingLeaseTank.SelectedItem.Text
+                                DirectCast(lstCtr(0), TextBox).Focus()
+                            End If
+                        End If
+                    End If
                 Case Me.vLeftDelFlg.ID 'アクティブなビューが削除フラグ
                     '削除フラグ選択時
                     targetObject = FindControl(Me.hdnTextDbClickField.Value)
@@ -1979,6 +2003,8 @@ Public Class GBM00024TRPATTERNSUB
         table.Columns("AGENTPOL2").DefaultValue = ""
         table.Columns.Add("AGENTPOD2", GetType(String))
         table.Columns("AGENTPOD2").DefaultValue = ""
+        table.Columns.Add("USINGLEASETANK", GetType(String))
+        table.Columns("USINGLEASETANK").DefaultValue = ""
         table.Columns.Add("DELFLG", GetType(String))
         table.Columns("DELFLG").DefaultValue = ""
         table.Columns.Add("INITYMD", GetType(String))
@@ -2035,6 +2061,7 @@ Public Class GBM00024TRPATTERNSUB
         workRow("AGENTPOD1") = ""
         workRow("AGENTPOL2") = ""
         workRow("AGENTPOD2") = ""
+        workRow("USINGLEASETANK") = ""
         workRow("DELFLG") = ""
         workRow("INITYMD") = ""
         workRow("UPDYMD") = ""
@@ -2105,6 +2132,7 @@ Public Class GBM00024TRPATTERNSUB
             workRow("AGENTPOD1") = ""
             workRow("AGENTPOL2") = ""
             workRow("AGENTPOD2") = ""
+            workRow("USINGLEASETANK") = ""
             workRow("DELFLG") = Me.txtDelFlg.Text
             workRow("INITYMD") = ""
             workRow("UPDYMD") = ""
@@ -2338,6 +2366,9 @@ Public Class GBM00024TRPATTERNSUB
             Case "AGENTPOD2"
                 '着２エージェント
                 repAttr = "Field_DBclick('vLeftAgent', 'AGENTPOD2');"
+            Case "USINGLEASETANK"
+                'リースタンク利用
+                repAttr = "Field_DBclick('vLeftUsingLeaseTank', 'USINGLEASETANK');"
             Case Else
                 repAttr = ""
         End Select
@@ -2393,6 +2424,22 @@ Public Class GBM00024TRPATTERNSUB
             End If
             txtRightErrorMessage.Text = txtRightErrorMessage.Text & ControlChars.NewLine _
                                            & "・" & refErrMessage & "(" & Me.dicField("BILLINGCATEGORY") & ":" & Convert.ToString(InpRow("BILLINGCATEGORY")) & ")" & errMessageStr
+            errFlg = True
+            returnCode = C_MESSAGENO.NORMAL
+        End If
+
+        'リースタンク利用
+        If Me.lbUsingLeaseTank.Items.Count <= 0 Then
+            SetUsingLeaseTankListItem(Convert.ToString(InpRow("USINGLEASETANK")))
+        End If
+        ChedckList(Convert.ToString(InpRow("USINGLEASETANK")), lbUsingLeaseTank, refErrMessage)
+        If returnCode <> C_MESSAGENO.NORMAL Then
+            errMessageStr = Me.ErrItemSet(InpRow)
+            If txtRightErrorMessage.Text <> "" Then
+                txtRightErrorMessage.Text = txtRightErrorMessage.Text & ControlChars.NewLine
+            End If
+            txtRightErrorMessage.Text = txtRightErrorMessage.Text & ControlChars.NewLine _
+                                           & "・" & refErrMessage & "(" & Me.dicField("USINGLEASETANK") & ":" & Convert.ToString(InpRow("USINGLEASETANK")) & ")" & errMessageStr
             errFlg = True
             returnCode = C_MESSAGENO.NORMAL
         End If
@@ -3363,6 +3410,87 @@ Public Class GBM00024TRPATTERNSUB
     End Sub
 
     ''' <summary>
+    ''' リースタンク利用リストアイテムを設定
+    ''' </summary>
+    Private Sub SetUsingLeaseTankListItem(selectedValue As String)
+        Dim COA0017FixValue As New COA0017FixValue
+
+        'リストクリア
+        Me.lbUsingLeaseTank.Items.Clear()
+
+        'リスト設定
+        COA0017FixValue.COMPCODE = GBC_COMPCODE_D
+        COA0017FixValue.CLAS = "USINGLEASETANK"
+        If COA0019Session.LANGDISP = C_LANG.JA Then
+            COA0017FixValue.LISTBOX1 = Me.lbUsingLeaseTank
+        Else
+            COA0017FixValue.LISTBOX2 = Me.lbUsingLeaseTank
+        End If
+
+        COA0017FixValue.COA0017getListFixValue()
+        If COA0017FixValue.ERR = C_MESSAGENO.NORMAL Then
+
+            If COA0019Session.LANGDISP = C_LANG.JA Then
+                Me.lbUsingLeaseTank = DirectCast(COA0017FixValue.LISTBOX1, ListBox)
+            Else
+                Me.lbUsingLeaseTank = DirectCast(COA0017FixValue.LISTBOX2, ListBox)
+            End If
+
+            '一応現在入力しているテキストと一致するものを選択状態
+            If Me.lbUsingLeaseTank.Items.Count > 0 Then
+                Dim findListItem = Me.lbUsingLeaseTank.Items.FindByValue(selectedValue)
+                If findListItem IsNot Nothing Then
+                    findListItem.Selected = True
+                End If
+            End If
+            '正常
+            returnCode = C_MESSAGENO.NORMAL
+
+        Else
+            '異常
+            returnCode = C_MESSAGENO.SYSTEMADM
+            CommonFunctions.ShowMessage(returnCode, Me.lblFooterMessage,
+                                        messageParams:=New List(Of String) From {String.Format("CODE:{0}", COA0017FixValue.ERR)})
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' リースタンク利用フラグ名設定
+    ''' </summary>
+    Public Sub USINGLEASETANK_Change()
+
+        Try
+            Dim lstCtr = GetRepObjects(WF_DViewRep1, "USINGLEASETANK")
+
+            DirectCast(lstCtr(1), Label).Text = ""
+
+            SetUsingLeaseTankListItem(DirectCast(lstCtr(0), TextBox).Text)
+            If returnCode = C_MESSAGENO.NORMAL AndAlso Me.lbUsingLeaseTank.Items.Count > 0 Then
+                Dim findListItem = Me.lbUsingLeaseTank.Items.FindByValue(DirectCast(lstCtr(0), TextBox).Text)
+                If findListItem IsNot Nothing Then
+                    DirectCast(lstCtr(1), Label).Text = findListItem.Text
+                Else
+                    Dim findListItemUpper = Me.lbUsingLeaseTank.Items.FindByValue(DirectCast(lstCtr(0), TextBox).Text.ToUpper)
+                    If findListItemUpper IsNot Nothing Then
+                        DirectCast(lstCtr(1), Label).Text = findListItemUpper.Text
+                        DirectCast(lstCtr(0), TextBox).Text = findListItemUpper.Value
+                    End If
+                End If
+            End If
+
+        Catch ex As Exception
+            returnCode = C_MESSAGENO.EXCEPTION
+            COA0003LogFile.RUNKBN = C_RUNKBN.ONLINE
+            COA0003LogFile.NIWEA = C_NAEIW.ABNORMAL
+            COA0003LogFile.TEXT = ex.ToString()
+            COA0003LogFile.MESSAGENO = returnCode
+            COA0003LogFile.COA0003WriteLog()
+        End Try
+    End Sub
+
+    ''' <summary>
     ''' 削除フラグリストアイテムを設定
     ''' </summary>
     Private Sub SetDelFlgListItem(selectedValue As String)
@@ -3546,6 +3674,7 @@ Public Class GBM00024TRPATTERNSUB
                                                                                "LOADPORT1", "DISCHARGEPORT1", "LOADPORT2", "DISCHARGEPORT2",
                                                                                "SHIPPER", "CONSIGNEE", "PRODUCTCODE",
                                                                                "AGENTPOL1", "AGENTPOD1", "AGENTPOL2", "AGENTPOD2",
+                                                                               "USINGLEASETANK",
                                                                                "DELFLG"})
 
         Dim drInput As DataRow = INPtbl.NewRow
@@ -3662,7 +3791,7 @@ Public Class GBM00024TRPATTERNSUB
                         workBaseRow("AGENTPOD1") = drInput("AGENTPOD1")
                         workBaseRow("AGENTPOL2") = drInput("AGENTPOL2")
                         workBaseRow("AGENTPOD2") = drInput("AGENTPOD2")
-
+                        workBaseRow("USINGLEASETANK") = drInput("USINGLEASETANK")
                         If Convert.ToString(drInput("DELFLG")) = "" Then
                             workBaseRow("DELFLG") = BaseDllCommon.CONST_FLAG_NO
                         Else
@@ -3730,7 +3859,7 @@ Public Class GBM00024TRPATTERNSUB
         txtEndYMD.Text = FormatDateContrySettings(Convert.ToString(dataTable(0)("ENDYMD")), GBA00003UserSetting.DATEFORMAT)
 
         txtTrPattern.Text = Convert.ToString(dataTable(0)("USETYPE"))
-        'txtTrPattern_Change()
+        txtTrPattern_Change()
 
         txtDelFlg.Text = Convert.ToString(dataTable(0)("DELFLG"))
         txtDelFlg_Change()
@@ -3746,6 +3875,22 @@ Public Class GBM00024TRPATTERNSUB
 
         'Detail初期設定
         SetDetailDbClick()
+        'コードに対する文言設定
+        INVOICEDBY_Change()
+        BILLINGCATEGORY_Change()
+        LOADPORT1_Change()
+        LOADPORT2_Change()
+        DISCHARGEPORT1_Change()
+        DISCHARGEPORT2_Change()
+        SHIPPER_Change()
+        CONSIGNEE_Change()
+        PRODUCTCODE_Change()
+        AGENTPOL1_Change()
+        AGENTPOL2_Change()
+        AGENTPOD1_Change()
+        AGENTPOD2_Change()
+        USINGLEASETANK_Change()
+
         '画面WF_GRID状態設定
         '状態をクリア設定
         For i As Integer = 0 To BASEtbl.Rows.Count - 1
