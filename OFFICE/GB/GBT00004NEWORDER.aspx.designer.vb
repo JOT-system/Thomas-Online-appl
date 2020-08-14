@@ -302,6 +302,60 @@ Partial Public Class GBT00004NEWORDER
     Protected WithEvents txtTotalInvoiced As Global.System.Web.UI.WebControls.TextBox
     
     '''<summary>
+    '''trTSEta コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents trTSEta As Global.System.Web.UI.HtmlControls.HtmlTableRow
+    
+    '''<summary>
+    '''lblTSEta コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblTSEta As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtTSEta コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtTSEta As Global.System.Web.UI.WebControls.TextBox
+    
+    '''<summary>
+    '''trTSEtd コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents trTSEtd As Global.System.Web.UI.HtmlControls.HtmlTableRow
+    
+    '''<summary>
+    '''lblTSEtd コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblTSEtd As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtTSEtd コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtTSEtd As Global.System.Web.UI.WebControls.TextBox
+    
+    '''<summary>
     '''lblEta1 コントロール。
     '''</summary>
     '''<remarks>

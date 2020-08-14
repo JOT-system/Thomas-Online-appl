@@ -369,6 +369,8 @@ Public Class GBT00004NEWORDER
         AddLangSetting(dicDisplayText, Me.lblEta1, "着港日1", "ETA1")
         AddLangSetting(dicDisplayText, Me.lblEtd2, "出港日2", "ETD2")
         AddLangSetting(dicDisplayText, Me.lblEta2, "着港日2", "ETA2")
+        AddLangSetting(dicDisplayText, Me.lblTSEtd, "出港日(T/S)", "TSETD")
+        AddLangSetting(dicDisplayText, Me.lblTSEta, "着港日(T/S)", "TSETA")
         AddLangSetting(dicDisplayText, Me.lblTotalInvoiced, "総額", "TOTAL INVOICED")
 
         ' AddLangSetting(dicDisplayText, Me.btnSave, "保存", "Save")
@@ -435,6 +437,7 @@ Public Class GBT00004NEWORDER
             Dim totalCost As String = GetBreakerValue(dicBrInfo, "", sqlCon)
             Dim totalShipperCost As String = GetBreakerValue(dicBrInfo, "1", sqlCon)
             Dim totalConsigneeCost As String = GetBreakerValue(dicBrInfo, "0", sqlCon)
+            Dim transitFlg As String = GetTrnTransit(dicBrInfo, sqlCon)
 
             '取得値を戻り値に設定
             Dim drBrBase As DataRow = dtBrBase.Rows(0)
@@ -496,6 +499,11 @@ Public Class GBT00004NEWORDER
                 retBrData.IsTrilateral = True
             Else
                 retBrData.IsTrilateral = False
+            End If
+            If Convert.ToInt32(transitFlg) > 0 Then
+                retBrData.IsTransit = True
+            Else
+                retBrData.IsTransit = False
             End If
             retBrData.BrCommission = Convert.ToString(drBrBase("FEE"))
             retBrData.BillingCategory = Convert.ToString(drBrBase("BILLINGCATEGORY"))
@@ -773,6 +781,63 @@ Public Class GBT00004NEWORDER
     End Function
 
     ''' <summary>
+    ''' Breakerに紐づく輸送パターンのトランジット有無を取得
+    ''' </summary>
+    ''' <param name="dicBrInfo"></param>
+    ''' <returns></returns>
+    Private Function GetTrnTransit(dicBrInfo As Dictionary(Of String, BreakerInfo), Optional sqlCon As SqlConnection = Nothing) As String
+        Dim canCloseConnect As Boolean = False
+        Dim sqlStat As New Text.StringBuilder
+        Dim retValue As String = ""
+        sqlStat.Append("SELECT COUNT(1) AS TRANSITCOUNT")
+        sqlStat.Append("  FROM GBM0009_TRPATTERN AS TP ")
+        sqlStat.Append(" WHERE TP.USETYPE = ( ")
+        sqlStat.Append("	SELECT TOP 1 BI.USETYPE ")
+        sqlStat.Append("	  FROM GBT0001_BR_INFO AS BI ")
+        sqlStat.Append("	 WHERE BI.BRID = @BRID ")
+        sqlStat.Append("	   AND BI.DELFLG <> @DELFLG ")
+        sqlStat.Append(" ) ")
+        sqlStat.Append("  AND TP.ACTIONID like 'TR%' ")
+        Try
+            If sqlCon Is Nothing Then
+                sqlCon = New SqlConnection(COA0019Session.DBcon)
+                sqlCon.Open()
+                canCloseConnect = True
+            End If
+            Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
+                Dim brInfoOrganizer As BreakerInfo = dicBrInfo("INFO")
+                'SQLパラメータ設定
+                With sqlCmd.Parameters
+                    .Add("@BRID", SqlDbType.NVarChar, 20).Value = brInfoOrganizer.BrId
+                    .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
+                    .Add("@COMPCODE", SqlDbType.NVarChar).Value = GBC_COMPCODE
+                End With
+
+                Using sqlDa As New SqlDataAdapter(sqlCmd)
+                    Dim dt As New DataTable
+                    sqlDa.Fill(dt)
+                    If dt Is Nothing OrElse dt.Rows.Count = 0 Then
+                        Throw New Exception("Get TrnPattarn Error")
+                    End If
+                    retValue = Convert.ToString(dt.Rows(0).Item("TRANSITCOUNT"))
+
+                End Using
+            End Using
+            Return retValue
+        Catch
+            Throw
+        Finally
+            If canCloseConnect = True Then
+                If sqlCon IsNot Nothing Then
+                    sqlCon.Close()
+                    sqlCon.Dispose()
+                End If
+            End If
+        End Try
+
+    End Function
+
+    ''' <summary>
     ''' オーナー情報を格納する空のデータテーブルを作成する
     ''' </summary>
     ''' <returns>Organizer情報のデータテーブルを作成</returns>
@@ -863,6 +928,11 @@ Public Class GBT00004NEWORDER
 
         retDt.Columns.Add("USINGLEASETANK", GetType(String))
 
+        '経由地関係
+        retDt.Columns.Add("ISTRANSIT", GetType(String)) '経由地登録有無 "1.経由地あり,その他.通常
+        retDt.Columns.Add("TSETD", GetType(String))
+        retDt.Columns.Add("TSETA", GetType(String))
+
         Dim dr As DataRow = retDt.NewRow
         dr.Item("DUMMY") = "　"
         retDt.Rows.Add(dr)
@@ -902,6 +972,8 @@ Public Class GBT00004NEWORDER
         Me.txtEta1.Text = FormatDateContrySettings(brData.BrEta1, GBA00003UserSetting.DATEFORMAT)
         Me.txtEtd2.Text = FormatDateContrySettings(brData.BrEtd2, GBA00003UserSetting.DATEFORMAT)
         Me.txtEta2.Text = FormatDateContrySettings(brData.BrEta2, GBA00003UserSetting.DATEFORMAT)
+        Me.txtTSEta.Text = ""
+        Me.txtTSEtd.Text = ""
         Me.txtTotalTanks.Text = ""
         Me.txtTotalInvoiced.Text = ""
         Me.txtVesselName.Text = brData.VesselName
@@ -925,6 +997,10 @@ Public Class GBT00004NEWORDER
         '三国間輸送の場合は表示ETA2,ETD2を表示
         Me.trEta2.Visible = brData.IsTrilateral
         Me.trEtd2.Visible = brData.IsTrilateral
+
+        '経由地TRSH/TRAV設定の場合はTSETA,TSETDを表示
+        Me.trTSEta.Visible = brData.IsTransit
+        Me.trTSEtd.Visible = brData.IsTransit
     End Sub
     ''' <summary>
     ''' Decimal文字列を数字に変換
@@ -1014,9 +1090,17 @@ Public Class GBT00004NEWORDER
             checkSingleObjects.Add("ETD2", Me.txtEtd2)
             checkSingleObjects.Add("ETA2", Me.txtEta2)
         End If
+        '経由地ありの場合はTSETD,TSETAをチェック項目に追加
+        If Me.trTSEta.Visible = True Then
+            checkSingleObjects.Add("TSETA", Me.txtTSEta)
+            checkSingleObjects.Add("TSETD", Me.txtTSEtd)
+        End If
         For Each checkObj As KeyValuePair(Of String, TextBox) In checkSingleObjects
             Dim checkValue As String = ""
-            If checkObj.Key = "FILLINGDATE" OrElse checkObj.Key = "ETD1" OrElse checkObj.Key = "ETA1" OrElse checkObj.Key = "ETD2" OrElse checkObj.Key = "ETA2" Then
+            If checkObj.Key = "FILLINGDATE" OrElse
+                checkObj.Key = "ETD1" OrElse checkObj.Key = "ETA1" OrElse
+                checkObj.Key = "ETD2" OrElse checkObj.Key = "ETA2" OrElse
+                checkObj.Key = "TSETA" OrElse checkObj.Key = "TSETD" Then
                 checkValue = FormatDateYMD(checkObj.Value.Text, GBA00003UserSetting.DATEFORMAT)
             Else
                 checkValue = checkObj.Value.Text
@@ -1046,6 +1130,14 @@ Public Class GBT00004NEWORDER
         retValue = CheckDateSpan(checkDateSpanObjects)
         If retValue <> C_MESSAGENO.NORMAL Then
             Return retValue
+        End If
+        '経由地ありの場合はTSETA,TSETDをチェック項目に追加
+        If Me.trTSEta.Visible = True Then
+            Dim checkDateSpanObjectsTransit As New List(Of TextBox) From {Me.txtFillingDate, Me.txtEtd1, Me.txtTSEta, Me.txtTSEtd, Me.txtEta1}
+            retValue = CheckDateSpan(checkDateSpanObjectsTransit)
+            If retValue <> C_MESSAGENO.NORMAL Then
+                Return retValue
+            End If
         End If
         '******************************
         'ブレーカー有効期限vsETD1チェック
@@ -1782,6 +1874,7 @@ Public Class GBT00004NEWORDER
         Dim fillingDate As Date
         Dim eta1 As Date, etd1 As Date
         Dim eta2 As Date, etd2 As Date
+        Dim tsEta As Date, tsEtd As Date
         If Date.TryParseExact(Me.txtFillingDate.Text, GBA00003UserSetting.DATEFORMAT, Nothing, Nothing, fillingDate) = False Then
             fillingDate = Date.Parse("1900/01/01")
         End If
@@ -1796,6 +1889,12 @@ Public Class GBT00004NEWORDER
         End If
         If Date.TryParseExact(Me.txtEtd2.Text, GBA00003UserSetting.DATEFORMAT, Nothing, Nothing, etd2) = False Then
             etd2 = Date.Parse("1900/01/01")
+        End If
+        If Date.TryParseExact(Me.txtTSEta.Text, GBA00003UserSetting.DATEFORMAT, Nothing, Nothing, tsEta) = False Then
+            tsEta = Date.Parse("1900/01/01")
+        End If
+        If Date.TryParseExact(Me.txtTSEtd.Text, GBA00003UserSetting.DATEFORMAT, Nothing, Nothing, tsEtd) = False Then
+            tsEtd = Date.Parse("1900/01/01")
         End If
 
         Dim updateDateVal As DateTime
@@ -1823,6 +1922,11 @@ Public Class GBT00004NEWORDER
                     updateDateVal = eta1
                 Case "ETD"
                     updateDateVal = etd1
+                '↓経由地追加
+                Case "TSETA"
+                    updateDateVal = tsEta
+                Case "TSETD"
+                    updateDateVal = tsEtd
             End Select
 
             If updateDateVal.ToString("yyyy/MM/dd") = "1900/01/01" Then
@@ -2356,10 +2460,10 @@ Public Class GBT00004NEWORDER
 
                     Dim eta2 As Date
                     Dim etd2 As Date
-                    If Date.TryParseExact(Me.txtEta1.Text, GBA00003UserSetting.DATEFORMAT, Nothing, Nothing, eta2) = False Then
+                    If Date.TryParseExact(Me.txtEta2.Text, GBA00003UserSetting.DATEFORMAT, Nothing, Nothing, eta2) = False Then
                         eta2 = Date.Parse("1900/01/01")
                     End If
-                    If Date.TryParseExact(Me.txtEtd1.Text, GBA00003UserSetting.DATEFORMAT, Nothing, Nothing, etd2) = False Then
+                    If Date.TryParseExact(Me.txtEtd2.Text, GBA00003UserSetting.DATEFORMAT, Nothing, Nothing, etd2) = False Then
                         etd2 = Date.Parse("1900/01/01")
                     End If
                     .Add("@ETA2", SqlDbType.Date).Value = eta2
@@ -3173,6 +3277,11 @@ Public Class GBT00004NEWORDER
         ''' </summary>
         ''' <returns></returns>
         Public Property IsTrilateral As Boolean = False
+        ''' <summary>
+        ''' 経由地有無(True:経由地あり,False(Default):経由地登録なし)
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property IsTransit As Boolean = False
         ''' <summary>
         ''' ブレーカー種類
         ''' </summary>
