@@ -1485,7 +1485,7 @@ Public Class GBT00006RESULT
                 COA0013TableObject.VARI = "GB_Allocate"
             End If
         Else
-            COA0013TableObject.VARI = ""
+            COA0013TableObject.VARI = "Default"
         End If
         COA0013TableObject.SRCDATA = listData
         COA0013TableObject.TBLOBJ = Me.WF_LISTAREA
