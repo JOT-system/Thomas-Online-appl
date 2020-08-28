@@ -146,7 +146,7 @@
                         <%-- リース登録本数 --%>
                         <tr>
 		                    <td>
-			                    <a><asp:Label ID="Label1" runat="server">リースブレーカ登録本数</asp:Label></a>
+			                    <a><asp:Label ID="lblLeaseTankLabel" runat="server"></asp:Label></a>
 		                    </td>
                             <td>
 			                    <a><asp:Label ID="lblLeaseTank" runat="server" ></asp:Label></a>
@@ -155,7 +155,7 @@
                         <%-- リースアウト本数 --%>
                         <tr>
 		                    <td>
-			                    <a><asp:Label ID="Label2" runat="server">リースアウト本数</asp:Label></a>
+			                    <a><asp:Label ID="lblLeaseOutLabel" runat="server"></asp:Label></a>
 		                    </td>
                             <td>
 			                    <a><asp:Label ID="lblLeaseOut" runat="server" ></asp:Label></a>
@@ -164,7 +164,7 @@
                         <%-- リース合計本数 --%>
                         <tr>
 		                    <td>
-			                    <a><asp:Label ID="Label3" runat="server">合計</asp:Label></a>
+			                    <a><asp:Label ID="lblLeaseTotalLabel" runat="server"></asp:Label></a>
 		                    </td>
                             <td>
 			                    <a><asp:Label ID="lblLeaseTotal" runat="server" ></asp:Label></a>

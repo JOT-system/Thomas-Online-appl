@@ -10,14 +10,67 @@ Public Class GBT00030LIST
     Private Const CONST_DSPROWCOUNT = 44                '指定数＋１が表示対象
     Private Const CONST_SCROLLROWCOUNT = 25              'マウススクロール時の増分
 
+    Public Const CONST_INCTORICODE_HIS = "0439000010"
+    Public Const CONST_LEASE_SHIPPER_HIS = "JPC01082"
+    Public Const CONST_LEASE_PRODUCT_HIS = "000662"
+
     Public Class SelectedMode
+        ''' <summary>
+        ''' ETYD（MY）
+        ''' </summary>
         Public Const ImportEmptyTank As String = "1"
+        ''' <summary>
+        ''' 輸入コンテナ　輸送手配
+        ''' </summary>
         Public Const ImportBeforeTransport As String = "2"
+        ''' <summary>
+        ''' 輸入コンテナ　海上輸送中
+        ''' </summary>
         Public Const ImportInTransit As String = "3"
+        ''' <summary>
+        ''' ETYD（JP）
+        ''' </summary>
         Public Const ExportEmptyTank As String = "4"
+        ''' <summary>
+        ''' 回送コンテナ　回送手配
+        ''' </summary>
         Public Const ExportBeforeTransport As String = "5"
+        ''' <summary>
+        ''' 回送コンテナ　海上輸送中
+        ''' </summary>
         Public Const ExportInTransit As String = "6"
+        ''' <summary>
+        ''' 仙台予備在庫
+        ''' </summary>
         Public Const StockTank As String = "9"
+
+        Private Shared dicModeTitle As Dictionary(Of String, String) = New Dictionary(Of String, String) From
+            {{ImportEmptyTank, "ETYD(MY)"},
+             {ImportBeforeTransport, "輸入コンテナ　輸送手配"},
+             {ImportInTransit, "輸入コンテナ　海上輸送中"},
+             {ExportEmptyTank, "ETYD(JP)"},
+             {ExportBeforeTransport, "回送コンテナ　回送手配"},
+             {ExportInTransit, "回送コンテナ　海上輸送中"},
+             {StockTank, "仙台予備在庫"}
+             }
+        Private Shared dicModeTitleEng As Dictionary(Of String, String) = New Dictionary(Of String, String) From
+            {{ImportEmptyTank, "ETYD(MY)"},
+             {ImportBeforeTransport, "Import Before Transport"},
+             {ImportInTransit, "Import In Transit"},
+             {ExportEmptyTank, "ETYD(JP)"},
+             {ExportBeforeTransport, "Export Before Transport"},
+             {ExportInTransit, "Export In Transit"},
+             {StockTank, "Stock at SDJ"}
+             }
+        Public Shared Function GetModeName(mode As String, Optional lang As String = "") As String
+            Dim retVal As String = ""
+            If lang <> C_LANG.JA Then
+                dicModeTitleEng.TryGetValue(mode, retVal)
+            Else
+                dicModeTitle.TryGetValue(mode, retVal)
+            End If
+            Return retVal
+        End Function
     End Class
 
     ''' <summary>
@@ -398,8 +451,8 @@ Public Class GBT00030LIST
                 .Add("@INITDATE", SqlDbType.Date).Value = "1900/01/01"
                 .Add("@STYMD", SqlDbType.Date).Value = Now()
                 .Add("@ENDYMD", SqlDbType.Date).Value = Now()
-                .Add("@SHIPPER", SqlDbType.NVarChar, 20).Value = "JPC01082"
-                .Add("@PRODUCTCODE", SqlDbType.NVarChar, 20).Value = "000662"
+                .Add("@SHIPPER", SqlDbType.NVarChar, 20).Value = CONST_LEASE_SHIPPER_HIS
+                .Add("@PRODUCTCODE", SqlDbType.NVarChar, 20).Value = CONST_LEASE_PRODUCT_HIS
 
             End With
             Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -508,6 +561,9 @@ Public Class GBT00030LIST
         AddLangSetting(dicDisplayText, Me.rbShowMemo, "メモ", "Memo")
         AddLangSetting(dicDisplayText, Me.rbShowError, "エラー詳細", "Error Information")
 
+        AddLangSetting(dicDisplayText, Me.lblLeaseTankLabel, "リース登録本数", "Lease Container")
+        AddLangSetting(dicDisplayText, Me.lblLeaseOutLabel, "リースアウト本数", "Lease Out")
+        AddLangSetting(dicDisplayText, Me.lblLeaseTotalLabel, "合計", "Total")
 
         '上記で設定したオブジェクトの文言を変更
         SetDisplayLangObjects(dicDisplayText, lang)
@@ -940,8 +996,7 @@ Public Class GBT00030LIST
         Dim vari As String = Me.hdnThisMapVariant.Value
         'ETYD時はタンク一覧に遷移（それ以外はオーダー一覧）
         If detailInfo = SelectedMode.ImportEmptyTank OrElse
-            detailInfo = SelectedMode.ExportEmptyTank OrElse
-            detailInfo = SelectedMode.StockTank Then
+            detailInfo = SelectedMode.ExportEmptyTank Then
             vari &= "_ETYD"
         End If
 

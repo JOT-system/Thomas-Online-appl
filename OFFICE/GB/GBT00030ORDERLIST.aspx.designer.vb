@@ -158,6 +158,24 @@ Partial Public Class GBT00030ORDERLIST
     Protected WithEvents txtOrderNo As Global.System.Web.UI.WebControls.TextBox
     
     '''<summary>
+    '''divListTitle コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents divListTitle As Global.System.Web.UI.HtmlControls.HtmlGenericControl
+    
+    '''<summary>
+    '''lblActyTitle コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblActyTitle As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
     '''WF_LISTAREA コントロール。
     '''</summary>
     '''<remarks>

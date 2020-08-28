@@ -159,6 +159,10 @@
                     </div>
                 </div>
 
+                <div id="divListTitle" runat="server">
+                    <asp:Label ID="lblActyTitle" runat="server" Text=""></asp:Label>
+                </div>
+                
                 <!-- タンク動静、オーダー一覧 -->
                 <asp:panel id="WF_LISTAREA" runat="server">
                 </asp:panel>

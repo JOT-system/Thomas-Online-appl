@@ -369,8 +369,8 @@ Public Class GBT00004NEWORDER
         AddLangSetting(dicDisplayText, Me.lblEta1, "着港日1", "ETA1")
         AddLangSetting(dicDisplayText, Me.lblEtd2, "出港日2", "ETD2")
         AddLangSetting(dicDisplayText, Me.lblEta2, "着港日2", "ETA2")
-        AddLangSetting(dicDisplayText, Me.lblTSEtd, "出港日(T/S)", "TSETD")
-        AddLangSetting(dicDisplayText, Me.lblTSEta, "着港日(T/S)", "TSETA")
+        AddLangSetting(dicDisplayText, Me.lblTSEtd, "出港日(T/S)", "ETD(T/S)")
+        AddLangSetting(dicDisplayText, Me.lblTSEta, "着港日(T/S)", "ETA(T/S)")
         AddLangSetting(dicDisplayText, Me.lblTotalInvoiced, "総額", "TOTAL INVOICED")
 
         ' AddLangSetting(dicDisplayText, Me.btnSave, "保存", "Save")

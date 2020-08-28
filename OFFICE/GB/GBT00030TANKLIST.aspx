@@ -138,6 +138,13 @@
                     </div>
                 </div>
 
+                <div id="divListTitle" runat="server">
+                    <span>
+                        <asp:Label ID="lblOrderNoLabel" runat="server" Text="OrderNo."></asp:Label>
+                        <asp:Label ID="lblOrderNo" runat="server" Text=""></asp:Label>
+                    </span>
+                </div>
+
                 <!-- タンク動静、タンク一覧 -->
                 <asp:panel id="WF_LISTAREA" runat="server">
                 </asp:panel>

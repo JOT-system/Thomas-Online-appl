@@ -14,6 +14,10 @@
 #divContensbox span[id^="lbl"][id$="Text"] {
     color: rgb(0,0,255);
 }
+#divListTitle span[id^="lbl"] {
+    color: rgb(0,0,255);
+    margin-left: 10px;
+}
 /* 共通関数で自動生成した表のスタイル */
 #WF_LISTAREA {
     margin-left: 10px;

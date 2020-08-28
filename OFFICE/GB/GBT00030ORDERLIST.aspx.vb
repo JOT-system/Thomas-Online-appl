@@ -579,7 +579,7 @@ Public Class GBT00030ORDERLIST
                 .Add("@INITDATE", SqlDbType.Date).Value = "1900/01/01"
                 .Add("@STYMD", SqlDbType.Date).Value = Now()
                 .Add("@ENDYMD", SqlDbType.Date).Value = Now()
-                .Add("@INCTORICODE", SqlDbType.NVarChar, 20).Value = "0439000010"
+                .Add("@INCTORICODE", SqlDbType.NVarChar, 20).Value = GBT00030LIST.CONST_INCTORICODE_HIS 
 
             End With
             Using sqlDa As New SqlDataAdapter(sqlCmd)
@@ -599,25 +599,60 @@ Public Class GBT00030ORDERLIST
         Dim leaseOutNum As Integer = 0
         Dim leaseTotal As Integer = 0
 
-        Dim actyTitle As String = ""
         Dim outputDate As Date = Now
 
-        Dim selAct As String() = {""}
+        Dim selAct As List(Of String) = New List(Of String)
         Select Case Me.hdnSelectedMode.Value
             Case GBT00030LIST.SelectedMode.ImportEmptyTank
             Case GBT00030LIST.SelectedMode.ImportBeforeTransport
-                selAct = {"E", "TKAL", "DOUT", "LOAD", "CYIN"}
-                actyTitle = "輸入コンテナ　輸送手配"
+                Select Case Me.hdnSelectedActy.Value
+                    Case "TKAL"
+                        selAct.AddRange({"TKAL", "DOUT", "LOAD", "CYIN"})
+                    Case "DOUT"
+                        selAct.AddRange({"DOUT", "LOAD", "CYIN"})
+                    Case "LOAD"
+                        selAct.AddRange({"LOAD", "CYIN"})
+                    Case "CYIN"
+                        selAct.AddRange({"CYIN"})
+                End Select
             Case GBT00030LIST.SelectedMode.ImportInTransit
-                selAct = {"SHIP", "ARVD", "TRSH", "TRAV", "DPIN", "DLRY"}
-                actyTitle = "輸入コンテナ　海上輸送中"
+                Select Case Me.hdnSelectedActy.Value
+                    Case "SHIP"
+                        selAct.AddRange({"SHIP", "TRAV", "TRSH", "ARVD", "DPIN", "DLRY"})
+                    Case "TRAV"
+                        selAct.AddRange({"TRAV", "TRSH", "ARVD", "DPIN", "DLRY"})
+                    Case "TRSH"
+                        selAct.AddRange({"TRSH", "ARVD", "DPIN", "DLRY"})
+                    Case "ARVD"
+                        selAct.AddRange({"ARVD", "DPIN", "DLRY"})
+                    Case "DPIN"
+                        selAct.AddRange({"DPIN", "DLRY"})
+                    Case "DLRY"
+                        selAct.AddRange({"DLRY"})
+                End Select
             Case GBT00030LIST.SelectedMode.ExportEmptyTank
             Case GBT00030LIST.SelectedMode.ExportBeforeTransport
-                selAct = {"", "ETKAL", "EDOUT", "ECYIN"}
-                actyTitle = "回送コンテナ　回送手配"
+                Select Case Me.hdnSelectedActy.Value
+                    Case "ETKAL"
+                        selAct.AddRange({"ETKAL", "EDOUT", "ECYIN"})
+                    Case "EDOUT"
+                        selAct.AddRange({"EDOUT", "ECYIN"})
+                    Case "ECYIN"
+                        selAct.AddRange({"ECYIN"})
+                End Select
             Case GBT00030LIST.SelectedMode.ExportInTransit
-                selAct = {"ESHIP", "EARVD", "ETRSH", "ETRAV"}
-                actyTitle = "回送コンテナ　海上輸送中"
+                Select Case Me.hdnSelectedActy.Value
+                    Case "ESHIP"
+                        selAct.AddRange({"ESHIP", "ETRAV", "ETRSH", "EARVD"})
+                    Case "ETRAV"
+                        selAct.AddRange({"ETRAV", "ETRSH", "EARVD"})
+                    Case "ETRSH"
+                        selAct.AddRange({"ETRSH", "EARVD"})
+                    Case "EARVD"
+                        selAct.AddRange({"EARVD"})
+                End Select
+            Case GBT00030LIST.SelectedMode.StockTank
+                selAct.AddRange({"STOK"})
             Case Else
 
         End Select
@@ -627,10 +662,14 @@ Public Class GBT00030ORDERLIST
         Dim lineCnt As Integer = 0
 
         For Each tRow As DataRow In dt.Rows
+            '対象モードのオーダーのみ表示
             If selAct.Contains(tRow("ACTY").ToString) = False Then
                 Continue For
             End If
-
+            '未完了オーダーのみ表示
+            If selAct.Contains(tRow("ACTY").ToString) = False Then
+                Continue For
+            End If
             lineCnt += 1
             Dim newRow = retDt.NewRow
             newRow("LINECNT") = lineCnt
@@ -705,11 +744,12 @@ Public Class GBT00030ORDERLIST
             newRow("HBL") = ""
             newRow("MBL") = ""
 
-            newRow("ACTYTITLE") = actyTitle
+            newRow("ACTYTITLE") = GBT00030LIST.SelectedMode.GetModeName(Me.hdnSelectedMode.Value)
             newRow("OUTPUTDATE") = outputDate
 
             retDt.Rows.Add(newRow)
         Next
+
 
         Return retDt
     End Function
@@ -856,9 +896,14 @@ Public Class GBT00030ORDERLIST
             Case GBT00030LIST.SelectedMode.ExportInTransit
                 '輸送中（回送）
                 vari &= "_ESHIP"
+            Case GBT00030LIST.SelectedMode.StockTank
+                '在庫
             Case Else
         End Select
         Me.hdnThisViewVariant.Value = vari
+
+        'Listタイトル
+        Me.lblActyTitle.Text = GBT00030LIST.SelectedMode.GetModeName(Me.hdnSelectedMode.Value, COA0019Session.LANGDISP)
     End Sub
 
     ''' <summary>

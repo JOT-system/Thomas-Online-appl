@@ -184,7 +184,7 @@ Public Class GBT00030TANKLIST
             '****************************************
             '何も問題なく最後まで到達した処理
             '****************************************
-            'Me.Page.Form.Attributes.Add("data-mapvari", Me.hdnThisMapVariant.Value)
+            Me.Page.Form.Attributes.Add("data-mapvari", Me.hdnThisMapVariant.Value)
             hdnSubmit.Value = "FALSE" 'サブミット可能にするためFalseを設定
         Catch ex As Threading.ThreadAbortException
             'キャンセルやServerTransferにて後続の処理が打ち切られた場合のエラーは発生させない
@@ -243,10 +243,9 @@ Public Class GBT00030TANKLIST
         Dim COA0011ReturnUrl As New BASEDLL.COA0011ReturnUrl
 
         Dim vari As String = Me.hdnThisMapVariant.Value
-        'ETYD時はタンク一覧に遷移（それ以外はオーダー一覧）
+        'ETYD時は一覧に遷移（それ以外はオーダー一覧）
         If Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ImportEmptyTank OrElse
-            Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ExportEmptyTank OrElse
-            Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.StockTank Then
+            Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ExportEmptyTank Then
             vari &= "_ETYD"
         End If
 
@@ -261,8 +260,7 @@ Public Class GBT00030TANKLIST
         End If
         '次画面の変数セット
         If Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ImportEmptyTank OrElse
-            Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ExportEmptyTank OrElse
-            Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.StockTank Then
+            Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ExportEmptyTank Then
             HttpContext.Current.Session("MAPvariant") = COA0011ReturnUrl.VARI_Return.Replace("_ETYD", "")
         Else
             HttpContext.Current.Session("MAPvariant") = COA0011ReturnUrl.VARI_Return
@@ -486,7 +484,31 @@ Public Class GBT00030TANKLIST
         sb.Append("  , isnull(ov.ISIMPORT,'0') as ISIMPORT ")
         sb.Append("from GBV0001_TANKSTATUS as st ")
         '-- 対象リースタンク
-        sb.Append("inner join GBV0002_LEASETANK as lt on lt.TANKNO=st.TANKNO and lt.SHIPPER= @SHIPPER and lt.PRODUCTCODE=@PRODUCTCODE ")
+        'sb.Append("inner join GBV0002_LEASETANK as lt on lt.TANKNO=st.TANKNO and lt.SHIPPER= @SHIPPER and lt.PRODUCTCODE=@PRODUCTCODE ")
+        sb.Append("inner join ( ")
+        sb.Append("	select lt.TANKNO ")
+        sb.Append("	from GBV0002_LEASETANK as lt ")
+        sb.Append("	inner join ( ")
+        sb.Append("	  select OVLESD.TANKNO, max(OVLESD.ACTUALDATE) as ACTUALDATE ")
+        sb.Append("	  from GBT0005_ODR_VALUE as OVLESD with(nolock) ")
+        sb.Append("	  where OVLESD.ACTIONID = 'LESD' ")
+        sb.Append("	  and   OVLESD.ACTUALDATE <> @InitDate ")
+        sb.Append("	  and   OVLESD.DELFLG <> @DelFlg ")
+        sb.Append("	  group by OVLESD.TANKNO ")
+        sb.Append("	  ) as LESD ")
+        sb.Append("	on LESD.TANKNO = lt.TANKNO ")
+        sb.Append("	left outer join ( ")
+        sb.Append("	  select OVLEIN.TANKNO, max(OVLEIN.ACTUALDATE) as ACTUALDATE ")
+        sb.Append("	  from GBT0005_ODR_VALUE as OVLEIN with(nolock) ")
+        sb.Append("	  where OVLEIN.ACTIONID = 'LEIN' ")
+        sb.Append("	  and   OVLEIN.ACTUALDATE <> @InitDate ")
+        sb.Append("	  and   OVLEIN.DELFLG <> @DelFlg ")
+        sb.Append("	  group by OVLEIN.TANKNO ")
+        sb.Append("	  ) as LEIN ")
+        sb.Append("	on LEIN.TANKNO = lt.TANKNO ")
+        sb.Append("	where lt.SHIPPER= @SHIPPER and lt.PRODUCTCODE=@PRODUCTCODE ")
+        sb.Append("	and  isnull(LESD.ACTUALDATE,'1900/01/01') >= isnull(LEIN.ACTUALDATE,'1900/01/01') ")
+        sb.Append(") as tank on tank.TANKNO=st.TANKNO ")
         '-- 輸送/回送判定
         sb.Append("inner join GBT0004_ODR_BASE as ob on ob.ORDERNO= st.ORDERNO and ob.DELFLG <> @DELFLG ")
         '-- 前回輸送判定
@@ -523,8 +545,8 @@ Public Class GBT00030TANKLIST
                 .Add("@INITDATE", SqlDbType.Date).Value = "1900/01/01"
                 .Add("@STYMD", SqlDbType.Date).Value = Now()
                 .Add("@ENDYMD", SqlDbType.Date).Value = Now()
-                .Add("@SHIPPER", SqlDbType.NVarChar, 20).Value = "JPC01082"
-                .Add("@PRODUCTCODE", SqlDbType.NVarChar, 20).Value = "000662"
+                .Add("@SHIPPER", SqlDbType.NVarChar, 20).Value = GBT00030LIST.CONST_LEASE_SHIPPER_HIS
+                .Add("@PRODUCTCODE", SqlDbType.NVarChar, 20).Value = GBT00030LIST.CONST_LEASE_PRODUCT_HIS
             End With
             Using sqlDa As New SqlDataAdapter(sqlCmd)
                 sqlDa.Fill(retDt)
@@ -610,11 +632,6 @@ Public Class GBT00030TANKLIST
                 Else
                     Continue For
                 End If
-            ElseIf Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.StockTank Then
-                If lastAct = "STOK" Then
-                Else
-                    Continue For
-                End If
             End If
 
             lineCnt += 1
@@ -635,30 +652,20 @@ Public Class GBT00030TANKLIST
             For Each actCol As DataRow In tank
                 Dim act As String = actCol.Item("ACTIONID").ToString
 
-                Select Case act
-                    Case "ETYD",
-                         "ETYC",
-                         "LESD"
-                        If lastOrderSerch = False Then
-                            Exit For
-                        End If
-                    Case "TKAL",
-                         "DOUT",
-                         "CYIN"
-                        If lastOrderSerch = False Then
-                            newRow(act) = FormatDateContrySettings(actCol("ACTUALDATE").ToString, "yyyy/MM/dd")
-                        End If
-                    Case "LOAD"
-                        If lastOrderSerch = True AndAlso actCol.Item("ORDERNO").ToString <> orderNo Then
-                            '前回輸送オーダー番号※回送ではないのでLOADで判定
-                            newRow("LASTIMPORTORDERNO") = actCol.Item("ORDERNO").ToString
-                            Exit For
-                        End If
+                If unAllocate.Contains(act) Then
+                    act = "ETYD"
+                End If
+
+                If actCol.Item("ORDERNO").ToString = orderNo Then
+                    If retDt.Columns.Contains(act) Then
                         newRow(act) = FormatDateContrySettings(actCol("ACTUALDATE").ToString, "yyyy/MM/dd")
-                    Case "STOK"
-                        Exit For
-                    Case Else
-                End Select
+                    End If
+                ElseIf lastOrderSerch = True AndAlso act = "LOAD" Then
+
+                    '前回輸送オーダー番号※LOADで判定
+                    newRow("LASTIMPORTORDERNO") = actCol.Item("ORDERNO").ToString
+                    Exit For
+                End If
             Next
 
             newRow("ACTYTITLE") = actyTitle
@@ -684,6 +691,8 @@ Public Class GBT00030TANKLIST
         retDt.Columns.Add("HIDDEN", GetType(Integer))
         Dim colList As New List(Of String) From {"ORDERNO", "TANKNO",
                                                  "TKAL", "DOUT", "LOAD", "CYIN",
+                                                 "SHIP", "TRAV", "TRSH", "ARVD",
+                                                 "DPIN", "DLRY", "ETYD", "STOK",
                                                  "NEXTINSPECTTYPE", "NEXTINSPECTDATE",
                                                  "LASTIMPORTORDERNO",
                                                  "ACTYTITLE", "OUTPUTDATE"}
@@ -843,6 +852,7 @@ Public Class GBT00030TANKLIST
                 vari &= "_IMP"
             Case GBT00030LIST.SelectedMode.ImportInTransit
                 '輸送中（輸入）
+                vari &= "_IMP"
             Case GBT00030LIST.SelectedMode.ExportEmptyTank
                 'ETYD（JP）
                 vari &= "_ETYD"
@@ -851,11 +861,24 @@ Public Class GBT00030TANKLIST
                 vari &= "_EXP"
             Case GBT00030LIST.SelectedMode.ExportInTransit
                 '輸送中（回送）
+                vari &= "_EXP"
             Case GBT00030LIST.SelectedMode.StockTank
                 '仙台予備在庫
+                vari &= "_IMP"
             Case Else
         End Select
         Me.hdnThisViewVariant.Value = vari
+
+        If String.IsNullOrEmpty(Me.hdnSelectedOrderNo.Value) Then
+            Me.lblOrderNoLabel.Visible = False
+            Me.lblOrderNo.Visible = False
+            Me.lblOrderNo.Text = Me.hdnSelectedOrderNo.Value
+        Else
+            Me.lblOrderNoLabel.Visible = True
+            Me.lblOrderNo.Visible = True
+            Me.lblOrderNo.Text = Me.hdnSelectedOrderNo.Value
+        End If
+
     End Sub
     ''' <summary>
     ''' 一覧 マウスホイール時処理 (一覧スクロール)

@@ -158,6 +158,33 @@ Partial Public Class GBT00030TANKLIST
     Protected WithEvents txtTankNo As Global.System.Web.UI.WebControls.TextBox
     
     '''<summary>
+    '''divListTitle コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents divListTitle As Global.System.Web.UI.HtmlControls.HtmlGenericControl
+    
+    '''<summary>
+    '''lblOrderNoLabel コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblOrderNoLabel As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''lblOrderNo コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblOrderNo As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
     '''WF_LISTAREA コントロール。
     '''</summary>
     '''<remarks>
