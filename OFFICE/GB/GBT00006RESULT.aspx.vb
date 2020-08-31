@@ -133,9 +133,9 @@ Public Class GBT00006RESULT
                         .MAPID = CONST_MAPID
                         If Me.hdnThisMapVariant.Value <> "GB_TankStatusList" Then
                             Dim orderInfo As GBT00006ROrderInfo = DirectCast(ViewState("ORDERINFO"), GBT00006ROrderInfo)
-                            If orderInfo.HISLeaseIO = "1" Then
+                            If Not IsNothing(orderInfo) AndAlso orderInfo.HISLeaseIO = "1" Then
                                 .VARI = "GB_AllocateHIS1"
-                            ElseIf orderInfo.HISLeaseIO = "2" Then
+                            ElseIf Not IsNothing(orderInfo) AndAlso orderInfo.HISLeaseIO = "2" Then
                                 .VARI = "GB_AllocateHIS2"
                             Else
                                 .VARI = "GB_Allocate"
@@ -1477,9 +1477,9 @@ Public Class GBT00006RESULT
         '        COA0013TableObject.VARI = If(Me.hdnThisMapVariant.Value <> "GB_TankStatusList", "GB_Allocate", "Default")
         If Me.hdnThisMapVariant.Value <> "GB_TankStatusList" Then
             Dim orderInfo As GBT00006ROrderInfo = DirectCast(ViewState("ORDERINFO"), GBT00006ROrderInfo)
-            If orderInfo.HISLeaseIO = "1" Then
+            If Not IsNothing(orderInfo) AndAlso orderInfo.HISLeaseIO = "1" Then
                 COA0013TableObject.VARI = "GB_AllocateHIS1"
-            ElseIf orderInfo.HISLeaseIO = "2" Then
+            ElseIf Not IsNothing(orderInfo) AndAlso orderInfo.HISLeaseIO = "2" Then
                 COA0013TableObject.VARI = "GB_AllocateHIS2"
             Else
                 COA0013TableObject.VARI = "GB_Allocate"
