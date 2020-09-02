@@ -168,7 +168,7 @@
 .tblAttachmentHeader {
     background-color: rgb(22,54,92);
     color: white;
-    //height:37px;
+    /*height:37px;*/
 }
 
 .tblAttachmentHeader, .tblAttachment {
@@ -176,7 +176,7 @@
     table-layout: fixed;
 }
 .tblAttachment {
-    //min-height: 100px;
+    /*min-height: 100px;*/
 }
     .tblAttachment input[type="text"] {
         width: calc(100% - 5px);

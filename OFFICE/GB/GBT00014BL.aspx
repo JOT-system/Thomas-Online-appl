@@ -90,7 +90,7 @@
                             footerMsg.textContent = '<%= Me.hdnUploadError05.Value %>';
                             footerMsg.style.color = "red";
                             footerMsg.style.fontWeight = "bold";
-                            commonDispWait();
+                            commonHideWait();
                             return;
                         }
                     }
@@ -118,7 +118,7 @@
                         footerMsg.textContent = '<%= Me.hdnUploadError01.Value %>';
                         footerMsg.style.color = "red";
                         footerMsg.style.fontWeight = "bold";
-                        commonDispWait();
+                        commonHideWait();
                     }
                 };
 
@@ -127,7 +127,7 @@
                     footerMsg.textContent = '<%= Me.hdnUploadError01.Value %>';
                     footerMsg.style.color = "red";
                     footerMsg.style.fontWeight = "bold";
-                    commonDispWait();
+                    commonHideWait();
                 };
 
                 // ⇒XHR 通信中止すると実行されるイベント
@@ -135,7 +135,7 @@
                     footerMsg.textContent = '<%= Me.hdnUploadError02.Value %>';
                     footerMsg.style.color = "red";
                     footerMsg.style.fontWeight = "bold";
-                    commonDispWait();
+                    commonHideWait();
                 };
 
                 // ⇒送信中にタイムアウトエラーが発生すると実行されるイベント
@@ -143,7 +143,7 @@
                     footerMsg.textContent = '<%= Me.hdnUploadError03.Value %>';
                     footerMsg.style.color = "red";
                     footerMsg.style.fontWeight = "bold";
-                    commonDispWait();
+                    commonHideWait();
                 };
 
                 // 「送信データ」を指定、XHR 通信を開始する
@@ -152,7 +152,7 @@
                 footerMsg.textContent = '<%= Me.hdnUploadError04.Value %>';
                 footerMsg.style.color = "red";
                 footerMsg.style.fontWeight = "bold";
-                commonDispWait();
+                commonHideWait();
             }
                 
         }
