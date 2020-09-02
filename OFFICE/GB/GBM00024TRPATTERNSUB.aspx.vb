@@ -3420,7 +3420,7 @@ Public Class GBM00024TRPATTERNSUB
 
         'リスト設定
         COA0017FixValue.COMPCODE = GBC_COMPCODE_D
-        COA0017FixValue.CLAS = "USINGLEASETANK"
+        COA0017FixValue.CLAS = "GENERALFLG"
         If COA0019Session.LANGDISP = C_LANG.JA Then
             COA0017FixValue.LISTBOX1 = Me.lbUsingLeaseTank
         Else
