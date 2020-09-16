@@ -203,7 +203,7 @@
                                         ondragenter="f_dragEventCancel(event)"
                                         ondragleave="f_dragEventCancel(event)" 
                                         ondragover="f_dragEventCancel(event)"  
-                                        ondrop="f_dragEventCancel">
+                                        ondrop="f_dragEventCancel(event)">
                                        <br />
 
                                         <asp:Label ID="lblFileName" runat="server" Text="File Name" Height="1.1em" Width="8em" CssClass="textLeft" style="position:relative;top:0.7em;left:5.0em;"></asp:Label>

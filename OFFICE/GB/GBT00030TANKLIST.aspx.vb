@@ -999,6 +999,62 @@ Public Class GBT00030TANKLIST
         Return
     End Sub
 
+    ''' <summary>
+    ''' Excelダウンロードボタン押下時
+    ''' </summary>
+    Public Sub btnExcelDownload_Click()
+        Dim dt As DataTable = CreateListDataTable()
+        Dim COA0021ListTable As New BASEDLL.COA0021ListTable
+        '一覧表示データ復元 
+        If Me.SavedDt Is Nothing Then
+            dt = CreateListDataTable()
+            COA0021ListTable.FILEdir = Me.hdnXMLsaveFile.Value
+            COA0021ListTable.TBLDATA = dt
+            COA0021ListTable.COA0021recoverListTable()
+            If COA0021ListTable.ERR = C_MESSAGENO.NORMAL Then
+                dt = COA0021ListTable.OUTTBL
+            Else
+                CommonFunctions.ShowMessage(COA0021ListTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                Return
+            End If
+        Else
+            dt = Me.SavedDt
+        End If
+        'そもそも初期検索結果がない場合は絞り込まず終了
+        If dt IsNot Nothing AndAlso dt.Rows.Count = 0 Then
+            Return
+        End If
+
+        '右ボックスの選択レポートIDを取得
+        If Me.lbRightList.SelectedItem Is Nothing Then
+            '未選択の場合はそのまま終了
+            Return
+        End If
+        Dim reportId As String = Me.lbRightList.SelectedItem.Value
+
+        '帳票出力
+        With Nothing
+            Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
+            Dim reportMapId As String = CONST_MAPID
+            COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
+            COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
+            COA0027ReportTable.FILETYPE = "XLSX"                               'PARAM03:出力ファイル形式
+            COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
+            COA0027ReportTable.COA0027ReportTable()
+
+            If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
+                CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
+            Else
+                CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                Return
+            End If
+
+            '別画面でExcelを表示
+            hdnPrintURL.Value = COA0027ReportTable.URL
+            ClientScript.RegisterStartupScript(Me.GetType(), "key", "f_ExcelPrint()", True)
+
+        End With
+    End Sub
 
 #Region "<<添付ファイル関連 >>"
     ''' <summary>

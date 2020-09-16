@@ -1226,7 +1226,7 @@ Public Class GBT00006RESULT
         '                                         "CLEANSCHEDULE", "CLEANFINISH", "ORDERINFO", "REPAIRSTATUS",
         '                                         "COMMENT", "CANPROVISION"}
         Dim colList As New List(Of String) From {"TANKNO", "ACTY", "TYPE", "FDA", "FROMAREA", "TOAREA",
-                                                 "ETAARR", "DISCHDATE", "DEMMYN", "DEMMSTART",
+                                                 "ETDARR", "ETAARR", "DISCHDATE", "DEMMYN", "DEMMSTART",
                                                  "DEPOTINDATE", "LOCATION", "CLEANDATE", "JOBNO",
                                                  "ALLOCATIONDATE", "DEPOTOUT", "LADENDATE", "DEPOINFINISH",
                                                  "EF", "NEXTPRODUCT", "ETDDATE", "ETADATE", "DESTINATION",

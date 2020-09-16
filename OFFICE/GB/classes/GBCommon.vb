@@ -6404,6 +6404,7 @@ Public Structure GBA00012TankInfo
             sqlStat.AppendLine("       B.POD_POLPORT as FROMAREA,")
             sqlStat.AppendLine("       B.POD_PODCOUNTRY as POD_PODCOUNTRY,")
             sqlStat.AppendLine("       B.POD_PODPORT as TOAREA,")
+            sqlStat.AppendLine("       B.POD_ACTUALDATE  as ETDARR,")
             sqlStat.AppendLine("       case")
             sqlStat.AppendLine("         when OVETA.ACTUALDATE > @InitDate then convert(char,OVETA.ACTUALDATE,111)")
             sqlStat.AppendLine("         else ''")

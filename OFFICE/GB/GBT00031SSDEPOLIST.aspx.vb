@@ -794,19 +794,6 @@ Public Class GBT00031SSDEPOLIST
             Return
         End If
 
-        'チェック値置換
-        For Each row In dispDispRow
-            For Each item In LISTAREA_ITEM_CHECKBOX
-                If row(item).Equals("Y") Then
-                    row(item) = "有"
-                ElseIf row(item).Equals("N") Then
-                    row(item) = "無"
-                Else
-                    row(item) = "未"
-                End If
-            Next
-        Next
-
         '右ボックスの選択レポートIDを取得
         If Me.lbRightList.SelectedItem Is Nothing Then
             '未選択の場合はそのまま終了
@@ -922,6 +909,10 @@ Public Class GBT00031SSDEPOLIST
         Dim checkDt As DataTable = Me.CreateListDataTable
         checkDt.Merge(targetData.CopyToDataTable)
 
+        If Me.lbCheck.Items.Count = 0 Then
+            SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
+        End If
+
         '単項目チェック
         If checkDt.Rows.Count > 0 Then
             messageNo = CheckSingle(CONST_MAPID, checkDt, fieldList, errMessage, keyFields:=keyFields)
@@ -932,6 +923,22 @@ Public Class GBT00031SSDEPOLIST
                 Me.txtRightErrorMessage.Text = errMessage
                 Return
             End If
+
+            'LISTチェック
+            For Each row As DataRow In checkDt.Rows
+                For Each col In LISTAREA_ITEM_CHECKBOX
+                    messageNo = ChedckList(row(col).ToString, Me.lbCheck, col, errMessage)
+                    If messageNo <> C_MESSAGENO.NORMAL Then
+                        CommonFunctions.ShowMessage(messageNo, Me.lblFooterMessage, pageObject:=Me)
+
+                        '右ボックスにエラーメッセージ表示
+                        Me.txtRightErrorMessage.Text = errMessage
+                        Return
+                    End If
+
+                Next
+            Next
+
         End If
 
         'OrderValueへのDataTable変換
@@ -1172,7 +1179,7 @@ Public Class GBT00031SSDEPOLIST
                     End If
                 Case Me.vLeftCheck.ID 'アクティブなビューがCheck
                     'Me.hdnActiveElementAfterOnChange.Value = Me.hdnTextDbClickField.Value
-                    Dim messageNo As String = UpdateDatatable(Me.lbCheck.SelectedValue, Me.hdnTextDbClickField.Value, Me.hdnListCurrentRownum.Value)
+                    Dim messageNo As String = UpdateDatatable(Me.lbCheck.SelectedItem.Text, Me.hdnTextDbClickField.Value, Me.hdnListCurrentRownum.Value)
                     If messageNo <> C_MESSAGENO.NORMAL Then
                         CommonFunctions.ShowMessage(messageNo, Me.lblFooterMessage)
                     End If
@@ -1244,6 +1251,7 @@ Public Class GBT00031SSDEPOLIST
             Throw New Exception("Fix value getError")
         End If
     End Sub
+
 #End Region
 
 #Region "<< RightBox >>"
@@ -1326,7 +1334,7 @@ Public Class GBT00031SSDEPOLIST
         sb.Append("  , ov.ACTIONID ")
         sb.Append("  , ov.SCHEDELDATE ")
         sb.Append("  , ov.ACTUALDATE ")
-        sb.Append("  , ov.TANKCONDITION ")
+        sb.Append("  , case when ov.TANKCONDITION = '' then '0' else ov.TANKCONDITION end as TANKCONDITION ")
         sb.Append("  ,isnull(convert(nvarchar, ov.UPDYMD , 120),'') as UPDYMD ")
         sb.Append("  ,isnull(rtrim(ov.UPDUSER),'')                  as UPDUSER ")
         sb.Append("  ,isnull(rtrim(ov.UPDTERMID),'')                as UPDTERMID ")
@@ -1431,6 +1439,11 @@ Public Class GBT00031SSDEPOLIST
         Dim retDt = CreateListDataTable()
         Dim lineCnt As Integer = 0
 
+        If Me.lbCheck.Items.Count = 0 Then
+            'チェック項目用名称リスト作成
+            SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
+        End If
+
         Dim outputDate As String = Today().ToShortDateString
         'タンク一覧作成（タンクステータス履歴）
         Dim tmpDt = dt.AsEnumerable
@@ -1486,11 +1499,17 @@ Public Class GBT00031SSDEPOLIST
                         newRow(act) = ""
                     End If
 
+                    Dim checkValue As String = actCol("TANKCONDITION").ToString
+                    Dim listItem = Me.lbCheck.Items.FindByValue(checkValue)
+                    If Not IsNothing(listItem) Then
+                        checkValue = listItem.Text
+                    End If
+
                     If retDt.Columns.Contains("DATAID_" & act) Then
                         newRow("DATAID_" & act) = actCol("DATAID").ToString
                     End If
                     If retDt.Columns.Contains("CHECK_" & act) Then
-                        newRow("CHECK_" & act) = actCol("TANKCONDITION").ToString
+                        newRow("CHECK_" & act) = checkValue
                     End If
                     If retDt.Columns.Contains("UPDYMD_" & act) Then
                         newRow("UPDYMD_" & act) = actCol("UPDYMD").ToString
@@ -1546,6 +1565,7 @@ Public Class GBT00031SSDEPOLIST
         If Request.Form.AllKeys.Contains(targetObjId) = True Then
             val = Request.Form.Item(targetObjId)
             val = val.Trim
+
             UpdateDatatable(val, targetObjId, rowNum)
         End If
     End Sub
@@ -1646,6 +1666,9 @@ Public Class GBT00031SSDEPOLIST
         Else
             dt = Me.SavedDt
         End If
+        If Me.lbCheck.Items.Count = 0 Then
+            SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
+        End If
 
         '変更対象の行を取得
         Dim targetRows = From dr As DataRow In Me.PrevDt
@@ -1679,9 +1702,20 @@ Public Class GBT00031SSDEPOLIST
         Dim prevDtValue As String = Convert.ToString(targetRow.Item(targetDateField))
         '変更発生時
         If dtValue <> prevDtValue Then
-            '自身の行の値を編集
-            afterInputRow.Item(targetDateField) = dtValue
-            afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "1"
+            Dim retMessageNo As String = ""
+            Dim retMessage As String = ""
+            If Me.lbCheck.Items.Count = 0 Then
+                SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
+            End If
+
+            retMessageNo = ChedckList(dtValue, Me.lbCheck, targetDateField, retMessage)
+            If retMessageNo <> C_MESSAGENO.NORMAL Then
+                afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "9"
+            Else
+                '自身の行の値を編集
+                afterInputRow.Item(targetDateField) = dtValue
+                afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "1"
+            End If
         End If
 
         Dim retValue = CheckRowStatus(afterInputRow)
@@ -1985,6 +2019,12 @@ Public Class GBT00031SSDEPOLIST
 
         End If
 
+        'チェック項目用名称リスト作成
+        If Me.lbCheck.Items.Count = 0 Then
+            'チェック項目用名称リスト作成
+            SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
+        End If
+
         Dim retMessageNo As String = C_MESSAGENO.NORMAL
         Dim retMessage As New StringBuilder
 
@@ -2032,24 +2072,13 @@ Public Class GBT00031SSDEPOLIST
                 Continue For
             End If
 
+            writeDr.Item("REPORTDATE") = reportDateString
+
             '値展開フィールドに記載
             For Each fieldName As String In writeFieldNameList
                 'そもそもフィールドがない場合はスキップ
                 If Not sortedUploadExcelDt.Columns.Contains(fieldName) Then
                     Continue For
-                End If
-                'チェック項目の場合、値置換
-                If {"CHECK_DPIN", "CHECK_ETYD", "CHECK_DOUT", "CHECK_CYIN"}.Contains(fieldName) Then
-                    Dim checkString As String = Convert.ToString(dr.Item(fieldName))
-                    checkString = checkString.Trim
-                    If checkString = "無" Then
-                        checkString = "N"
-                    ElseIf checkString = "有" Then
-                        checkString = "Y"
-                    Else
-                        checkString = ""
-                    End If
-                    dr.Item(fieldName) = checkString
                 End If
 
                 '値に変化がなければスキップ（付帯処理は行わない）
@@ -2870,6 +2899,37 @@ Public Class GBT00031SSDEPOLIST
             Next
 
         Next 'END For Each dr As DataRow In dt.Rows
+        errMessage = retMessage.ToString
+        Return retMessageNo
+    End Function
+
+    ''' <summary>
+    ''' LIST登録チェック
+    ''' </summary>
+    ''' <param name="inText"></param>
+    ''' <param name="inList"></param>
+    Protected Function ChedckList(ByVal inText As String, ByVal inList As ListBox, ByVal textNm As String, ByRef errMessage As String) As String
+        Dim flag As Boolean = False
+        Dim retMessageNo As String = C_MESSAGENO.NORMAL
+        Dim dummyLabelObj As New Label '画面描画しないダミーのラベルオブジェクト
+        Dim retMessage As New StringBuilder
+
+        If inText <> "" Then
+
+            For i As Integer = 0 To inList.Items.Count - 1
+                If inList.Items(i).Text = inText Then
+                    flag = True
+                    Exit For
+                End If
+            Next
+
+            If (flag = False) Then
+                retMessageNo = C_MESSAGENO.RIGHTBIXOUT
+                CommonFunctions.ShowMessage(C_MESSAGENO.INVALIDINPUT, dummyLabelObj)
+                retMessage.AppendFormat("・{0}：{1}", textNm, dummyLabelObj.Text).AppendLine()
+            End If
+        End If
+
         errMessage = retMessage.ToString
         Return retMessageNo
     End Function

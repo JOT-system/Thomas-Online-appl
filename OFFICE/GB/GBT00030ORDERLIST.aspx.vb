@@ -534,7 +534,7 @@ Public Class GBT00030ORDERLIST
         sb.Append("left join ( ")
         sb.Append(" select ")
         sb.Append("  ORDERNO ")
-        sb.Append(", SUM(case when TANKCONDITION='Y' then 1 else 0 end) as DAMAGED ")
+        sb.Append(", SUM(case when TANKCONDITION='2' then 1 else 0 end) as DAMAGED ")
         sb.Append(" from GBT0005_ODR_VALUE ")
         sb.Append(" where TANKNO<>'' ")
         sb.Append(" and   DELFLG <> @DELFLG ")
