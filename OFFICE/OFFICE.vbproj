@@ -126,6 +126,7 @@
     <Content Include="GB\css\GBT00025LIST.css" />
     <Content Include="GB\css\GBT00028INVOICEEDIT.css" />
     <Content Include="GB\css\GBT00028RESULT.css" />
+    <Content Include="GB\css\GBT00031SSDEPOLIST.css" />
     <Content Include="GB\css\GBT00030LIST.css" />
     <Content Include="GB\css\GBT00030ORDERLIST.css" />
     <Content Include="GB\css\GBT00030TANKLIST.css" />
@@ -159,6 +160,7 @@
     <Content Include="GB\GBT00028INVOICEEDIT.aspx" />
     <Content Include="GB\GBT00028RESULT.aspx" />
     <Content Include="GB\GBT00028SELECT.aspx" />
+    <Content Include="GB\GBT00031SSDEPOLIST.aspx" />
     <Content Include="GB\GBT00030LIST.aspx" />
     <Content Include="GB\GBT00030ORDERLIST.aspx" />
     <Content Include="GB\GBT00030TANKLIST.aspx" />
@@ -246,6 +248,7 @@
     <Content Include="GB\script\GBT00023RESULT.js" />
     <Content Include="GB\script\GBT00026BLNOTRANSFER.js" />
     <Content Include="GB\script\GBT00028INVOICEEDIT.js" />
+    <Content Include="GB\script\GBT00031SSDEPOLIST.js" />
     <Content Include="GB\script\GBTcommonPanel.js" />
     <Content Include="Images\ascending.png" />
     <Content Include="Images\delete.png" />
@@ -911,6 +914,13 @@
     </Compile>
     <Compile Include="GB\GBT00028SELECT.aspx.vb">
       <DependentUpon>GBT00028SELECT.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBT00031SSDEPOLIST.aspx.designer.vb">
+      <DependentUpon>GBT00031SSDEPOLIST.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBT00031SSDEPOLIST.aspx.vb">
+      <DependentUpon>GBT00031SSDEPOLIST.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="GB\GBT00030LIST.aspx.designer.vb">

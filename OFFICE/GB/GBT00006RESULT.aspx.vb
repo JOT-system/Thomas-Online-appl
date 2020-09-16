@@ -1677,6 +1677,10 @@ Public Class GBT00006RESULT
             If Convert.ToString(dr.Item("NEEDSAPPLY")) = "1" Then
                 tankInfoList(tankSeq).NeedsApply = True
             End If
+            '仮引当フラグ設定
+            If {"SHIP", "TRAV", "TRSH", "ARVD"}.Contains(Convert.ToString(dr.Item("ACTY"))) Then
+                tankInfoList(tankSeq).IsReserve = True
+            End If
         Next
 
         '引当処理すべきレコードが無い場合
@@ -2346,6 +2350,18 @@ Public Class GBT00006RESULT
         sqlStat.AppendLine("     ,DATEINTERVAL")
         sqlStat.AppendLine("     ,BRADDEDCOST")
         sqlStat.AppendLine("     ,AGENTORGANIZER")
+
+        sqlStat.AppendLine("     ,CURRENCYSEGMENT")
+        sqlStat.AppendLine("     ,ACCCRERATE")
+        sqlStat.AppendLine("     ,ACCCREYEN")
+        sqlStat.AppendLine("     ,ACCCREFOREIGN")
+        sqlStat.AppendLine("     ,ACCCURRENCYSEGMENT")
+        sqlStat.AppendLine("     ,FORCECLOSED")
+        sqlStat.AppendLine("     ,AMOUNTFIXBFC")
+        sqlStat.AppendLine("     ,ACCCREYENBFC")
+        sqlStat.AppendLine("     ,ACCCREFOREIGNBFC")
+        sqlStat.AppendLine("     ,TANKCONDITION")
+
         sqlStat.AppendLine("     ,DELFLG")
         sqlStat.AppendLine("     ,INITYMD")
         sqlStat.AppendLine("     ,INITUSER")
@@ -2396,6 +2412,18 @@ Public Class GBT00006RESULT
         sqlStat.AppendLine("         ,DATEINTERVAL")
         sqlStat.AppendLine("         ,BRADDEDCOST")
         sqlStat.AppendLine("         ,AGENTORGANIZER")
+
+        sqlStat.AppendLine("         ,CURRENCYSEGMENT")
+        sqlStat.AppendLine("         ,ACCCRERATE")
+        sqlStat.AppendLine("         ,ACCCREYEN")
+        sqlStat.AppendLine("         ,ACCCREFOREIGN")
+        sqlStat.AppendLine("         ,ACCCURRENCYSEGMENT")
+        sqlStat.AppendLine("         ,FORCECLOSED")
+        sqlStat.AppendLine("         ,AMOUNTFIXBFC")
+        sqlStat.AppendLine("         ,ACCCREYENBFC")
+        sqlStat.AppendLine("         ,ACCCREFOREIGNBFC")
+        sqlStat.AppendLine("         ,TANKCONDITION")
+
         sqlStat.AppendLine("         ,'" & CONST_FLAG_YES & "'             AS DELFLG")
         sqlStat.AppendLine("         ,INITYMD")
         sqlStat.AppendLine("         ,INITUSER")
@@ -2569,8 +2597,12 @@ Public Class GBT00006RESULT
                     '申請必須タンクの場合は予定のみ
                     .Add("@SCHEDELDATE", SqlDbType.NVarChar).Value = updDateString
                     .Add("@ACTUALDATE", SqlDbType.NVarChar).Value = ""
+                ElseIf tankInfo.IsReserve Then
+                    '仮引当タンクの場合は予定のみ
+                    .Add("@SCHEDELDATE", SqlDbType.NVarChar).Value = updDateString
+                    .Add("@ACTUALDATE", SqlDbType.NVarChar).Value = ""
                 Else
-                    '申請必須タンクの場合は予定のみ
+                    '上記以外の通常引当
                     .Add("@SCHEDELDATE", SqlDbType.NVarChar).Value = updDateString
                     .Add("@ACTUALDATE", SqlDbType.NVarChar).Value = updDateString
                 End If
@@ -3034,6 +3066,12 @@ Public Class GBT00006RESULT
         ''' <remarks>ACTYが発のACTUALDATEが初期値以外でTrue</remarks>
         Public Property IsShipped As Boolean = False
         ''' <summary>
+        ''' 仮引当可能か(True:可能,False:不可)
+        ''' </summary>
+        ''' <returns></returns>
+        ''' <remarks>仮引当可能なACTYのACTUALDATEが初期値以外でTrue</remarks>
+        Public Property IsReserve As Boolean = False
+        ''' <summary>
         ''' コンストラクタ
         ''' </summary>
         ''' <param name="tankSeq"></param>
@@ -3046,6 +3084,7 @@ Public Class GBT00006RESULT
             Me.LastStep = ""
             Me.NeedsApply = False
             Me.IsShipped = isShipped
+            Me.IsReserve = False
         End Sub
     End Class
 End Class

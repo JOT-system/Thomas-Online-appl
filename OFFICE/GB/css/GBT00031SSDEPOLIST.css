@@ -1,88 +1,34 @@
-﻿#selectHeaderBox {
-    padding: 10px;
-    min-width: 100px;
-    height: 38px;
-}
-
-#selectHeaderBox input[type="text"] {
-    height: 20px;
-    width: calc(100% - 10px);
-    margin: 3px;
+﻿/* ボタンエリアの最小幅 */
+#actionButtonsBox {
+    min-width: 450px;
 }
 
 /* 文言表示部分 lblで始まりTextで終わるSpan */
 #divContensbox span[id^="lbl"][id$="Text"] {
     color: rgb(0,0,255);
 }
-/* ListTitle表示部分Span */
-#divListTitle span[id^="lbl"] {
-    color: rgb(0,0,255);
-    margin-left: 10px;
-}
+       
 /* 共通関数で自動生成した表のスタイル */
 #WF_LISTAREA {
     margin-left: 10px;
     margin-right: 10px;
     min-height: 180px;
     position: relative;
-}
-    #WF_LISTAREA td {
-       vertical-align:middle;
-    }
-
-/* ボタンエリアの最小幅 */
-#actionButtonsBox {
-min-width: 450px;
-} 
-
-/* 確認ポップアップ */
-#divConfirmBoxWrapper {
-    display: none;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    justify-content: space-around;
-    opacity: 1;
-    z-index: 9998;
-    background-color: rgba(55, 55, 55, 0.6);
-    vertical-align: middle;
-    text-align: center;
+    z-index: 6;
 }
 
-#divConfirmBox {
-    position: fixed;
-    top: 100px;
-    text-align: left;
-    min-width: 500px;
-    left: calc(50% - 250px);
-    background-color: rgb(240,240,240);
-    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
+/* 比較の大小比較結果 */
+#WF_LISTAREA .lessThan {
+    color: rgb(0, 0, 255);
 }
 
-#divConfirmtitle {
-    width: calc(100% - 20px);
-    font-weight: bold;
-    padding: 10px;
-    height: 15px;
-    background-color: #8BACCD;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+#WF_LISTAREA .greatherThan {
+    color: rgb(255, 0, 0);
 }
-
-#divConfirmBoxButtons {
-    padding: 10px 10px 5px 5px;
-}
-
-    #divConfirmBoxButtons input[type=button] {
-        min-width: 70px;
-    }
-
-#divConfirmBoxMessageArea {
-    padding: 10px;
+/* ダブルクリック項目の文言にアンダーライン */
+th[cellfiedlname="DPIN"], th[cellfiedlname="ETYD"], th[cellfiedlname="DOUT"], th[cellfiedlname="CYIN"],
+th[cellfiedlname="CHECK_DPIN"], th[cellfiedlname="CHECK_ETYD"], th[cellfiedlname="CHECK_DOUT"], th[cellfiedlname="CHECK_CYIN"] {
+    text-decoration: underline;
 }
 /* 添付ファイルエリア */
 #divAttachmentInputAreaWapper {
@@ -168,7 +114,6 @@ min-width: 450px;
 #hdnUpload {
     display: none;
 }
-
 #divAttachmentInputAreaTitle {
     width: calc(100% - 20px);
     font-weight: bold;

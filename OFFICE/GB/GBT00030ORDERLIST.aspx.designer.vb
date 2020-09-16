@@ -185,6 +185,51 @@ Partial Public Class GBT00030ORDERLIST
     Protected WithEvents WF_LISTAREA As Global.System.Web.UI.WebControls.Panel
     
     '''<summary>
+    '''divFileUpInfo コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents divFileUpInfo As Global.System.Web.UI.HtmlControls.HtmlGenericControl
+    
+    '''<summary>
+    '''mltvFileUp コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents mltvFileUp As Global.System.Web.UI.WebControls.MultiView
+    
+    '''<summary>
+    '''vFileUp コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents vFileUp As Global.System.Web.UI.WebControls.View
+    
+    '''<summary>
+    '''lblFileName コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblFileName As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''dViewRep コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents dViewRep As Global.System.Web.UI.WebControls.Repeater
+    
+    '''<summary>
     '''hdnSubmit コントロール。
     '''</summary>
     '''<remarks>
@@ -446,6 +491,15 @@ Partial Public Class GBT00030ORDERLIST
     Protected WithEvents hdnListScrollXPos As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
+    '''hdnFileDisplay コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnFileDisplay As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
     '''hdnConfirmTitle コントロール。
     '''</summary>
     '''<remarks>
@@ -705,4 +759,85 @@ Partial Public Class GBT00030ORDERLIST
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
     Protected WithEvents lblConfirmMessage As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''divAttachmentInputAreaWapper コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents divAttachmentInputAreaWapper As Global.System.Web.UI.HtmlControls.HtmlGenericControl
+    
+    '''<summary>
+    '''lblAttachTankNoTitle コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblAttachTankNoTitle As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''lblAttachTankNo コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblAttachTankNo As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''hdnUpload コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnUpload As Global.System.Web.UI.WebControls.Button
+    
+    '''<summary>
+    '''btnDownloadFiles コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents btnDownloadFiles As Global.System.Web.UI.HtmlControls.HtmlInputButton
+    
+    '''<summary>
+    '''btnAttachmentUploadCancel コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents btnAttachmentUploadCancel As Global.System.Web.UI.HtmlControls.HtmlInputButton
+    
+    '''<summary>
+    '''divAttachmentArea コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents divAttachmentArea As Global.System.Web.UI.HtmlControls.HtmlGenericControl
+    
+    '''<summary>
+    '''hdnAttachmentHeaderFileName コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnAttachmentHeaderFileName As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
+    '''repAttachment コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents repAttachment As Global.System.Web.UI.WebControls.Repeater
 End Class

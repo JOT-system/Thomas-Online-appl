@@ -28,7 +28,9 @@
                                        '<%= Me.btnExtract.ClientID %>',
                                        '<%= Me.btnExcelDownload.ClientID %>',
                                        '<%= Me.btnLeftBoxButtonSel.ClientId  %>','<%= Me.btnLeftBoxButtonCan.ClientId  %>',
-                                       '<%= Me.btnFIRST.ClientId  %>','<%= Me.btnLAST.ClientId  %>'
+                                       '<%= Me.btnFIRST.ClientId  %>','<%= Me.btnLAST.ClientId  %>',
+                                       '<%= Me.btnAttachmentUploadCancel.ClientID %>',
+                                       '<%= Me.btnDownloadFiles.ClientID %>'
                                        ];
             bindButtonClickEvent(targetButtonObjects);
 
@@ -63,6 +65,16 @@
             /* 検索ボックス生成 */
             commonCreateSearchArea('selectHeaderBox');
 
+            // 添付ファイルボックスの前画面操作抑止
+            var attachmentAreaObjId = "divAttachmentInputAreaWapper";
+            var attachmentAreaObj = document.getElementById(attachmentAreaObjId);
+            if (attachmentAreaObj !== null) {
+                if (attachmentAreaObj.style.display !== 'none') {
+                    commonDisableModalBg(attachmentAreaObj.id);
+
+                }
+            }
+
             screenUnlock();
             focusAfterChange();
         });
@@ -78,6 +90,30 @@
             leftDataTableObj.scrollTop = rightDataTableObj.scrollTop; // 上下連動させる
 
         };
+
+        // 一覧表添付ファイルセルダブルクリック時イベント
+        function showAttachmentArea(obj, lineCnt, fieldName) {
+            var currentRowNum = obj.getAttribute('rownum');
+            var objCurrentRowNum = document.getElementById('hdnListCurrentRownum');
+            var objButtonClick = document.getElementById('hdnButtonClick');
+            if (document.getElementById('hdnSubmit').value === 'FALSE') {
+                document.getElementById('hdnSubmit').value = 'TRUE'
+                objCurrentRowNum.value = lineCnt;
+                objButtonClick.value = 'ShowAttachmentArea';
+                commonDispWait();
+                document.forms[0].submit();                             //aspx起動
+            };
+            return false;
+        }
+        // 添付ファイル一覧、添付ファイル名ダブルクリック時
+        function dispAttachmentFile(filename) {
+            if (document.getElementById("hdnSubmit").value == "FALSE") {
+                document.getElementById("hdnSubmit").value = "TRUE"
+                document.getElementById('hdnFileDisplay').value = filename;
+                commonDispWait();
+                document.forms[0].submit();                            //aspx起動
+            }
+        }
 
     </script>
 </head>
@@ -148,6 +184,73 @@
                 <!-- タンク動静、タンク一覧 -->
                 <asp:panel id="WF_LISTAREA" runat="server">
                 </asp:panel>
+                <!-- 添付ファイル一覧 -->
+                <div id="divFileUpInfo" runat="server" visible="false" >
+                <table class="infoTable fileup" >
+                    <colgroup>
+                        <col /><col /><col /><col /><col /><col />
+                        <col /><col /><col /><col /><col /><col />
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                        <td colspan="12">
+                            <asp:MultiView ID="mltvFileUp" runat="server" ActiveViewIndex="0">
+                                <asp:View ID="vFileUp" runat="server">
+                                    <span id="dViewRepArea" style="position:absolute;min-height:33em;left:1.5em;right:1.5em;overflow-x:hidden;overflow-y:auto;background-color:white;background-color: rgb(220,230,240);table-layout: auto" 
+                                        ondragstart="f_dragEventCancel(event)"
+                                        ondrag="f_dragEventCancel(event)"
+                                        ondragend="f_dragEventCancel(event)" 
+                                        ondragenter="f_dragEventCancel(event)"
+                                        ondragleave="f_dragEventCancel(event)" 
+                                        ondragover="f_dragEventCancel(event)"  
+                                        ondrop="f_dragEventCancel">
+                                       <br />
+
+                                        <asp:Label ID="lblFileName" runat="server" Text="File Name" Height="1.1em" Width="8em" CssClass="textLeft" style="position:relative;top:0.7em;left:5.0em;"></asp:Label>
+
+                                        <br />
+
+                                        <span style="position:absolute;top:3.5em;left:1.3em;height:390px;min-width:90em;overflow-x:hidden;overflow-y:auto;background-color:white;border:1px solid black;">
+                                        <asp:Repeater ID="dViewRep" runat="server" >
+                                            <HeaderTemplate>
+                                            </HeaderTemplate>
+
+                                            <ItemTemplate>
+                                                <table style="">
+                                                <tr style="">
+
+                                                <td style="height:1.0em;width:40em;">
+                                                <%-- ファイル記号名称 --%>
+                                                <a>　</a>
+                                                <asp:Label ID="lblRepFileName" runat="server" Text="" Height="1.0em" Width="77em" CssClass="textLeft"></asp:Label>
+                                                </td>
+
+                                                <td style="height:1.0em;width:10em;" hidden="hidden">
+                                                <%-- FILEPATH --%>
+                                                <asp:Label ID="lblRepFilePath" runat="server" Height="1.0em" Width="10em" CssClass="textLeft"></asp:Label>
+                                                </td>
+
+                                                </tr>
+                                                </table>
+                                            </ItemTemplate>
+
+                                            <FooterTemplate>
+                                            </FooterTemplate>
+             
+                                        </asp:Repeater>
+                                        </span>
+                                    </span>
+                                </asp:View>
+                            </asp:MultiView>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+
                 <div id="divHidden">
                     <%-- 必要な隠し要素はこちらに(共通で使用しそうなものは定義済) --%>
                     <asp:HiddenField ID="hdnSubmit" runat="server" Value="" />      <%-- サーバー処理中（TRUE:実行中、FALSE:未実行）--%>
@@ -190,6 +293,8 @@
                     <asp:HiddenField ID="hdnListEvent" runat="server" Value="" Visible="False" />
                     <asp:HiddenField ID="hdnListFunc" runat="server" Value="" Visible="False" />
                     <asp:HiddenField ID="hdnListScrollXPos" runat="server" Value="" />
+                    <%-- 添付ファイル一覧のファイルダブルクリック時のファイル名保持 --%>
+                    <asp:HiddenField ID="hdnFileDisplay" Value="" runat="server" />
 
                     <asp:HiddenField ID="hdnConfirmTitle" runat="server" Value="" Visible="False" />
                 </div>
@@ -297,6 +402,44 @@
                     </div>
                     <div id="divConfirmBoxMessageArea">
                         <div><asp:Label ID="lblConfirmMessage" runat="server" Text=""></asp:Label></div>
+                    </div>
+                </div>
+            </div>
+            <!-- 添付ファイル設定エリア -->
+            <div id="divAttachmentInputAreaWapper" runat="server" stype="display:none;"> 
+                <div id="divAttachmentInputArea">
+                    <div id="divAttachmentInputAreaTitle">
+                        <asp:Label ID="lblAttachTankNoTitle" runat="server" Text=""></asp:Label>:
+                        <asp:Label ID="lblAttachTankNo" runat="server" Text=""></asp:Label>
+                    </div>
+                    <div id="divAttachmentInputAreaButtons">
+                        <asp:Button ID="hdnUpload" runat="server" Text="" />
+                        <input id="btnDownloadFiles" type="button" value="File Download"  runat="server"  />
+                        <input id="btnAttachmentUploadCancel" type="button" value="CANCEL" runat="server" />
+                    </div>
+                    <div id="divAttachmentFiles">
+                        <div id="divAttachmentArea" runat="server">
+                            <asp:HiddenField ID="hdnAttachmentHeaderFileName" runat="server" Value="FileName" />
+
+                            <table class="tblAttachmentHeader">
+                                <tr>
+                                    <th rowspan="2"><%= Me.hdnAttachmentHeaderFileName.Value %></th>
+                                </tr>
+                            </table>
+                            <asp:Repeater ID="repAttachment" runat="server">
+                                <HeaderTemplate>
+                                    <table class="tblAttachment">
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <tr class="trAttachment" >
+                                        <td ondblclick='dispAttachmentFile("<%# Eval("FILENAME") %>");'><asp:Label ID="lblFileName" runat="server" Text='<%# HttpUtility.HtmlEncode(Eval("FILENAME")) %>' CssClass="textLeft" Title='<%# Eval("FILENAME") %>'></asp:Label></td>
+                                    </tr>
+                                </ItemTemplate>
+                                <FooterTemplate>
+                                    </table>
+                                </FooterTemplate>
+                            </asp:Repeater>
+                        </div>
                     </div>
                 </div>
             </div>

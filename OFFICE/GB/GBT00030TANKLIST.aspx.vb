@@ -10,6 +10,15 @@ Public Class GBT00030TANKLIST
     Private Const CONST_MAPID As String = "GBT00030T" '自身のMAPID
     Private Const CONST_DSPROWCOUNT = 34                '指定数＋１が表示対象
     Private Const CONST_SCROLLROWCOUNT = 8              'マウススクロール時の増分
+
+    Private Const CONST_VS_FILECNTDATA As String = "VSFILECNT" 'ファイル数保持用ビューステートデータ
+    Private Const CONST_VS_ATTA_UNIQUEID As String = "ATTA_UNIQUEID"
+    Private Const CONST_VS_PREV_ATTACHMENTINFO As String = "PREV_ATTACHMENTINFO"
+    Private Const CONST_VS_CURR_ATTACHMENTINFO As String = "CURR_ATTACHMENTINFO"
+
+    'アップロードファイルルート
+    Private Const CONST_DIRNAME_APPEARANCE_UPROOT As String = "APPEARANCE" '外観チェックファイルアップロードルート
+
     ''' <summary>
     ''' ログ出力(クラススコープ ロード時にNewします)
     ''' </summary>
@@ -19,15 +28,9 @@ Public Class GBT00030TANKLIST
     ''' </summary>
     Private SavedDt As DataTable = Nothing
     ''' <summary>
-    ''' 画面退避用アイテム
+    ''' 添付情報保持データテーブル
     ''' </summary>
-    ''' <returns></returns>
-    Public Property DisplayItems As GBT00030DITEMS
-    ''' <summary>
-    ''' 引当情報
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property OrderInfo As GBT00030LIST.GBT00030OrderInfo
+    Private dtCurAttachment As DataTable
     ''' <summary>
     ''' ページロード時処理
     ''' </summary>
@@ -125,6 +128,8 @@ Public Class GBT00030TANKLIST
             'ポストバック時
             '**********************************************
             If IsPostBack Then
+                Me.dtCurAttachment = CollectDispAttachmentInfo()
+
                 '**********************
                 ' ボタンクリック判定
                 '**********************
@@ -168,6 +173,13 @@ Public Class GBT00030TANKLIST
                     Return '単票ページにリダイレクトするため念のため処理は終わらせる
                 End If
                 '**********************
+                ' 添付ファイル内容表示処理
+                '**********************
+                If Me.hdnFileDisplay.Value IsNot Nothing AndAlso Me.hdnFileDisplay.Value <> "" Then
+                    AttachmentFileNameDblClick()
+                    hdnFileDisplay.Value = ""
+                End If
+                '**********************
                 ' Help表示
                 '**********************
                 If Me.hdnHelpChange.Value IsNot Nothing AndAlso Me.hdnHelpChange.Value <> "" Then
@@ -184,6 +196,7 @@ Public Class GBT00030TANKLIST
             '****************************************
             '何も問題なく最後まで到達した処理
             '****************************************
+            ViewState(CONST_VS_CURR_ATTACHMENTINFO) = Me.dtCurAttachment
             Me.Page.Form.Attributes.Add("data-mapvari", Me.hdnThisMapVariant.Value)
             hdnSubmit.Value = "FALSE" 'サブミット可能にするためFalseを設定
         Catch ex As Threading.ThreadAbortException
@@ -476,6 +489,7 @@ Public Class GBT00030TANKLIST
         sb.Append("  , st.TANKNO ")
         sb.Append("  , st.RECENT ")
         sb.Append("  , st.ACTIONID ")
+        sb.Append("  , st.SCHEDELDATE ")
         sb.Append("  , st.ACTUALDATE ")
         sb.Append("  , case when ob.DISCHARGEPORT1 = 'JPSDJ' then 'I' else 'E' end as ROOT ")
         sb.Append("  , tk.NEXTINSPECTTYPE ")
@@ -484,10 +498,11 @@ Public Class GBT00030TANKLIST
         sb.Append("  , isnull(ov.ISIMPORT,'0') as ISIMPORT ")
         sb.Append("from GBV0001_TANKSTATUS as st ")
         '-- 対象リースタンク
-        'sb.Append("inner join GBV0002_LEASETANK as lt on lt.TANKNO=st.TANKNO and lt.SHIPPER= @SHIPPER and lt.PRODUCTCODE=@PRODUCTCODE ")
         sb.Append("inner join ( ")
         sb.Append("	select lt.TANKNO ")
         sb.Append("	from GBV0002_LEASETANK as lt ")
+        sb.Append("	inner join GBM0004_CUSTOMER as c on c.COMPCODE=@COMPCODE and c.CUSTOMERCODE=lt.SHIPPER and c.STYMD<=@STYMD and c.ENDYMD>=@ENDYMD and c.DELFLG<>@DELFLG ")
+        sb.Append("	inner join COS0017_FIXVALUE as f on f.CLASS='PROJECT' and f.KEYCODE='HIS' and c.TORICOMP=f.VALUE1 and f.STYMD<=@STYMD and f.ENDYMD>=@ENDYMD and f.DELFLG<>@DELFLG ")
         sb.Append("	inner join ( ")
         sb.Append("	  select OVLESD.TANKNO, max(OVLESD.ACTUALDATE) as ACTUALDATE ")
         sb.Append("	  from GBT0005_ODR_VALUE as OVLESD with(nolock) ")
@@ -506,8 +521,7 @@ Public Class GBT00030TANKLIST
         sb.Append("	  group by OVLEIN.TANKNO ")
         sb.Append("	  ) as LEIN ")
         sb.Append("	on LEIN.TANKNO = lt.TANKNO ")
-        sb.Append("	where lt.SHIPPER= @SHIPPER and lt.PRODUCTCODE=@PRODUCTCODE ")
-        sb.Append("	and  isnull(LESD.ACTUALDATE,'1900/01/01') >= isnull(LEIN.ACTUALDATE,'1900/01/01') ")
+        sb.Append("	and isnull(LESD.ACTUALDATE,'1900/01/01') >= isnull(LEIN.ACTUALDATE,'1900/01/01') ")
         sb.Append(") as tank on tank.TANKNO=st.TANKNO ")
         '-- 輸送/回送判定
         sb.Append("inner join GBT0004_ODR_BASE as ob on ob.ORDERNO= st.ORDERNO and ob.DELFLG <> @DELFLG ")
@@ -545,8 +559,6 @@ Public Class GBT00030TANKLIST
                 .Add("@INITDATE", SqlDbType.Date).Value = "1900/01/01"
                 .Add("@STYMD", SqlDbType.Date).Value = Now()
                 .Add("@ENDYMD", SqlDbType.Date).Value = Now()
-                .Add("@SHIPPER", SqlDbType.NVarChar, 20).Value = GBT00030LIST.CONST_LEASE_SHIPPER_HIS
-                .Add("@PRODUCTCODE", SqlDbType.NVarChar, 20).Value = GBT00030LIST.CONST_LEASE_PRODUCT_HIS
             End With
             Using sqlDa As New SqlDataAdapter(sqlCmd)
                 sqlDa.Fill(retDt)
@@ -646,7 +658,8 @@ Public Class GBT00030TANKLIST
             newRow("TANKNO") = tankNo
             newRow("NEXTINSPECTTYPE") = inspecType
             newRow("NEXTINSPECTDATE") = FormatDateContrySettings(inspecDate, "yyyy/MM/dd")
-            newRow("LASTIMPORTORDERNO") = ""
+            newRow("LASTIMPORTORDERNO") = orderNo
+            newRow("ATTACHMENT") = ""
 
             'タンク動静履歴
             For Each actCol As DataRow In tank
@@ -659,17 +672,27 @@ Public Class GBT00030TANKLIST
                 If actCol.Item("ORDERNO").ToString = orderNo Then
                     If retDt.Columns.Contains(act) Then
                         newRow(act) = FormatDateContrySettings(actCol("ACTUALDATE").ToString, "yyyy/MM/dd")
+                        '仮引当時は予定日
+                        If act = "TKAL" And newRow(act).ToString = "1900/01/01" Then
+                            newRow(act) = "(" & FormatDateContrySettings(actCol("SCHEDELDATE").ToString, "yyyy/MM/dd") & ")"
+                        End If
                     End If
-                ElseIf lastOrderSerch = True AndAlso act = "LOAD" Then
+                    'ElseIf lastOrderSerch = True AndAlso act = "LOAD" Then
+                ElseIf act = "LOAD" Then
 
                     '前回輸送オーダー番号※LOADで判定
                     newRow("LASTIMPORTORDERNO") = actCol.Item("ORDERNO").ToString
-                    Exit For
+                    If lastOrderSerch = True Then
+                        Exit For
+                    End If
                 End If
             Next
 
             newRow("ACTYTITLE") = actyTitle
             newRow("OUTPUTDATE") = outputDate
+
+            '添付ファイル数取得
+            GetAttachmentCnt(newRow)
 
             retDt.Rows.Add(newRow)
         Next
@@ -690,11 +713,13 @@ Public Class GBT00030TANKLIST
         retDt.Columns.Add("SELECT", GetType(Integer))             'DBの固定フィールド
         retDt.Columns.Add("HIDDEN", GetType(Integer))
         Dim colList As New List(Of String) From {"ORDERNO", "TANKNO",
+                                                 "ISRESERVE",
                                                  "TKAL", "DOUT", "LOAD", "CYIN",
                                                  "SHIP", "TRAV", "TRSH", "ARVD",
                                                  "DPIN", "DLRY", "ETYD", "STOK",
                                                  "NEXTINSPECTTYPE", "NEXTINSPECTDATE",
                                                  "LASTIMPORTORDERNO",
+                                                 "ATTACHMENT",
                                                  "ACTYTITLE", "OUTPUTDATE"}
 
         For Each colName As String In colList
@@ -918,6 +943,9 @@ Public Class GBT00030TANKLIST
                 '行（ラインカウント）を再設定する。既存項目（SELECT）を利用
                 dt.Rows(i)("SELECT") = DataCnt
             End If
+
+            '添付ファイル数取得
+            GetAttachmentCnt(dt.Rows(i))
         Next
 
         '現在表示位置取得
@@ -971,86 +999,165 @@ Public Class GBT00030TANKLIST
         Return
     End Sub
 
+
+#Region "<<添付ファイル関連 >>"
     ''' <summary>
-    ''' Excelダウンロードボタン押下時
+    ''' 添付ファイルポップアップ-ダウンロードボタン押下時
     ''' </summary>
-    Public Sub btnExcelDownload_Click()
-        Dim dt As DataTable = CreateListDataTable()
-        Dim COA0021ListTable As New BASEDLL.COA0021ListTable
-        '一覧表示データ復元 
-        If Me.SavedDt Is Nothing Then
-            dt = CreateListDataTable()
-            COA0021ListTable.FILEdir = Me.hdnXMLsaveFile.Value
-            COA0021ListTable.TBLDATA = dt
-            COA0021ListTable.COA0021recoverListTable()
-            If COA0021ListTable.ERR = C_MESSAGENO.NORMAL Then
-                dt = COA0021ListTable.OUTTBL
-            Else
-                CommonFunctions.ShowMessage(COA0021ListTable.ERR, Me.lblFooterMessage, pageObject:=Me)
-                Return
-            End If
-        Else
-            dt = Me.SavedDt
+    Public Sub btnDownloadFiles_Click()
+        Dim dtAttachment As DataTable = Me.dtCurAttachment
+        Dim aTTauniqueId As String = Convert.ToString(ViewState(CONST_VS_ATTA_UNIQUEID)).Replace("\", "_")
+        'ダウンロード対象有無
+        If dtAttachment Is Nothing OrElse dtAttachment.Rows.Count = 0 Then
+            CommonFunctions.ShowMessage(C_MESSAGENO.FILENOTEXISTS, Me.lblFooterMessage, pageObject:=Me)
         End If
-        'そもそも初期検索結果がない場合は絞り込まず終了
-        If dt IsNot Nothing AndAlso dt.Rows.Count = 0 Then
-            Return
-        End If
-
-        '右ボックスの選択レポートIDを取得
-        If Me.lbRightList.SelectedItem Is Nothing Then
-            '未選択の場合はそのまま終了
-            Return
-        End If
-        Dim reportId As String = Me.lbRightList.SelectedItem.Value
-
-        '帳票出力
-        With Nothing
-            Dim COA0027ReportTable As New BASEDLL.COA0027ReportTable
-            Dim reportMapId As String = CONST_MAPID
-            COA0027ReportTable.MAPID = reportMapId                             'PARAM01:画面ID
-            COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
-            COA0027ReportTable.FILETYPE = "XLSX"                               'PARAM03:出力ファイル形式
-            COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
-            COA0027ReportTable.COA0027ReportTable()
-
-            If COA0027ReportTable.ERR = C_MESSAGENO.NORMAL Then
-                CommonFunctions.ShowMessage(C_MESSAGENO.NORMAL, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
-            Else
-                CommonFunctions.ShowMessage(COA0027ReportTable.ERR, Me.lblFooterMessage, pageObject:=Me)
-                Return
-            End If
-
-            '別画面でExcelを表示
-            hdnPrintURL.Value = COA0027ReportTable.URL
+        Dim dlUrl As String = CommonFunctions.GetAttachmentCompressedFileUrl(dtAttachment, aTTauniqueId)
+        If dlUrl <> "" Then
+            Me.hdnPrintURL.Value = dlUrl
             ClientScript.RegisterStartupScript(Me.GetType(), "key", "f_ExcelPrint()", True)
-
-        End With
+        End If
+        '終了メッセージ
+        CommonFunctions.ShowMessage(C_MESSAGENO.NORMALDOWNLOAD, Me.lblFooterMessage, naeiw:=C_NAEIW.NORMAL, pageObject:=Me)
     End Sub
+
     ''' <summary>
-    ''' 当画面の保持必要情報を保持し退避用クラスを生成
+    ''' 一覧の添付(Attachment)フィールドダブルクリック時
+    ''' </summary>
+    Public Sub ShowAttachmentArea_Click()
+        Me.hdnIsLeftBoxOpen.Value = ""
+        Me.hdnLeftboxActiveViewId.Value = ""
+
+        '*********************************
+        '添付ファイル情報のリセット
+        '*********************************
+        ViewState.Remove(CONST_VS_PREV_ATTACHMENTINFO)
+        ViewState.Remove(CONST_VS_CURR_ATTACHMENTINFO)
+        ViewState.Remove(CONST_VS_ATTA_UNIQUEID)
+        '*********************************
+        'データを復元し選択行のレコード取得
+        '*********************************
+        Dim dt As DataTable = CreateListDataTable()
+        Dim COA0021ListTable As New COA0021ListTable
+        COA0021ListTable.FILEdir = hdnXMLsaveFile.Value
+        COA0021ListTable.TBLDATA = dt
+        COA0021ListTable.COA0021recoverListTable()
+        If COA0021ListTable.ERR = C_MESSAGENO.NORMAL Then
+            dt = COA0021ListTable.OUTTBL
+        Else
+            CommonFunctions.ShowMessage(C_MESSAGENO.SYSTEMADM, Me.lblFooterMessage, pageObject:=Me,
+                                        messageParams:=New List(Of String) From {"CODE:" & COA0021ListTable.ERR & ""})
+            Return
+        End If
+
+
+        Dim rowIdString As String = Me.hdnListCurrentRownum.Value
+
+        Dim targetDr As DataRow = (From item In dt Where Convert.ToString(item("LINECNT")) = rowIdString).FirstOrDefault
+        Dim orderNo As String = Convert.ToString(targetDr("ORDERNO"))
+        Dim tankNo As String = Convert.ToString(targetDr("TANKNO"))
+        Dim attrUniqueId As String = String.Format("{0}\{1}", orderNo, tankNo.Replace("/", ""))
+
+        '*********************************
+        '添付ファイルユーザー作業領域のクリア
+        '*********************************
+        CommonFunctions.CleanUserTempDirectory(CONST_MAPID)
+        '*********************************
+        '保存済みの添付ファイル一覧の取得、画面設定
+        '*********************************
+        Dim dtAttachment As DataTable = CommonFunctions.GetInitAttachmentFileList(attrUniqueId, CONST_DIRNAME_APPEARANCE_UPROOT, CONST_MAPID)
+        Me.dtCurAttachment = dtAttachment
+        ViewState(CONST_VS_PREV_ATTACHMENTINFO) = dtAttachment
+        ViewState(CONST_VS_CURR_ATTACHMENTINFO) = CommonFunctions.DeepCopy(dtAttachment)
+        ViewState(CONST_VS_ATTA_UNIQUEID) = attrUniqueId
+        'リピーターに一覧を設定
+        repAttachment.DataSource = dtAttachment
+        repAttachment.DataBind()
+        '*********************************
+        '添付ファイルポップアップの表示
+        '*********************************
+        'ヘッダー部分にTANKNOを転送
+        Me.lblAttachTankNoTitle.Text = "TankNo.(OrderNo)"
+        Me.lblAttachTankNo.Text = tankNo & "(" & orderNo & ")"
+        '表示スタイル設定
+        Me.divAttachmentInputAreaWapper.Style.Remove("display")
+        Me.divAttachmentInputAreaWapper.Style.Add("display", "block")
+    End Sub
+
+    ''' <summary>
+    ''' 添付ファイル欄の添付ファイル名ダブルクリック時処理
+    ''' </summary>
+    Private Sub AttachmentFileNameDblClick()
+        Dim fileName As String = Me.hdnFileDisplay.Value
+        If fileName = "" Then
+            Return
+        End If
+        Dim dtAttachment As DataTable = Me.dtCurAttachment
+        Dim dlUrl As String = CommonFunctions.GetAttachfileDownloadUrl(dtAttachment, fileName)
+        Me.hdnPrintURL.Value = dlUrl
+        ClientScript.RegisterStartupScript(Me.GetType(), "key", "f_ExcelPrint()", True)
+    End Sub
+
+    ''' <summary>
+    ''' 添付ファイルボックスのキャンセルボタン押下時イベント
+    ''' </summary>
+    Public Sub btnAttachmentUploadCancel_Click()
+
+        'マルチライン入力ボックスの非表示
+        Me.divAttachmentInputAreaWapper.Style("display") = "none"
+
+    End Sub
+
+    ''' <summary>
+    ''' アップロード済ファイル数を取得
+    ''' </summary>
+    Private Sub GetAttachmentCnt(dr As DataRow)
+        '一旦添付ファイル情報フィールドをクリア
+        dr("ATTACHMENT") = ""
+        'コピー元のディレクトリ取得
+        Dim orderNo As String = Convert.ToString(dr("ORDERNO")).Replace("/", "")
+        Dim tankNo As String = Convert.ToString(dr("TANKNO"))
+
+        '対象のファイル有無取得
+        Dim upBaseDir As String = COA0019Session.UPLOADFILESDir
+        Dim uploadPath As String = IO.Path.Combine(upBaseDir, CONST_DIRNAME_APPEARANCE_UPROOT, orderNo, tankNo)
+        'フォルダ自体未存在
+        If IO.Directory.Exists(uploadPath) = False Then
+            Return
+        End If
+        '対象ディレクトリのファイル情報取得
+        Dim filesObj = IO.Directory.GetFiles(uploadPath)
+        If filesObj Is Nothing OrElse filesObj.Count = 0 Then
+            Return
+        End If
+        'ここまで来た場合はファイル存在あり
+        dr("ATTACHMENT") = String.Format("{0} File", filesObj.Count)
+    End Sub
+
+    ''' <summary>
+    ''' 画面入力情報を取得しデータセットに格納
     ''' </summary>
     ''' <returns></returns>
-    Public Function GetGbt00006items() As GBT00030DITEMS
-        Dim item As New GBT00030DITEMS
-        item.OrderInfo = DirectCast(ViewState("ORDERINFO"), GBT00030LIST.GBT00030OrderInfo)
-        Return item
+    Private Function CollectDispAttachmentInfo() As DataTable
+        Dim dt As DataTable = DirectCast(ViewState(CONST_VS_CURR_ATTACHMENTINFO), DataTable)
+        If dt Is Nothing Then
+            Return Nothing
+        End If
+        '添付ファイルの収集
+        Dim dtAttachment As DataTable = CommonFunctions.DeepCopy(dt)
+        For Each repItem As RepeaterItem In Me.repAttachment.Items
+            Dim fileName As Label = DirectCast(repItem.FindControl("lblFileName"), Label)
+            If fileName Is Nothing Then
+                Continue For
+            End If
+            Dim qAttachment = From attachmentItem In dtAttachment Where attachmentItem("FILENAME").Equals(fileName.Text)
+            If qAttachment.Any Then
+                'qAttachment.FirstOrDefault.Item("ISMODIFIED") = CONST_FLAG_YES
+            End If
+        Next
+
+        Return dtAttachment
     End Function
-    ''' <summary>
-    ''' 退避情報を画面に戻す
-    ''' </summary>
-    ''' <param name="item"></param>
-    Private Sub SetGbt00006items(item As GBT00030DITEMS)
-        Me.DisplayItems = item
-        ViewState("ORDERINFO") = item.OrderInfo
-    End Sub
 
-    ''' <summary>
-    ''' 画面情報退避用クラス
-    ''' </summary>
-    <Serializable>
-    Public Class GBT00030DITEMS
-        Public Property OrderInfo As GBT00030LIST.GBT00030OrderInfo
+#End Region
 
-    End Class
 End Class

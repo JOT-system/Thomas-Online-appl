@@ -10,10 +10,6 @@ Public Class GBT00030LIST
     Private Const CONST_DSPROWCOUNT = 44                '指定数＋１が表示対象
     Private Const CONST_SCROLLROWCOUNT = 25              'マウススクロール時の増分
 
-    Public Const CONST_INCTORICODE_HIS = "0439000010"
-    Public Const CONST_LEASE_SHIPPER_HIS = "JPC01082"
-    Public Const CONST_LEASE_PRODUCT_HIS = "000662"
-
     Public Class SelectedMode
         ''' <summary>
         ''' ETYD（MY）
@@ -60,7 +56,7 @@ Public Class GBT00030LIST
              {ExportEmptyTank, "ETYD(JP)"},
              {ExportBeforeTransport, "Export Before Transport"},
              {ExportInTransit, "Export In Transit"},
-             {StockTank, "Stock at SDJ"}
+             {StockTank, "Stock at JPSS"}
              }
         Public Shared Function GetModeName(mode As String, Optional lang As String = "") As String
             Dim retVal As String = ""
@@ -390,10 +386,10 @@ Public Class GBT00030LIST
         sb.AppendLine(" , ST.ROOT ")
         sb.AppendLine(" , PORT.AREANAME ")
         sb.AppendLine("from ( ")
-        sb.AppendLine("   select * ")
-        sb.AppendLine("   from GBV0002_LEASETANK ")
-        sb.AppendLine("   where SHIPPER= @SHIPPER ")
-        sb.AppendLine("     and PRODUCTCODE=@PRODUCTCODE ")
+        sb.AppendLine("   select l.* ")
+        sb.AppendLine("   from GBV0002_LEASETANK as l")
+        sb.AppendLine("	  inner join GBM0004_CUSTOMER as c on c.COMPCODE=@COMPCODE and c.CUSTOMERCODE=l.SHIPPER and c.STYMD<=@STYMD and c.ENDYMD>=@ENDYMD and c.DELFLG<>@DELFLG ")
+        sb.AppendLine("	  inner join COS0017_FIXVALUE as f on f.CLASS='PROJECT' and f.KEYCODE='HIS' and c.TORICOMP=f.VALUE1 and f.STYMD<=@STYMD and f.ENDYMD>=@ENDYMD and f.DELFLG<>@DELFLG ")
         sb.AppendLine(") as B ")
         sb.AppendLine("-- リース登録 ")
         sb.AppendLine("left outer join ( ")
@@ -451,8 +447,6 @@ Public Class GBT00030LIST
                 .Add("@INITDATE", SqlDbType.Date).Value = "1900/01/01"
                 .Add("@STYMD", SqlDbType.Date).Value = Now()
                 .Add("@ENDYMD", SqlDbType.Date).Value = Now()
-                .Add("@SHIPPER", SqlDbType.NVarChar, 20).Value = CONST_LEASE_SHIPPER_HIS
-                .Add("@PRODUCTCODE", SqlDbType.NVarChar, 20).Value = CONST_LEASE_PRODUCT_HIS
 
             End With
             Using sqlDa As New SqlDataAdapter(sqlCmd)

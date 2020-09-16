@@ -1,4 +1,4 @@
-﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="GBT00030ORDERLIST.aspx.vb" Inherits="OFFICE.GBT00030ORDERLIST" %>
+﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="GBT00031SSDEPOLIST.aspx.vb" Inherits="OFFICE.GBT00031SSDEPOLIST" %>
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -11,7 +11,7 @@
     <%--全画面共通のスタイルシート --%>
     <link href="~/css/commonStyle.css" rel="stylesheet" type="text/css" />
     <%--個別のスタイルは以下に記載 OR 外部ファイルに逃す --%>
-    <link href="~/GB/css/GBT00030ORDERLIST.css" rel="stylesheet" type="text/css" />
+    <link href="~/GB/css/GBT00031SSDEPOLIST.css" rel="stylesheet" />
     <style>
     </style>
     <%--共通利用するJavaScript --%>
@@ -19,37 +19,45 @@
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
     <script type="text/javascript" src='<%= ResolveUrl("~/script/calendar.js") %>'  charset="utf-8"></script>
     <%--個別のスクリプトは以下に記載 --%>
+    <script type="text/javascript" src='<%= ResolveUrl("~/GB/script/GBT00031SSDEPOLIST.js?dtm=20190422A") %>'  charset="utf-8"></script>
     <script type="text/javascript">
         // ○画面ロード時処理(すべてのレンダリングが終了後実行されます。)
         window.addEventListener('DOMContentLoaded', function () {
             screenLock();
             /* ボタンクリックイベントのバインド(適宜追加) */
             var targetButtonObjects = ['<%= Me.btnBack.ClientId  %>',
-                                       '<%= Me.btnExtract.ClientID %>',
+                                       '<%= Me.btnLeftBoxButtonSel.ClientId  %>',
+                                       '<%= Me.btnLeftBoxButtonCan.ClientId  %>',
                                        '<%= Me.btnExcelDownload.ClientID %>',
-                                       '<%= Me.btnLeftBoxButtonSel.ClientId  %>','<%= Me.btnLeftBoxButtonCan.ClientId  %>',
+                                       '<%= Me.btnSave.ClientID %>',
                                        '<%= Me.btnFIRST.ClientId  %>','<%= Me.btnLAST.ClientId  %>',
+                                       '<%= Me.btnAttachmentUploadOk.ClientID %>',
                                        '<%= Me.btnAttachmentUploadCancel.ClientID %>',
                                        '<%= Me.btnDownloadFiles.ClientID %>'
-                                       ];
+                                      ];
             bindButtonClickEvent(targetButtonObjects);
 
             /* 左ボックス表示/非表示制御(hdnIsLeftBoxOpenが'Open'の場合表示) */
             displayLeftBox();
-
-            /* 左ボックス表示ダブルクリックイベントのバインド */
-            var viewOrderNo = '<%= Me.vLeftOrderNo.ClientID  %>';
-            var dblClickObjects = [['<%= Me.txtOrderNo.ClientId %>', viewOrderNo]]
+            
+            /* 左ボックスのリストボックスダブルクリックイベントバインド */
+            var viewCalId = '<%= Me.vLeftCal.ClientID %>';                      /* 基準日 */
+            var viewYesNo = '<%= me.vLeftYesNo.ClientID %>';
+            var dblClickObjects = [];
+            var txtAttachmentDelFlgObjects = document.querySelectorAll('input[id^="repAttachment_txtDeleteFlg_"');
+            for (let i = 0; i < txtAttachmentDelFlgObjects.length; i++) {
+                dblClickObjects.push([txtAttachmentDelFlgObjects[i].id, viewYesNo]);
+            }
             bindLeftBoxShowEvent(dblClickObjects);
+
             /* 手入力変更時のイベント */
 
             /* 左ボックスのリストボックスダブルクリックイベントバインド */
             bindLeftListBoxDblClickEvent();
-
-            var leftListExtentionTarget = [['<%= Me.lbOrderNo.ClientID %>', '3', '1']];
-            addLeftBoxExtention(leftListExtentionTarget);
-
+            
             /* 画面テキストボックス変更イベントのバインド(変更検知したいテキストボックスIDを指定 */
+<%--            var targetOnchangeObjects = [['<%= Me.txtYMD.ClientID %>']];
+            bindTextOnchangeEvent(targetOnchangeObjects);--%>
 
             /* 右ボックスの開閉ダブルクリックイベントバインド
                右上透明ボックス、下のメッセージ欄、他がある場合は個別で　*/
@@ -59,11 +67,32 @@
             /* ヘルプ表示処理 */
             openHelpPage(); /* hdnCanHelpOpenに"1"が立たない限り開きません。 */
 
-            /* 共通一覧のスクロールイベント紐づけ */
-            bindListCommonEvents('<%= Me.WF_LISTAREA.ClientId %>', '<%= if(IsPostBack = True, "1", "0") %>',true);
+            /* カレンダー描画処理 */
+            var calValueObj = document.getElementById('<%= Me.hdnCalendarValue.ClientID %>');
+            if (calValueObj !== null) {
+                /* 日付格納隠し項目がレンダリングされている場合のみ実行 */
+                carenda(0);
+                setAltMsg(firstAltYMD, firstAltMsg);
+            }
 
-            /* 検索ボックス生成 */
-            commonCreateSearchArea('selectHeaderBox');
+            /**
+             * 一覧表制御 
+             */
+            /* 一覧表日付項目カレンダー表示イベントバインド */
+            //bindListDateTextbox();
+            bindListTextboxEvents();
+            /* 共通一覧のスクロールイベント紐づけ */
+            bindListCommonEvents('<%= Me.WF_LISTAREA.ClientId %>','<%= if(IsPostBack = True, "1", "0") %>',true);
+            //一覧ボタンイベントバインド
+            //bindGridButtonClickEvent();
+
+            /* アップロードボタンの設定 */
+            addUploadExtention('<%= Me.btnExcelDownload.ClientID %>', 'AFTER', false, 'headerbox', 'Upload');
+
+            var dragDropAreaObjectsList = [
+                { id: 'divContensbox', kbn: ''}
+            ];
+            bindCommonDragDropEvents(dragDropAreaObjectsList, '<%= ResolveUrl(OFFICE.CommonConst.C_UPLOAD_HANDLER_URL)  %>');
 
             // 添付ファイルボックスの前画面操作抑止
             var attachmentAreaObjId = "divAttachmentInputAreaWapper";
@@ -71,6 +100,20 @@
             if (attachmentAreaObj !== null) {
                 if (attachmentAreaObj.style.display !== 'none') {
                     commonDisableModalBg(attachmentAreaObj.id);
+                    // D&Dイベント紐づけリスト(id:対象のオブジェクトID,kbn,許可拡張子配列(未指定時はすべて))
+                    var dragDropAreaObjectsList = [
+                        { id: 'divAttachmentInputArea', kbn: 'FILE_UP'}
+                    ];
+                    var enableUpload = document.getElementById('<%= Me.hdnUpload.ClientID  %>');
+                    if (enableUpload !== null) {
+                        if (enableUpload.disabled) {
+                            dragDropAreaObjectsList = null;
+                        }
+                    }
+                    bindCommonDragDropEvents(dragDropAreaObjectsList, '<%= ResolveUrl(OFFICE.CommonConst.C_UPLOAD_HANDLER_URL)  %>');
+
+                    /* アップロードボタンの設定 */
+                    addUploadExtention('<%= Me.hdnUpload.ClientID %>', 'AFTER', true, 'divAttachmentArea','Upload');
 
                 }
             }
@@ -78,63 +121,6 @@
             screenUnlock();
             focusAfterChange();
         });
-
-
-        // ○一覧用処理
-        function ListDbClick(obj, LineCnt) {
-            if (document.getElementById('hdnSubmit').value == 'FALSE') {
-                document.getElementById('hdnSubmit').value = 'TRUE'
-                document.getElementById('hdnListDBclick').value = LineCnt;
-                commonDispWait();
-                document.forms[0].submit();                             //aspx起動
-            };
-        };
-        // ○一覧用処理
-        function ListCellClick(obj, LineCnt, Column) {
-            if (document.getElementById('hdnSubmit').value == 'FALSE') {
-                document.getElementById('hdnSubmit').value = 'TRUE'
-                document.getElementById('hdnListDBclick').value = LineCnt;
-                document.getElementById('hdnListCellclick').value = Column;
-                commonDispWait();
-                document.forms[0].submit();                             //aspx起動
-            };
-        };
-
-        // ○一覧スクロール処理
-        function commonListScroll(listObj) {
-            var rightHeaderTableObj = document.getElementById(listObj.id + '_HR');
-            var rightDataTableObj = document.getElementById(listObj.id + '_DR');
-            var leftDataTableObj = document.getElementById(listObj.id + '_DL');
-
-            setCommonListScrollXpos(listObj.id, rightDataTableObj.scrollLeft);
-            rightHeaderTableObj.scrollLeft = rightDataTableObj.scrollLeft; // 左右連動させる
-            leftDataTableObj.scrollTop = rightDataTableObj.scrollTop; // 上下連動させる
-
-        };
-
-        // 一覧表添付ファイルセルダブルクリック時イベント
-        function showAttachmentArea(obj, lineCnt, fieldName) {
-            var currentRowNum = obj.getAttribute('rownum');
-            var objCurrentRowNum = document.getElementById('hdnListCurrentRownum');
-            var objButtonClick = document.getElementById('hdnButtonClick');
-            if (document.getElementById('hdnSubmit').value === 'FALSE') {
-                document.getElementById('hdnSubmit').value = 'TRUE'
-                objCurrentRowNum.value = lineCnt;
-                objButtonClick.value = 'ShowAttachmentArea';
-                commonDispWait();
-                document.forms[0].submit();                             //aspx起動
-            };
-            return false;
-        }
-        // 添付ファイル一覧、添付ファイル名ダブルクリック時
-        function dispAttachmentFile(filename) {
-            if (document.getElementById("hdnSubmit").value == "FALSE") {
-                document.getElementById("hdnSubmit").value = "TRUE"
-                document.getElementById('hdnFileDisplay').value = filename;
-                commonDispWait();
-                document.forms[0].submit();                            //aspx起動
-            }
-        }
 
     </script>
 </head>
@@ -144,7 +130,7 @@
     ※%付きのコメントはHTMLソース表示でもレンダリングされないものです --%>
 <body>
     <%--FormIDは適宜変更ください。 --%>
-    <form id="GBT00030O" runat="server" >
+    <form id="GBT00031L" runat="server">
         <%--ヘッダーボックス --%>
         <div id="divContainer">
             <div id="divTitlebox">
@@ -177,30 +163,14 @@
             <%--コンテンツボックス(このdiv内に適宜追加お願いします) --%>
             <div id="divContensbox">
                 <div id="actionButtonsBox">
-                    <input id="btnExtract" type="button" value="絞り込み"  runat="server"  />
-                    <input id="btnExcelDownload" type="button" value="Excelダウンロード"  runat="server" />
-                    <input id="btnBack" type="button" value="戻る"  runat="server"  />
+                    <input id="btnExcelDownload" type="button" value="Excelダウンロード"  runat="server" />   
+                    <input id="btnSave" type="button" value="保存"  runat="server" />   
+                    <input id="btnBack" type="button" value="戻る"  runat="server" />
                     <div id="btnFIRST" class="firstPage" runat="server"></div>
                     <div id="btnLAST" class="lastPage" runat="server"></div>
                 </div>
-
-                <div id="selectHeaderBox" runat="server">
-                    <div id="divSearchConditionBox">
-                        <asp:HiddenField ID="hdnSearchConditionDetailOpenFlg" runat="server" Value="" />
-                        <span>
-                            <asp:Label ID="lblOrderNoLabel" runat="server" Text=""></asp:Label>
-                            <asp:TextBox ID="txtOrderNo" runat="server" Text=""></asp:TextBox>
-                            <%--<asp:Label ID="lblOrderNoText" runat="server" Text=""></asp:Label>--%>
-                        </span>
-                    </div>
-                </div>
-
-                <div id="divListTitle" runat="server">
-                    <asp:Label ID="lblActyTitle" runat="server" Text=""></asp:Label>
-                </div>
-                
-                <!-- タンク動静、オーダー一覧 -->
-                <asp:panel id="WF_LISTAREA" runat="server">
+                <!-- 一覧 -->
+                <asp:panel id="WF_LISTAREA" runat="server" >
                 </asp:panel>
                 <!-- 添付ファイル一覧 -->
                 <div id="divFileUpInfo" runat="server" visible="false" >
@@ -221,11 +191,15 @@
                                         ondragenter="f_dragEventCancel(event)"
                                         ondragleave="f_dragEventCancel(event)" 
                                         ondragover="f_dragEventCancel(event)"  
-                                        ondrop="f_dragEventCancel">
+                                        ondrop="f_dragEvent(event,'FILE_UP')">
+
+                                        <asp:Label ID="lblDropDesc" runat="server" Text="To register attached documents, drop it here" Height="1.1em" CssClass="textLeft" Font-Bold="true" Font-Size="Medium" style="position:relative;top:0.5em;left:30.5em;"></asp:Label>
+                                        <asp:Label ID="lblUnder" runat="server" Text="↓↓↓" Height="1.1em" CssClass="textLeft" Font-Bold="true" Font-Size="Medium" style="position:absolute;top:1.6em;left:40.5em;"></asp:Label>
                                        <br />
 
                                         <asp:Label ID="lblFileName" runat="server" Text="File Name" Height="1.1em" Width="8em" CssClass="textLeft" style="position:relative;top:0.7em;left:5.0em;"></asp:Label>
 
+                                        <asp:Label ID="lblDelete" runat="server" Text="Delete" Height="1.1em" Width="8em" CssClass="textCenter" style="position:relative;top:0.7em;left:72.5em;"></asp:Label>
                                         <br />
 
                                         <span style="position:absolute;top:3.5em;left:1.3em;height:390px;min-width:90em;overflow-x:hidden;overflow-y:auto;background-color:white;border:1px solid black;">
@@ -241,6 +215,11 @@
                                                 <%-- ファイル記号名称 --%>
                                                 <a>　</a>
                                                 <asp:Label ID="lblRepFileName" runat="server" Text="" Height="1.0em" Width="77em" CssClass="textLeft"></asp:Label>
+                                                </td>
+
+                                                <td style="height:1.0em;width:10em;">
+                                                <%-- 削除 --%>
+                                                <asp:TextBox ID="txtRepDelFlg" runat="server" Height="1.0em" Width="10em" CssClass="textCenter"></asp:TextBox>
                                                 </td>
 
                                                 <td style="height:1.0em;width:10em;" hidden="hidden">
@@ -268,6 +247,7 @@
                     </tbody>
                 </table>
                 </div>
+
                 <div id="divHidden">
                     <%-- 必要な隠し要素はこちらに(共通で使用しそうなものは定義済) --%>
                     <asp:HiddenField ID="hdnSubmit" runat="server" Value="" />      <%-- サーバー処理中（TRUE:実行中、FALSE:未実行）--%>
@@ -292,27 +272,30 @@
                     <asp:HiddenField ID="hdnListPosition" runat="server" Value="" /> <%--  縦スクロールポジション --%>
                     <asp:HiddenField ID="hdnListDBclick" runat="server" Value="" />  <%--  ダブルクリックした行番号を記録 --%>   
                     <asp:HiddenField ID="hdnListCurrentRownum" runat="server" Value="" /> <%-- 一覧でボタンクリックイベントを発生させたRowNumを保持 --%>
-                    <asp:HiddenField ID="hdnListCellclick" runat="server" Value="" />  <%--  CellクリックしたColumnを記録 --%>   
-                    <%-- ダブルクリックしたオーダーId --%>
-                    <asp:HiddenField ID="hdnSelectedOrderNo" runat="server" Value="" />
-                    <%-- 前画面情報の選択モード --%>
-                    <asp:HiddenField ID="hdnSelectedPort" runat="server" Value="" Visible="False" />
-                    <asp:HiddenField ID="hdnSelectedActy" runat="server" Value="" Visible="False" />
-                    <asp:HiddenField ID="hdnSelectedMode" runat="server" Value="" Visible="False" />
-                    <%-- 前画面情報(オーダー情報)を保持しているファイルパス --%>
-                    <asp:HiddenField ID="hdnOrderXMLsaveFile" runat="server" Value="" Visible="False" />
-                    <%-- 前画面情報（オーダー情報）のスクロール位置 --%>
-                    <asp:HiddenField ID="hdnOrderDispListPosition" runat="server" Value="" Visible="False" />
-                    <%-- 当画面情報 --%>
-                    <asp:HiddenField ID="hdnThisMapVariant" runat="server" Value="" Visible="False" />
-                    <asp:HiddenField ID="hdnThisViewVariant" runat="server" Value="" Visible="False" />
-                    <asp:HiddenField ID="hdnListEvent" runat="server" Value="" Visible="False" />
-                    <asp:HiddenField ID="hdnListFunc" runat="server" Value="" Visible="False" />
-                    <asp:HiddenField ID="hdnListScrollXPos" runat="server" Value="" />
+                    <asp:HiddenField ID="hdnOrgXMLsaveFile" runat="server" Value="" Visible="False" />  <%--  初回ロード時に取得したデータ、「hdnXMLsaveFile」と比較し更新可否制御 --%> 
+                    <%-- 前画面情報保持用 --%>
+                    <asp:HiddenField ID="hdnMsgId" runat="server" Value="" Visible="False" /> 
+                   
+                    <%-- アップロード先のURL --%>
+                    <asp:HiddenField ID="hdnMAPpermitCode" Value="TRUE" runat="server" />
+                    <asp:HiddenField ID="hdnListUpload" Value="" runat="server" />
+                    <%-- ドラッグアンドドロップ(メッセージ 英語/日本語切替対応用) --%>
+                    <asp:HiddenField ID="hdnUploadMessage01" Value="ファイルアップロード開始" runat="server" />
+                    <asp:HiddenField ID="hdnUploadError01" Value="ファイルアップロードが失敗しました。" runat="server" />
+                    <asp:HiddenField ID="hdnUploadError02" Value="通信を中止しました。" runat="server" />
+                    <asp:HiddenField ID="hdnUploadError03" Value="タイムアウトエラーが発生しました。" runat="server" />
+                    <asp:HiddenField ID="hdnUploadError04" Value="更新権限がありません。" runat="server" />
+                    <asp:HiddenField ID="hdnUploadError05" Value="対応外のファイル形式です。" runat="server" />
                     <%-- 添付ファイル一覧のファイルダブルクリック時のファイル名保持 --%>
                     <asp:HiddenField ID="hdnFileDisplay" Value="" runat="server" />
 
+
+                    <asp:HiddenField ID="hdnListScrollXPos" Value="" runat="server" />
+
                     <asp:HiddenField ID="hdnConfirmTitle" runat="server" Value="" Visible="False" />
+
+                    <%-- 遷移したMAPVARI保持 --%>
+                    <asp:HiddenField ID="hdnThisMapVariant" runat="server" Value="" Visible="false" />
                 </div>
             </div>
             <%-- 左ボックス --%>
@@ -323,12 +306,43 @@
                 </div>
                 <%--  　マルチビュー　 --%>
                 <asp:MultiView ID="mvLeft" runat="server">
-                    <%-- ORDERNO VIEW --%>
-                    <asp:View ID="vLeftOrderNo" runat="server">
+                    <%--  　カレンダー　 --%>
+                    <asp:View id="vLeftCal" runat="server" >
                         <div class="leftViewContents">
-                            <asp:ListBox ID="lbOrderNo" runat="server"></asp:ListBox>
+                            <asp:HiddenField ID="hdnCalendarValue" runat="server" />
+                            <input id="hdnDateValue" type="hidden" value="" />
+                            <table border="0">
+                                <tr>
+                                    <td>
+                                        <table border="1" >
+                                            <tr>
+                                                <td>
+                                                    <div id="carenda">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td id="altMsg" style="background:white">
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
-                    </asp:View> <%-- END ORDERNO VIEW　 --%>
+                    </asp:View> <%-- END カレンダー VIEW　 --%>
+                    <%--  　外観チェック　 --%>
+                    <asp:View id="vLeftCheck" runat="server" >
+                        <div class="leftViewContents">
+                            <asp:ListBox ID="lbCheck" runat="server" CssClass="leftViewContents"></asp:ListBox>
+                        </div>
+                    </asp:View> <%-- END 外観チェック VIEW　 --%>
+                     <%-- Yes/No(添付削除フラグ) VIEW　 --%>
+                    <asp:View ID="vLeftYesNo" runat="server">
+                        <div class="leftViewContents">
+                            <asp:ListBox ID="lbYesNo" runat="server"></asp:ListBox>
+                        </div>
+                    </asp:View> <%-- END Yes/No(添付削除フラグ) VIEW　 --%>
                 </asp:MultiView>
             </div> <%-- END 左ボックス --%>
             <%-- 右ボックス --%>
@@ -358,7 +372,7 @@
                                                                     Me.rbShowError.Text,
                                                                     "") %>
                     </div>
-                <%-- ****************************
+                    <%-- ****************************
                      右マルチラインテキストボックス
                      **************************** --%>
                     <div id="divRightMessageTextBox">
@@ -407,20 +421,6 @@
                 <div><asp:Label ID="lblFooterMessage" runat="server" Text=""></asp:Label></div>
                 <div id="divShowHelp" ></div>
             </div>
-            <div id="divConfirmBoxWrapper" runat="server" enableviewstate="false">
-                <div id="divConfirmBox">
-                    <div id="divConfirmtitle">
-                        <%= Me.hdnConfirmTitle.Value %>
-                    </div>
-                    <div id="divConfirmBoxButtons">
-                        <input id="btnConfirmOk" type="button" value="OK" runat="server" />
-                        <input id="btnConfirmCancel" type="button" value="CANCEL" runat="server" onclick="document.getElementById('divConfirmBoxWrapper').style.display = 'none';" />
-                    </div>
-                    <div id="divConfirmBoxMessageArea">
-                        <div><asp:Label ID="lblConfirmMessage" runat="server" Text=""></asp:Label></div>
-                    </div>
-                </div>
-            </div>
             <!-- 添付ファイル設定エリア -->
             <div id="divAttachmentInputAreaWapper" runat="server" stype="display:none;"> 
                 <div id="divAttachmentInputArea">
@@ -431,15 +431,24 @@
                     <div id="divAttachmentInputAreaButtons">
                         <asp:Button ID="hdnUpload" runat="server" Text="" />
                         <input id="btnDownloadFiles" type="button" value="File Download"  runat="server"  />
+
+                        <input id="btnAttachmentUploadOk" type="button" value="OK" runat="server" />
                         <input id="btnAttachmentUploadCancel" type="button" value="CANCEL" runat="server" />
                     </div>
                     <div id="divAttachmentFiles">
                         <div id="divAttachmentArea" runat="server">
                             <asp:HiddenField ID="hdnAttachmentHeaderFileName" runat="server" Value="FileName" />
+                            <asp:HiddenField ID="hdnAttachmentHeaderText" runat="server" Value="To register attached documents, drop it here" />
+                            <asp:HiddenField ID="hdnAttachmentHeaderDelete" runat="server" Value="Delete" />
 
                             <table class="tblAttachmentHeader">
                                 <tr>
                                     <th rowspan="2"><%= Me.hdnAttachmentHeaderFileName.Value %></th>
+                                    <th><%= Me.hdnAttachmentHeaderText.Value %></th>
+                                    <th rowspan="2"><%= Me.hdnAttachmentHeaderDelete.Value %></th>
+                                </tr>
+                                <tr>
+                                    <th>↓↓↓</th>
                                 </tr>
                             </table>
                             <asp:Repeater ID="repAttachment" runat="server">
@@ -449,6 +458,8 @@
                                 <ItemTemplate>
                                     <tr class="trAttachment" >
                                         <td ondblclick='dispAttachmentFile("<%# Eval("FILENAME") %>");'><asp:Label ID="lblFileName" runat="server" Text='<%# HttpUtility.HtmlEncode(Eval("FILENAME")) %>' CssClass="textLeft" Title='<%# Eval("FILENAME") %>'></asp:Label></td>
+                                        <td><asp:TextBox ID="txtDeleteFlg" runat="server" CssClass="textCenter" Text='<%# Eval("DELFLG") %>' Enabled='<%# IF(Me.hdnUpload.Enabled, "True", "False") %>'></asp:TextBox>
+                                        </td>
                                     </tr>
                                 </ItemTemplate>
                                 <FooterTemplate>
