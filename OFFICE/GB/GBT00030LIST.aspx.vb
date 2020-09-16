@@ -424,7 +424,7 @@ Public Class GBT00030LIST
         sb.AppendLine("    inner join ( ")
         sb.AppendLine("		select s.TANKNO, min(s.RECENT) as RECENT ")
         sb.AppendLine("		from GBV0001_TANKSTATUS as s ")
-        sb.AppendLine("		where s.ACTIONID<>'TKAL' and s.ACTUALDATE<>@INITDATE ")
+        sb.AppendLine("		where not (s.ACTIONID='TKAL' and s.ACTUALDATE=@INITDATE) ")
         sb.AppendLine("		group by s.TANKNO ")
         sb.AppendLine("	) as recent on recent.TANKNO=vt.TANKNO and recent.RECENT=vt.RECENT ")
         sb.AppendLine(") as ST ")

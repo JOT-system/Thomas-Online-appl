@@ -691,7 +691,9 @@ Public Class GBT00014BL
                             tankType &= "20'TN"
                             sealNo &= editSealNoString
                             netWeight &= Convert.ToDecimal(tank.Item("NETWEIGHT")).ToString("#,##0")
-                            tareWeight &= Convert.ToDecimal(tank.Item("TAREWEIGHT")).ToString("#,##0")
+                            If Not String.IsNullOrEmpty(tank.Item("TAREWEIGHT").ToString()) Then
+                                tareWeight &= Convert.ToDecimal(tank.Item("TAREWEIGHT")).ToString("#,##0")
+                            End If
                             grossWeight &= Convert.ToDecimal(tank.Item("GROSSWEIGHT")).ToString("#,##0")
                         End If
 
@@ -1831,7 +1833,10 @@ Public Class GBT00014BL
                     COA0027ReportTable.REPORTID = reportId                             'PARAM02:帳票ID
                     COA0027ReportTable.FILETYPE = CONST_FILETYPE_EXCEL                 'PARAM03:出力ファイル形式
                     COA0027ReportTable.TBLDATA = dt                                    'PARAM04:データ参照tabledata
-                    COA0027ReportTable.ADDSHEET = CONST_BOOKING_ONE_SHEET
+                    If reportId = CONST_REPORT_ID.BOOKING.OOCL Then
+                    ElseIf reportId = CONST_REPORT_ID.BOOKING.ONE Then
+                        COA0027ReportTable.ADDSHEET = CONST_BOOKING_ONE_SHEET
+                    End If
 
                     COA0027ReportTable.COA0027ReportTable()
 
@@ -5829,7 +5834,7 @@ Public Class GBT00014BL
         sqlStat.AppendLine("      ,OV2.WORKF3 AS WORKF3")
         sqlStat.AppendLine("      ,OV2.WORKF4 AS WORKF4")
         sqlStat.AppendLine("      ,OV2.WORKF5 AS WORKF5")
-        sqlStat.AppendLine("      ,TK.NETWEIGHT AS TAREWEIGHT")
+        sqlStat.AppendLine("      ,isnull(TK.NETWEIGHT, 0) AS TAREWEIGHT")
         sqlStat.AppendLine("  FROM GBT0007_ODR_VALUE2 OV2 ")
         sqlStat.AppendLine("  LEFT JOIN GBT0005_ODR_VALUE OV ")
         sqlStat.AppendLine("    ON OV.ORDERNO   = OV2.ORDERNO")
