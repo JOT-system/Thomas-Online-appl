@@ -717,12 +717,14 @@ Public Class GBT00030LIST
             For i = 0 To CInt(summarySet.Length / summarySet.Rank) - 1
                 Dim orderCnt = 0
                 Dim tankCnt = 0
+                Dim orderNoList = New List(Of String)
                 For Each tmp In Split(summarySet(i, 1), ",")
                     If tRow.Value.ContainsKey(tmp) Then
-                        orderCnt += tRow.Value(tmp).orderNo.Count
+                        orderNoList.AddRange(tRow.Value(tmp).orderNo.Keys)
                         tankCnt += tRow.Value(tmp).orderNo.Sum(Function(d) d.Value)
                     End If
                 Next
+                orderCnt = orderNoList.Distinct.Count()
                 Dim setup = summarySet(i, 0)
                 'ETYDはタンク本数のみ
                 If setup = "ETYD" OrElse setup = "EETYD" Then

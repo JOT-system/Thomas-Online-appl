@@ -640,7 +640,6 @@ Public Class GBT00030TANKLIST
                 End If
             ElseIf Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ExportEmptyTank Then
                 If unAllocate.Contains(lastAct) AndAlso root = "I" Then
-                    lastOrderSerch = True
                 Else
                     Continue For
                 End If
@@ -677,14 +676,10 @@ Public Class GBT00030TANKLIST
                             newRow(act) = "(" & FormatDateContrySettings(actCol("SCHEDELDATE").ToString, "yyyy/MM/dd") & ")"
                         End If
                     End If
-                    'ElseIf lastOrderSerch = True AndAlso act = "LOAD" Then
-                ElseIf act = "LOAD" Then
-
+                ElseIf lastOrderSerch = True AndAlso act = "LOAD" Then
                     '前回輸送オーダー番号※LOADで判定
                     newRow("LASTIMPORTORDERNO") = actCol.Item("ORDERNO").ToString
-                    If lastOrderSerch = True Then
-                        Exit For
-                    End If
+                    Exit For
                 End If
             Next
 

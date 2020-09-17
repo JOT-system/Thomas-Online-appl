@@ -141,6 +141,12 @@ Public Class GBT00031SSDEPOLIST
                     Return
                 End If
                 '****************************************
+                '左ボックスリストの生成
+                '****************************************
+                SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
+                SetFixvalueListItem("GENERALFLG", Me.lbYesNo)
+
+                '****************************************
                 '前画面情報取得
                 '****************************************
                 SetPrevDisplayValues()
@@ -812,6 +818,7 @@ Public Class GBT00031SSDEPOLIST
                 For i As Integer = 0 To outputDt.Rows.Count - 1
                     '行（ラインカウント）を再設定する
                     outputDt.Rows(i)("LINECNT") = i + 1
+                    outputDt.Rows(i)("REPORTDATE") = ""
                 Next
             Else
                 outputDt = dt.Clone
@@ -839,6 +846,7 @@ Public Class GBT00031SSDEPOLIST
                 For i As Integer = 0 To outputDt.Rows.Count - 1
                     '行（ラインカウント）を再設定する
                     outputDt.Rows(i)("LINECNT") = i + 1
+                    outputDt.Rows(i)("REPORTDATE") = ""
                 Next
             Else
                 outputDt = dt.Clone
@@ -909,10 +917,6 @@ Public Class GBT00031SSDEPOLIST
         Dim checkDt As DataTable = Me.CreateListDataTable
         checkDt.Merge(targetData.CopyToDataTable)
 
-        If Me.lbCheck.Items.Count = 0 Then
-            SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
-        End If
-
         '単項目チェック
         If checkDt.Rows.Count > 0 Then
             messageNo = CheckSingle(CONST_MAPID, checkDt, fieldList, errMessage, keyFields:=keyFields)
@@ -937,6 +941,15 @@ Public Class GBT00031SSDEPOLIST
                     End If
 
                 Next
+            Next
+
+            'ERRORが存在する場合は更新不可
+            For Each row As DataRow In checkDt.Rows
+                If row.Item("OPERATION").ToString = errDisp Then
+                    messageNo = C_MESSAGENO.INPUTERROR
+                    CommonFunctions.ShowMessage(messageNo, Me.lblFooterMessage, pageObject:=Me)
+                    Return
+                End If
             Next
 
         End If
@@ -1088,8 +1101,6 @@ Public Class GBT00031SSDEPOLIST
                     End If
                 'チェックビュー表示切替
                 Case Me.vLeftCheck.ID
-                    SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
-
                     '書き換えるテキストフィールドを特定
                     Dim targetDateField = Me.hdnTextDbClickField.Value
                     If targetDateField.StartsWith("txtWF_LISTAREACHECK_DPIN") Then
@@ -1114,7 +1125,7 @@ Public Class GBT00031SSDEPOLIST
                         .SelectedIndex = -1
                         '一応現在入力しているテキストと一致するものを選択状態
                         If .Items.Count > 0 Then
-                            Dim findListItem = .Items.FindByValue(targetRows.First.Item(targetDateField).ToString)
+                            Dim findListItem = .Items.FindByText(targetRows.First.Item(targetDateField).ToString)
                             If findListItem IsNot Nothing Then
                                 findListItem.Selected = True
                             End If
@@ -1123,7 +1134,6 @@ Public Class GBT00031SSDEPOLIST
 
                 Case Else
 
-                    SetFixvalueListItem("GENERALFLG", Me.lbYesNo)
                     Dim dicListId As New Dictionary(Of String, ListBox) _
                         From {{Me.vLeftYesNo.ID, Me.lbYesNo}}
 
@@ -1433,16 +1443,11 @@ Public Class GBT00031SSDEPOLIST
     ''' <returns></returns>
     Private Function SummaryDataTable(ByRef dt As DataTable) As DataTable
         Dim impSSDepo As String() = {"ARVD", "DPIN", "DLRY", "ETYD", "STOK"}
-        Dim expSSDepo As String() = {"TKAL", "DOUT"}
+        Dim expSSDepo As String() = {"TKAL", "DOUT", "CYIN"}
 
         '一覧表用データテーブル作成
         Dim retDt = CreateListDataTable()
         Dim lineCnt As Integer = 0
-
-        If Me.lbCheck.Items.Count = 0 Then
-            'チェック項目用名称リスト作成
-            SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
-        End If
 
         Dim outputDate As String = Today().ToShortDateString
         'タンク一覧作成（タンクステータス履歴）
@@ -1461,7 +1466,7 @@ Public Class GBT00031SSDEPOLIST
             newRow("HIDDEN") = "0"
 
             newRow("OUTPUTDATE") = outputDate
-            newRow("REPORTDATE") = ""
+            newRow("REPORTDATE") = outputDate
 
             newRow("TANKNO") = tankNo
             newRow("TANKNO_H") = Left(tankNo, 4)
@@ -1666,9 +1671,6 @@ Public Class GBT00031SSDEPOLIST
         Else
             dt = Me.SavedDt
         End If
-        If Me.lbCheck.Items.Count = 0 Then
-            SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
-        End If
 
         '変更対象の行を取得
         Dim targetRows = From dr As DataRow In Me.PrevDt
@@ -1704,9 +1706,6 @@ Public Class GBT00031SSDEPOLIST
         If dtValue <> prevDtValue Then
             Dim retMessageNo As String = ""
             Dim retMessage As String = ""
-            If Me.lbCheck.Items.Count = 0 Then
-                SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
-            End If
 
             retMessageNo = ChedckList(dtValue, Me.lbCheck, targetDateField, retMessage)
             If retMessageNo <> C_MESSAGENO.NORMAL Then
@@ -1793,8 +1792,11 @@ Public Class GBT00031SSDEPOLIST
         Dim prevDtValue As String = Convert.ToString(targetRow.Item(targetDateField))
         '自身の行の日付を編集
         afterInputRow.Item(targetDateField) = dtValue
+        '自身の行の報告日付を取得
+        Dim reportDtValue As String = Convert.ToString(targetRow.Item("REPORTDATE"))
         '変更発生時
-        If dtValue <> prevDtValue Then
+        '又は日付が予定→実績とみなす（報告日より以前）場合
+        If dtValue <> prevDtValue OrElse dtValue < reportDtValue Then
             '自身の行の日付を編集
             afterInputRow.Item(targetDateField) = dtValue
             afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "1"
@@ -1813,16 +1815,10 @@ Public Class GBT00031SSDEPOLIST
             COA0026FieldCheck.VALUE = dtValue
             COA0026FieldCheck.COA0026FieldCheck()
             If COA0026FieldCheck.ERR <> C_MESSAGENO.NORMAL Then
-                afterInputRow.Item("OPERATION") = errDisp
+                afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "9"
 
                 retMessageNo = C_MESSAGENO.RIGHTBIXOUT
-                'retMessage.AppendFormat("・{0} ： {1}", fieldDic(checkField), dummyLabelObj.Text).AppendLine()
-
-                'If targetKeyFields IsNot Nothing Then
-                '    For Each keyField In targetKeyFields
-                '        retMessage.AppendFormat("--> {0} = {1}", padRight(fieldDic(keyField), keyValuePadLen), Convert.ToString(dr.Item(keyField))).AppendLine()
-                '    Next
-                'End If 'END targetKeyFields IsNot Nothing 
+                retMessage.AppendFormat("・{0} ： {1}", targetDateField, dummyLabelObj.Text).AppendLine()
 
             End If 'END  COA0026FieldCheck.ERR <> C_MESSAGENO.NORMAL
 
@@ -1832,17 +1828,17 @@ Public Class GBT00031SSDEPOLIST
                 afterInputRow.Item("ARVD").ToString,
                 afterInputRow.Item("DPIN").ToString,
                 afterInputRow.Item("ETYD").ToString,
+                afterInputRow.Item("TKAL").ToString,
                 afterInputRow.Item("DOUT").ToString,
                 afterInputRow.Item("CYIN").ToString}
-            Dim retValue = CheckDateSpan(checkDateSpanObjectsTransit)
-            If retValue = C_MESSAGENO.VALIDITYINPUT Then
+            retMessageNo = CheckDateSpan(checkDateSpanObjectsTransit)
+            If retMessageNo = C_MESSAGENO.VALIDITYINPUT Then
+                afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "9"
                 retMessageNo = C_MESSAGENO.RIGHTBIXOUT
+                retMessage.AppendFormat("・{0} ： {1}", targetDateField, dummyLabelObj.Text).AppendLine()
             End If
 
-            retValue = CheckRowStatus(afterInputRow)
-            If retValue <> C_MESSAGENO.NORMAL Then
-                retMessageNo = C_MESSAGENO.RIGHTBIXOUT
-            End If
+            CheckRowStatus(afterInputRow)
 
         End If
 
@@ -1925,6 +1921,15 @@ Public Class GBT00031SSDEPOLIST
         Dim COA0029XlsTable As New BASEDLL.COA0029XlsTable
         Dim reportId As String = Me.lbRightList.SelectedItem.Value
         Dim reportMapId As String = CONST_MAPID
+
+
+        '初期処理
+        Me.txtRightErrorMessage.Text = ""
+        Me.lblFooterMessage.Text = ""
+        'Me.lblFooterMessage.ForeColor = Color.Black
+        'Me.lblFooterMessage.Font.Bold = False
+
+
         ''初期処理
         'errList = New List(Of String)
         'errListAll = New List(Of String)
@@ -2019,41 +2024,9 @@ Public Class GBT00031SSDEPOLIST
 
         End If
 
-        'チェック項目用名称リスト作成
-        If Me.lbCheck.Items.Count = 0 Then
-            'チェック項目用名称リスト作成
-            SetFixvalueListItem("JPSSCHECK", Me.lbCheck)
-        End If
-
         Dim retMessageNo As String = C_MESSAGENO.NORMAL
         Dim retMessage As New StringBuilder
 
-        '報告日・出力日チェック
-        Dim outputDateString = uploadedExcelDt.Rows(0).Item("OUTPUTDATE").ToString
-        Dim reportDateString = uploadedExcelDt.Rows(0).Item("REPORTDATE").ToString
-        outputDateString = outputDateString.Trim
-        outputDateString = FormatDateYMD(outputDateString, GBA00003UserSetting.DATEFORMAT)
-        reportDateString = reportDateString.Trim
-        reportDateString = FormatDateYMD(reportDateString, GBA00003UserSetting.DATEFORMAT)
-        If outputDateString = "" Then
-            retMessageNo = C_MESSAGENO.RIGHTBIXOUT
-            retMessage.AppendFormat("・{0}：{1}", "出力日", "未入力です！").AppendLine()
-            retMessage.AppendFormat("--> {0} = {1}", "出力日", outputDateString).AppendLine()
-            errMsg = retMessage.ToString
-            Return retMessageNo
-        ElseIf reportDateString = "" Then
-            retMessageNo = C_MESSAGENO.RIGHTBIXOUT
-            retMessage.AppendFormat("・{0}：{1}", "報告日", "未入力です！").AppendLine()
-            retMessage.AppendFormat("--> {0} = {1}", "報告日", reportDateString).AppendLine()
-            errMsg = retMessage.ToString
-            Return retMessageNo
-        ElseIf reportDateString < outputDateString Then
-            retMessageNo = C_MESSAGENO.RIGHTBIXOUT
-            retMessage.AppendFormat("・{0}：{1}", "報告日", "出力日より過去の入力です！").AppendLine()
-            retMessage.AppendFormat("--> {0} = {1}", "報告日", reportDateString).AppendLine()
-            errMsg = retMessage.ToString
-            Return retMessageNo
-        End If
 
         'ACTYが空のデータを上に持っていき処理を行う
         Dim uploadedExcelDtSorted = ""
@@ -2070,6 +2043,33 @@ Public Class GBT00031SSDEPOLIST
             '書き込み先が存在しない場合はつぎへスキップ
             If writeDr Is Nothing Then
                 Continue For
+            End If
+
+            '報告日・出力日チェック
+            Dim outputDateString = dr.Item("OUTPUTDATE").ToString
+            Dim reportDateString = dr.Item("REPORTDATE").ToString
+            outputDateString = outputDateString.Trim
+            outputDateString = FormatDateYMD(outputDateString, GBA00003UserSetting.DATEFORMAT)
+            reportDateString = reportDateString.Trim
+            reportDateString = FormatDateYMD(reportDateString, GBA00003UserSetting.DATEFORMAT)
+            If outputDateString = "" Then
+                retMessageNo = C_MESSAGENO.RIGHTBIXOUT
+                retMessage.AppendFormat("・{0}：{1}", "出力日", "未入力です！").AppendLine()
+                retMessage.AppendFormat("--> {0} = {1}", "出力日", outputDateString).AppendLine()
+                errMsg = retMessage.ToString
+                Return retMessageNo
+            ElseIf reportDateString = "" Then
+                retMessageNo = C_MESSAGENO.RIGHTBIXOUT
+                retMessage.AppendFormat("・{0}：{1}", "報告日", "未入力です！").AppendLine()
+                retMessage.AppendFormat("--> {0} = {1}", "報告日", reportDateString).AppendLine()
+                errMsg = retMessage.ToString
+                Return retMessageNo
+            ElseIf reportDateString < outputDateString Then
+                retMessageNo = C_MESSAGENO.RIGHTBIXOUT
+                retMessage.AppendFormat("・{0}：{1}", "報告日", "出力日より過去の入力です！").AppendLine()
+                retMessage.AppendFormat("--> {0} = {1}", "報告日", reportDateString).AppendLine()
+                errMsg = retMessage.ToString
+                Return retMessageNo
             End If
 
             writeDr.Item("REPORTDATE") = reportDateString
@@ -2188,7 +2188,8 @@ Public Class GBT00031SSDEPOLIST
         '**************************************************
         Dim updateTargetList = currentDt.AsEnumerable
         Dim compareFieldList As New List(Of String) From {"DPIN", "ETYD", "DOUT", "CYIN",
-                                                          "CHECK_DPIN", "CHECK_ETYD", "CHECK_DOUT", "CHECK_CYIN"}
+                                                          "CHECK_DPIN", "CHECK_ETYD", "CHECK_DOUT", "CHECK_CYIN",
+                                                          "UPDATE_DPIN", "UPDATE_ETYD", "UPDATE_DOUT", "UPDATE_CYIN"}
 
         Dim updRowList As New List(Of DataRow)
         Dim updRow As DataRow
@@ -2199,7 +2200,7 @@ Public Class GBT00031SSDEPOLIST
             For Each fieldName As String In compareFieldList
                 If compareDr Is Nothing OrElse
                 Not tgtDr(fieldName).Equals(compareDr(fieldName)) Then
-                    tgtDr.Item("UPDATE_" & fieldName.Replace("CHECK_", "")) = "1"
+                    tgtDr.Item("UPDATE_" & fieldName.Replace("CHECK_", "").Replace("UPDATE_", "")) = "1"
                     hasUnmatch = True
                 End If
             Next
