@@ -6264,7 +6264,7 @@ Public Structure GBA00012TankInfo
             sqlStat.AppendLine(",WITH_STATUS as (")
             sqlStat.AppendLine("    select")
             'sqlStat.AppendLine("        RANK() OVER(PARTITION BY OVSTAT.TANKNO ORDER BY (CASE WHEN OVSTAT.ACTUALDATE = @InitDate THEN '9999/12/12' else OVSTAT.ACTUALDATE END) desc, OVSTAT.DISPSEQ desc) as RECENT,")
-            sqlStat.AppendLine("        RANK() OVER(PARTITION BY OVSTAT.TANKNO ORDER BY (CASE WHEN OVSTAT.ACTUALDATE = @InitDate THEN '9999/12/12' else OVSTAT.ACTUALDATE END) desc, convert(char(10),OVSTAT.INITYMD,111) desc, OVSTAT.DISPSEQ desc) as RECENT,")
+            sqlStat.AppendLine("        RANK() OVER(PARTITION BY OVSTAT.TANKNO ORDER BY (CASE WHEN OVSTAT.ACTUALDATE = @InitDate THEN '9999/12/12' else OVSTAT.ACTUALDATE END) desc, convert(char(10),OVSTAT.INITYMD,111) desc, convert(int,ov.DISPSEQ) desc) as RECENT,")
             sqlStat.AppendLine("        OVSTAT.TANKNO, OVSTAT.ACTIONID,OVSTAT.ACTUALDATE,OVSTAT.DISPSEQ")
             sqlStat.AppendLine("    from GBT0005_ODR_VALUE as OVSTAT with(nolock) ")
             sqlStat.AppendLine("    where OVSTAT.DELFLG <> @DelFlg")
