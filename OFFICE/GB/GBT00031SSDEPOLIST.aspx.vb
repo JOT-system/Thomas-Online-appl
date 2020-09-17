@@ -1795,8 +1795,7 @@ Public Class GBT00031SSDEPOLIST
         '自身の行の報告日付を取得
         Dim reportDtValue As String = Convert.ToString(targetRow.Item("REPORTDATE"))
         '変更発生時
-        '又は日付が予定→実績とみなす（報告日より以前）場合
-        If dtValue <> prevDtValue OrElse dtValue < reportDtValue Then
+        If dtValue <> prevDtValue Then
             '自身の行の日付を編集
             afterInputRow.Item(targetDateField) = dtValue
             afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "1"
@@ -1838,9 +1837,12 @@ Public Class GBT00031SSDEPOLIST
                 retMessage.AppendFormat("・{0} ： {1}", targetDateField, dummyLabelObj.Text).AppendLine()
             End If
 
-            CheckRowStatus(afterInputRow)
-
+        ElseIf dtValue < reportDtValue Then
+            '日付が予定→実績とみなす（報告日より以前）場合
+            afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "1"
         End If
+
+        CheckRowStatus(afterInputRow)
 
         If targetDt Is Nothing Then
             'サーバーローカルに保存
@@ -1950,7 +1952,7 @@ Public Class GBT00031SSDEPOLIST
             Return
         End If
 
-        Dim excelDt As DataTable = COA0029XlsTable.TBLDATA.Copy
+        Dim excelDt As DataTable = (From uploadedExcelDr In COA0029XlsTable.TBLDATA).CopyToDataTable
 
         ''UPLOAD_XLSデータ取得
         COA0029XlsTable.MAPID = reportMapId
@@ -2082,9 +2084,9 @@ Public Class GBT00031SSDEPOLIST
                 End If
 
                 '値に変化がなければスキップ（付帯処理は行わない）
-                If writeDr.Item(fieldName).Equals(dr.Item(fieldName)) Then
-                    Continue For
-                End If
+                'If writeDr.Item(fieldName).Equals(dr.Item(fieldName)) Then
+                '    Continue For
+                'End If
 
                 '日付項目かつ入力したデータが日付型の場合
                 If {"DPIN", "ETYD", "DOUT", "CYIN"}.Contains(fieldName) Then
@@ -2200,7 +2202,6 @@ Public Class GBT00031SSDEPOLIST
             For Each fieldName As String In compareFieldList
                 If compareDr Is Nothing OrElse
                 Not tgtDr(fieldName).Equals(compareDr(fieldName)) Then
-                    tgtDr.Item("UPDATE_" & fieldName.Replace("CHECK_", "").Replace("UPDATE_", "")) = "1"
                     hasUnmatch = True
                 End If
             Next

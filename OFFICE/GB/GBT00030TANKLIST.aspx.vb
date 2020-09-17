@@ -521,7 +521,7 @@ Public Class GBT00030TANKLIST
         sb.Append("	  group by OVLEIN.TANKNO ")
         sb.Append("	  ) as LEIN ")
         sb.Append("	on LEIN.TANKNO = lt.TANKNO ")
-        sb.Append("	and isnull(LESD.ACTUALDATE,'1900/01/01') >= isnull(LEIN.ACTUALDATE,'1900/01/01') ")
+        sb.Append("	where isnull(LESD.ACTUALDATE,'1900/01/01') >= isnull(LEIN.ACTUALDATE,'1900/01/01') ")
         sb.Append(") as tank on tank.TANKNO=st.TANKNO ")
         '-- 輸送/回送判定
         sb.Append("inner join GBT0004_ODR_BASE as ob on ob.ORDERNO= st.ORDERNO and ob.DELFLG <> @DELFLG ")
@@ -576,34 +576,9 @@ Public Class GBT00030TANKLIST
     ''' <returns></returns>
     Private Function SummaryDataTable(ByRef dt As DataTable) As DataTable
         Dim unAllocate As String() = {"ETYC", "ETYD", "LESD"}
-        Dim actyTitle As String = ""
+        Dim actyTitle As String = GBT00030LIST.SelectedMode.GetModeName(Me.hdnSelectedMode.Value)
         Dim outputDate As Date = Now
 
-        Dim selAct As String() = {""}
-        Select Case Me.hdnSelectedMode.Value
-            Case GBT00030LIST.SelectedMode.ImportEmptyTank
-                'ETYD（MY）
-                actyTitle = "輸入コンテナ　ETYD"
-            Case GBT00030LIST.SelectedMode.ImportBeforeTransport
-                'MY側　TKAL～CYIN
-                actyTitle = "輸入コンテナ　輸送手配"
-            Case GBT00030LIST.SelectedMode.ImportInTransit
-                '輸送中（輸入）
-                actyTitle = "輸入コンテナ　海上輸送中"
-            Case GBT00030LIST.SelectedMode.ExportEmptyTank
-                'ETYD（JP）
-                actyTitle = "回送コンテナ　ETYD"
-            Case GBT00030LIST.SelectedMode.ExportBeforeTransport
-                'JP側　(E)TKAL～(E)CYIN
-                actyTitle = "回送コンテナ　回送手配"
-            Case GBT00030LIST.SelectedMode.ExportInTransit
-                actyTitle = "回送コンテナ　海上輸送中"
-                '輸送中（回送）
-            Case GBT00030LIST.SelectedMode.StockTank
-                '仙台予備在庫
-                actyTitle = "仙台予備在庫"
-            Case Else
-        End Select
 
         '一覧表用データテーブル作成
         Dim retDt = CreateListDataTable()
@@ -615,6 +590,7 @@ Public Class GBT00030TANKLIST
             '対象ORDERNO限定
             tmpDt = tmpDt.Where(Function(a) a.Item("ORDERNO").ToString = Me.hdnSelectedOrderNo.Value)
         End If
+        Dim lastDt = dt.AsEnumerable
 
         'タンク毎に処理
         Dim tankDt = tmpDt.GroupBy(Function(a) a.Item("TANKNO").ToString)
@@ -629,12 +605,8 @@ Public Class GBT00030TANKLIST
             Dim root As String = tank.First.Item("ROOT").ToString
             Dim isImport As String = tank.First.Item("ISIMPORT").ToString
 
-            '前回輸送オーダー検索有無
-            Dim lastOrderSerch As Boolean = False
-
             If Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ImportEmptyTank Then
                 If unAllocate.Contains(lastAct) AndAlso root = "E" Then
-                    lastOrderSerch = True
                 Else
                     Continue For
                 End If
@@ -657,8 +629,23 @@ Public Class GBT00030TANKLIST
             newRow("TANKNO") = tankNo
             newRow("NEXTINSPECTTYPE") = inspecType
             newRow("NEXTINSPECTDATE") = FormatDateContrySettings(inspecDate, "yyyy/MM/dd")
-            newRow("LASTIMPORTORDERNO") = orderNo
             newRow("ATTACHMENT") = ""
+            newRow("ISIMPORT") = isImport
+            newRow("LASTIMPORTORDERNO") = orderNo
+
+            '前回輸送オーダー番号取得
+            If Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ExportEmptyTank Then
+                newRow("LASTIMPORTORDERNO") = orderNo
+            Else
+                Dim lastOrder = lastDt.Where(Function(a) a.Item("TANKNO").ToString = tankNo AndAlso
+                                      Convert.ToInt32(a.Item("RECENT").ToString) > Convert.ToInt32(recent) AndAlso
+                                      a.Item("ORDERNO").ToString <> orderNo AndAlso
+                                      a.Item("ACTIONID").ToString = "LOAD")
+                If Not IsNothing(lastOrder) Then
+                    newRow("LASTIMPORTORDERNO") = lastOrder.First.Item("ORDERNO").ToString
+                End If
+            End If
+
 
             'タンク動静履歴
             For Each actCol As DataRow In tank
@@ -676,9 +663,7 @@ Public Class GBT00030TANKLIST
                             newRow(act) = "(" & FormatDateContrySettings(actCol("SCHEDELDATE").ToString, "yyyy/MM/dd") & ")"
                         End If
                     End If
-                ElseIf lastOrderSerch = True AndAlso act = "LOAD" Then
-                    '前回輸送オーダー番号※LOADで判定
-                    newRow("LASTIMPORTORDERNO") = actCol.Item("ORDERNO").ToString
+                Else
                     Exit For
                 End If
             Next
@@ -708,7 +693,7 @@ Public Class GBT00030TANKLIST
         retDt.Columns.Add("SELECT", GetType(Integer))             'DBの固定フィールド
         retDt.Columns.Add("HIDDEN", GetType(Integer))
         Dim colList As New List(Of String) From {"ORDERNO", "TANKNO",
-                                                 "ISRESERVE",
+                                                 "ISIMPORT",
                                                  "TKAL", "DOUT", "LOAD", "CYIN",
                                                  "SHIP", "TRAV", "TRSH", "ARVD",
                                                  "DPIN", "DLRY", "ETYD", "STOK",
@@ -1104,7 +1089,15 @@ Public Class GBT00030TANKLIST
         Dim rowIdString As String = Me.hdnListCurrentRownum.Value
 
         Dim targetDr As DataRow = (From item In dt Where Convert.ToString(item("LINECNT")) = rowIdString).FirstOrDefault
-        Dim orderNo As String = Convert.ToString(targetDr("ORDERNO"))
+        Dim orderNo As String = ""
+        Dim dispOrderNo As String = ""
+        If targetDr("ISIMPORT").ToString = "0" Then
+            orderNo = Convert.ToString(targetDr("LASTIMPORTORDERNO")).Replace("/", "")
+            dispOrderNo = String.Format("{0} to {1}", orderNo, Convert.ToString(targetDr("ORDERNO")).Replace("/", ""))
+        Else
+            orderNo = Convert.ToString(targetDr("ORDERNO")).Replace("/", "")
+            dispOrderNo = orderNo
+        End If
         Dim tankNo As String = Convert.ToString(targetDr("TANKNO"))
         Dim attrUniqueId As String = String.Format("{0}\{1}", orderNo, tankNo.Replace("/", ""))
 
@@ -1128,7 +1121,7 @@ Public Class GBT00030TANKLIST
         '*********************************
         'ヘッダー部分にTANKNOを転送
         Me.lblAttachTankNoTitle.Text = "TankNo.(OrderNo)"
-        Me.lblAttachTankNo.Text = tankNo & "(" & orderNo & ")"
+        Me.lblAttachTankNo.Text = tankNo & "(" & dispOrderNo & ")"
         '表示スタイル設定
         Me.divAttachmentInputAreaWapper.Style.Remove("display")
         Me.divAttachmentInputAreaWapper.Style.Add("display", "block")
@@ -1165,7 +1158,12 @@ Public Class GBT00030TANKLIST
         '一旦添付ファイル情報フィールドをクリア
         dr("ATTACHMENT") = ""
         'コピー元のディレクトリ取得
-        Dim orderNo As String = Convert.ToString(dr("ORDERNO")).Replace("/", "")
+        Dim orderNo As String = ""
+        If dr("ISIMPORT").ToString = "0" Then
+            orderNo = Convert.ToString(dr("LASTIMPORTORDERNO")).Replace("/", "")
+        Else
+            orderNo = Convert.ToString(dr("ORDERNO")).Replace("/", "")
+        End If
         Dim tankNo As String = Convert.ToString(dr("TANKNO"))
 
         '対象のファイル有無取得

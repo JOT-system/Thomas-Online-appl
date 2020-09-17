@@ -631,6 +631,7 @@ Public Class GBT00030ORDERLIST
         Dim leaseTotal As Integer = 0
 
         Dim outputDate As Date = Now
+        Dim actyTitle As String = GBT00030LIST.SelectedMode.GetModeName(Me.hdnSelectedMode.Value)
 
         Dim selAct As List(Of String) = New List(Of String)
         Select Case Me.hdnSelectedMode.Value
@@ -787,7 +788,7 @@ Public Class GBT00030ORDERLIST
             newRow("MBL") = ""
             newRow("ATTACHMENT") = ""
 
-            newRow("ACTYTITLE") = GBT00030LIST.SelectedMode.GetModeName(Me.hdnSelectedMode.Value)
+            newRow("ACTYTITLE") = actyTitle
             newRow("OUTPUTDATE") = outputDate
 
             orderList.Add(tRow("ORDERNO").ToString)
