@@ -2255,9 +2255,7 @@ Public Class GBT00031SSDEPOLIST
         For Each tgtDr In tgtDt
             Dim tankNo As String = Convert.ToString(tgtDr.Item("TANKNO"))
             Dim updDate As String = tgtDr("REPORTDATE").ToString
-            If updDate = "" Then
-                updDate = Today().ToShortDateString
-            End If
+
 
             For Each fieldName As String In updFieldList
                 If tgtDr(fieldName).Equals("1") Then
@@ -2266,6 +2264,12 @@ Public Class GBT00031SSDEPOLIST
 
                     Dim fieldId = fieldName.Replace("UPDATE_", "")
                     Dim fieldDate = tgtDr(fieldId).ToString
+                    Dim tankCond = "0"
+                    Dim findListItem = Me.lbCheck.Items.FindByText(tgtDr("CHECK_" & fieldId).ToString)
+                    If findListItem IsNot Nothing Then
+                        tankCond = findListItem.Value
+                    End If
+
 
                     updRow.Item("DATAID") = tgtDr("DATAID_" & fieldId)
                     updRow.Item("ACTIONID") = fieldId
@@ -2279,16 +2283,16 @@ Public Class GBT00031SSDEPOLIST
                     If fieldDate <> "1900/01/01" Then
                         '未来日なら予定日更新
                         If fieldDate > updDate Then
-                            updRow.Item("SCHEDELDATE") = tgtDr(fieldId)
-                            updRow.Item("TANKCONDITION") = ""
+                            updRow.Item("SCHEDELDATE") = fieldDate
+                            updRow.Item("TANKCONDITION") = "0"
                         Else
-                            updRow.Item("ACTUALDATE") = tgtDr(fieldId)
-                            updRow.Item("TANKCONDITION") = tgtDr("CHECK_" & fieldId)
+                            updRow.Item("ACTUALDATE") = fieldDate
+                            updRow.Item("TANKCONDITION") = tankCond
                         End If
                     Else
                         updRow.Item("SCHEDELDATE") = "1900/01/01"
                         updRow.Item("ACTUALDATE") = "1900/01/01"
-                        updRow.Item("TANKCONDITION") = ""
+                        updRow.Item("TANKCONDITION") = "0"
                     End If
                     updRow.Item("UPDYMD") = tgtDr("UPDYMD_" & fieldId)
                     updRowList.Add(updRow)
