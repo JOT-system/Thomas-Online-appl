@@ -2187,8 +2187,8 @@ Public Class GBT00031SSDEPOLIST
         '各種動作を行うデータ一覧の生成
         '**************************************************
         Dim updateTargetList = currentDt.AsEnumerable
-        Dim compareFieldList As New List(Of String) From {"DPIN", "ETYD", "DOUT", "DPIN",
-                                                          "CHECK_DPIN", "CHECK_ETYD", "CHECK_DOUT", "CHECK_DPIN"}
+        Dim compareFieldList As New List(Of String) From {"DPIN", "ETYD", "DOUT", "CYIN",
+                                                          "CHECK_DPIN", "CHECK_ETYD", "CHECK_DOUT", "CHECK_CYIN"}
 
         Dim updRowList As New List(Of DataRow)
         Dim updRow As DataRow
