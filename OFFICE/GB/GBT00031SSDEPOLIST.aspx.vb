@@ -28,6 +28,7 @@ Public Class GBT00031SSDEPOLIST
     Private errDisp As String = Nothing                     'エラー用表示文言
     Private updateDisp As String = Nothing                  '更新用表示文言
 
+
     ''' <summary>
     ''' 処理返却用のメッセージ
     ''' </summary>
@@ -36,36 +37,6 @@ Public Class GBT00031SSDEPOLIST
         Public Property modOtherUsers As List(Of DataRow)
         Public Property dateSeqError As New List(Of DataRow)
     End Class
-    ''' <summary>
-    ''' 修正パターン列挙型
-    ''' </summary>
-    <Flags()>
-    Private Enum ModifyType As Integer
-        ''' <summary>
-        ''' 追加
-        ''' </summary>
-        ins = 1
-        ''' <summary>
-        ''' 追加（タンク更新を含んだ費用の追加）
-        ''' </summary>
-        insTank = 2
-        ''' <summary>
-        ''' 更新
-        ''' </summary>
-        upd = 4
-        ''' <summary>
-        ''' タンク更新(タンク単位で更新のためのこちらの更新はトランザクションする目的)
-        ''' </summary>
-        updTank = 8
-        ''' <summary>
-        ''' 論理削除
-        ''' </summary>
-        del = 16
-        ''' <summary>
-        ''' 論理削除（タンク更新を含んだ費用の削除）
-        ''' </summary>
-        delTank = 32
-    End Enum
 
     Private SavedDt As DataTable = Nothing
     ''' <summary>
@@ -942,6 +913,19 @@ Public Class GBT00031SSDEPOLIST
 
                 Next
             Next
+            '外観チェック設定チェック
+            'For Each row As DataRow In checkDt.Rows
+            '    For Each col In LISTAREA_ITEM_CHECKBOX
+            '        If messageNo <> C_MESSAGENO.NORMAL Then
+            '            CommonFunctions.ShowMessage(messageNo, Me.lblFooterMessage, pageObject:=Me)
+
+            '            '右ボックスにエラーメッセージ表示
+            '            Me.txtRightErrorMessage.Text = errMessage
+            '            Return
+            '        End If
+
+            '    Next
+            'Next
 
             'ERRORが存在する場合は更新不可
             For Each row As DataRow In checkDt.Rows
@@ -1419,6 +1403,10 @@ Public Class GBT00031SSDEPOLIST
                                                 "DPIN", "DLRY", "ETYD",
                                                 "TKAL",
                                                 "DOUT", "CYIN",
+                                                "SCHEDULE_DPIN", "SCHEDULE_DLRY", "SCHEDULE_ETYD",
+                                                "SCHEDULE_DOUT", "SCHEDULE_CYIN",
+                                                "ACTUAL_DPIN", "ACTUAL_DLRY", "ACTUAL_ETYD",
+                                                "ACTUAL_DOUT", "ACTUAL_CYIN",
                                                 "CHECK_DPIN", "CHECK_DLRY", "CHECK_ETYD",
                                                 "CHECK_DOUT", "CHECK_CYIN",
                                                 "DATAID_DPIN", "DATAID_DLRY", "DATAID_ETYD",
@@ -1491,6 +1479,7 @@ Public Class GBT00031SSDEPOLIST
 
 
                 If retDt.Columns.Contains(act) Then
+
                     If actualDate = "1900/01/01" AndAlso scheduleDate <> "1900/01/01" Then
                         '予定日
                         newRow(act) = scheduleDate
@@ -1504,22 +1493,19 @@ Public Class GBT00031SSDEPOLIST
                         newRow(act) = ""
                     End If
 
-                    Dim checkValue As String = actCol("TANKCONDITION").ToString
-                    Dim listItem = Me.lbCheck.Items.FindByValue(checkValue)
+                    '外観チェック状態
+                    Dim checkValue As String = "0"
+                    Dim listItem = Me.lbCheck.Items.FindByValue(actCol("TANKCONDITION").ToString)
                     If Not IsNothing(listItem) Then
                         checkValue = listItem.Text
                     End If
 
                     If retDt.Columns.Contains("DATAID_" & act) Then
                         newRow("DATAID_" & act) = actCol("DATAID").ToString
-                    End If
-                    If retDt.Columns.Contains("CHECK_" & act) Then
+                        newRow("SCHEDULE_" & act) = scheduleDate
+                        newRow("ACTUAL_" & act) = actualDate
                         newRow("CHECK_" & act) = checkValue
-                    End If
-                    If retDt.Columns.Contains("UPDYMD_" & act) Then
                         newRow("UPDYMD_" & act) = actCol("UPDYMD").ToString
-                    End If
-                    If retDt.Columns.Contains("UPDATE_" & act) Then
                         newRow("UPDATE_" & act) = "0"
                     End If
                 End If
@@ -1788,9 +1774,12 @@ Public Class GBT00031SSDEPOLIST
         '自身の対象行を取得
         Dim targetRow As DataRow = targetRows(0)
         Dim afterInputRow As DataRow = afterInputRows(0)
-        '自身の行の設定日付を取得
+        '更新前行の設定日付を取得
         Dim prevDtValue As String = Convert.ToString(targetRow.Item(targetDateField))
-        '自身の行の日付を編集
+        Dim prevSchDtValue As String = Convert.ToString(targetRow.Item("SCHEDULE_" & targetDateField))
+        Dim prevActDtValue As String = Convert.ToString(targetRow.Item("ACTUAL_" & targetDateField))
+
+        '更新行の日付を編集
         afterInputRow.Item(targetDateField) = dtValue
         '自身の行の報告日付を取得
         Dim reportDtValue As String = Convert.ToString(targetRow.Item("REPORTDATE"))
@@ -1798,6 +1787,13 @@ Public Class GBT00031SSDEPOLIST
         If dtValue <> prevDtValue Then
             '自身の行の日付を編集
             afterInputRow.Item(targetDateField) = dtValue
+            If dtValue > reportDtValue Then
+                afterInputRow.Item("SCHEDULE_" & targetDateField) = dtValue
+                afterInputRow.Item("ACTUAL_" & targetDateField) = "1900/01/01"
+            Else
+                afterInputRow.Item("ACTUAL_" & targetDateField) = dtValue
+            End If
+
             afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "1"
 
             Dim COA0026FieldCheck As New BASEDLL.COA0026FieldCheck              '項目チェック
@@ -1824,12 +1820,8 @@ Public Class GBT00031SSDEPOLIST
             '関連日付チェック
             Dim updateList = New List(Of String)
             Dim checkDateSpanObjectsTransit As New List(Of String) From {
-                afterInputRow.Item("ARVD").ToString,
-                afterInputRow.Item("DPIN").ToString,
-                afterInputRow.Item("ETYD").ToString,
-                afterInputRow.Item("TKAL").ToString,
-                afterInputRow.Item("DOUT").ToString,
-                afterInputRow.Item("CYIN").ToString}
+                    afterInputRow.Item("ARVD").ToString, afterInputRow.Item("DPIN").ToString, afterInputRow.Item("ETYD").ToString,
+                    afterInputRow.Item("TKAL").ToString, afterInputRow.Item("DOUT").ToString, afterInputRow.Item("CYIN").ToString}
             retMessageNo = CheckDateSpan(checkDateSpanObjectsTransit)
             If retMessageNo = C_MESSAGENO.VALIDITYINPUT Then
                 afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "9"
@@ -1837,8 +1829,9 @@ Public Class GBT00031SSDEPOLIST
                 retMessage.AppendFormat("・{0} ： {1}", targetDateField, dummyLabelObj.Text).AppendLine()
             End If
 
-        ElseIf dtValue < reportDtValue Then
+        ElseIf prevSchDtValue <= reportDtValue Then
             '日付が予定→実績とみなす（報告日より以前）場合
+            afterInputRow.Item("ACTUAL_" & targetDateField) = dtValue
             afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "1"
         End If
 
@@ -2029,7 +2022,6 @@ Public Class GBT00031SSDEPOLIST
         Dim retMessageNo As String = C_MESSAGENO.NORMAL
         Dim retMessage As New StringBuilder
 
-
         'ACTYが空のデータを上に持っていき処理を行う
         Dim uploadedExcelDtSorted = ""
         Dim writeFieldNameList As New List(Of String) '更新対象フィールド一覧
@@ -2074,6 +2066,7 @@ Public Class GBT00031SSDEPOLIST
                 Return retMessageNo
             End If
 
+            '
             writeDr.Item("REPORTDATE") = reportDateString
 
             '値展開フィールドに記載
@@ -2088,30 +2081,36 @@ Public Class GBT00031SSDEPOLIST
                 '    Continue For
                 'End If
 
+                '復路項目の場合
+                If String.IsNullOrEmpty(writeDr.Item("EXPORDERNO").ToString) Then
+                    If {"DOUT", "CYIN", "CHECK_DOUT", "CHECK_CYIN"}.Contains(fieldName) Then
+                        Continue For 'チェック項目処理は終了のため後続処理へ
+                    End If 'チェック項目項目処理
+                End If
+
                 '日付項目かつ入力したデータが日付型の場合
                 If {"DPIN", "ETYD", "DOUT", "CYIN"}.Contains(fieldName) Then
                     Dim dateString As String = Convert.ToString(dr.Item(fieldName))
                     dateString = dateString.Trim
                     dateString = FormatDateYMD(dateString, GBA00003UserSetting.DATEFORMAT)
                     Dim dateBuff As Date
-                    '日付項目が空白または日付に変換できない場合は次のフィールドにスキップ
-                    If dateString = "" OrElse Date.TryParse(dateString, dateBuff) = False Then
+                    '日付項目が空白は初期値で更新
+                    ' 日付のクリア
+                    If dateString = "" Then
+                        dateString = "1900/01/01"
+                    End If
+                    '日付に変換できない場合は次のフィールドにスキップ
+                    If Date.TryParse(dateString, dateBuff) = False Then
                         Continue For
                     End If
                     If dateString <> "" Then
                         dateString = dateBuff.ToString("yyyy/MM/dd")
                     End If
-                    ' 日付のクリア
-                    If dateString = "1900/01/01" Then
-                        dateString = ""
-                    End If
-                    '日付項目一括転送を行う
-                    If dateString <> "" Then
-                        '日付入力したACTYをもとに他の日付を連鎖して更新
-                        Dim rowNum As String = Convert.ToString(writeDr.Item("LINECNT"))
-                        Dim txtBoxName As String = String.Format("txt{0}{1}Dummy", Me.WF_LISTAREA.ID, fieldName)
-                        UpdateDatatableDate(dateString, txtBoxName, rowNum, writeDt)
-                    End If
+
+                    '日付項目更新を行う
+                    Dim rowNum As String = Convert.ToString(writeDr.Item("LINECNT"))
+                    Dim txtBoxName As String = String.Format("txt{0}{1}Dummy", Me.WF_LISTAREA.ID, fieldName)
+                    UpdateDatatableDate(dateString, txtBoxName, rowNum, writeDt)
 
                     Continue For '日付処理は終了のため後続処理へ
                 End If '日付項目処理
@@ -2125,8 +2124,6 @@ Public Class GBT00031SSDEPOLIST
                     Continue For 'チェック項目処理は終了のため後続処理へ
                 End If 'チェック項目項目処理
 
-                ''Excelに入力した値をコピー
-                'writeDr.Item(fieldName) = dr.Item(fieldName)
             Next 'フィールド名ループ END
 
         Next 'Excel取得のデータテーブルループEND 
@@ -2248,7 +2245,6 @@ Public Class GBT00031SSDEPOLIST
     Private Function GetUpdateData(tgtDt As List(Of DataRow)) As List(Of DataRow)
 
         Dim updDt As DataTable = CreateOrderListTable()
-        updDt.Columns.Add("MODIFIED", GetType(ModifyType))
         Dim updRowList As New List(Of DataRow)
 
         Dim updFieldList As String() = {"UPDATE_DPIN", "UPDATE_ETYD",
@@ -2263,38 +2259,27 @@ Public Class GBT00031SSDEPOLIST
                     Dim updRow = updDt.NewRow
                     updRow.Item("LINECNT") = tgtDr("LINECNT")
 
+                    '更新対象ACTYID
                     Dim fieldId = fieldName.Replace("UPDATE_", "")
-                    Dim fieldDate = tgtDr(fieldId).ToString
+
+                    '外観チェック値変換
                     Dim tankCond = "0"
                     Dim findListItem = Me.lbCheck.Items.FindByText(tgtDr("CHECK_" & fieldId).ToString)
                     If findListItem IsNot Nothing Then
                         tankCond = findListItem.Value
                     End If
 
-
                     updRow.Item("DATAID") = tgtDr("DATAID_" & fieldId)
                     updRow.Item("ACTIONID") = fieldId
-
                     If {"DPIN", "ETYD"}.Contains(fieldId) Then
                         updRow.Item("ORDERNO") = tgtDr("IMPORDERNO")
                     Else
                         updRow.Item("ORDERNO") = tgtDr("EXPORDERNO")
                     End If
                     updRow.Item("TANKNO") = tgtDr("TANKNO")
-                    If fieldDate <> "1900/01/01" Then
-                        '未来日なら予定日更新
-                        If fieldDate > updDate Then
-                            updRow.Item("SCHEDELDATE") = fieldDate
-                            updRow.Item("TANKCONDITION") = "0"
-                        Else
-                            updRow.Item("ACTUALDATE") = fieldDate
-                            updRow.Item("TANKCONDITION") = tankCond
-                        End If
-                    Else
-                        updRow.Item("SCHEDELDATE") = "1900/01/01"
-                        updRow.Item("ACTUALDATE") = "1900/01/01"
-                        updRow.Item("TANKCONDITION") = "0"
-                    End If
+                    updRow.Item("SCHEDELDATE") = tgtDr("SCHEDULE_" & fieldId).ToString
+                    updRow.Item("ACTUALDATE") = tgtDr("ACTUAL_" & fieldId).ToString
+                    updRow.Item("TANKCONDITION") = tankCond
                     updRow.Item("UPDYMD") = tgtDr("UPDYMD_" & fieldId)
                     updRowList.Add(updRow)
 
