@@ -88,6 +88,7 @@
                                            ['<%= Me.lbShipper.ClientID %>', '3', '1'],
                                            ['<%= Me.lbConsignee.ClientID %>', '3', '1'],
                                            ['<%= Me.lbProduct.ClientID %>', '3', '1'],
+                                           ['<%= Me.lbUsingLeaseTank.ClientID %>', '3', '1'],
                                            ['<%= Me.lbDelFlg.ClientID %>', '3', '1']
                                            ];
             addLeftBoxExtention(leftListExtentionTarget);
@@ -489,6 +490,12 @@
                             <asp:ListBox ID="lbProduct" runat="server" CssClass="leftViewContents"></asp:ListBox>
                         </div>
                     </asp:View> <%-- END 積載品 VIEW　 --%>
+                    <%--  リースタンク利用 --%>
+                    <asp:View id="vLeftUsingLeaseTank" runat="server" >
+                        <div class="leftViewContents">
+                            <asp:ListBox ID="lbUsingLeaseTank" runat="server" CssClass="leftViewContents"></asp:ListBox>
+                        </div>
+                    </asp:View> <%-- END リースタンク利用 VIEW --%>
                     <%--  削除フラグ --%>
                     <asp:View id="vLeftDelFlg" runat="server" >
                         <div class="leftViewContents">

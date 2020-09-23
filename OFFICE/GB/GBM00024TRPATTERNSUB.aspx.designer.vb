@@ -824,6 +824,24 @@ Partial Public Class GBM00024TRPATTERNSUB
     Protected WithEvents lbProduct As Global.System.Web.UI.WebControls.ListBox
     
     '''<summary>
+    '''vLeftUsingLeaseTank コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents vLeftUsingLeaseTank As Global.System.Web.UI.WebControls.View
+    
+    '''<summary>
+    '''lbUsingLeaseTank コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lbUsingLeaseTank As Global.System.Web.UI.WebControls.ListBox
+    
+    '''<summary>
     '''vLeftDelFlg コントロール。
     '''</summary>
     '''<remarks>

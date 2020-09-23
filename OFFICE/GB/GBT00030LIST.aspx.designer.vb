@@ -11,7 +11,7 @@ Option Strict On
 Option Explicit On
 
 
-Partial Public Class GBT00004NEWORDER
+Partial Public Class GBT00030LIST
     
     '''<summary>
     '''phCommonHeader コントロール。
@@ -23,13 +23,13 @@ Partial Public Class GBT00004NEWORDER
     Protected WithEvents phCommonHeader As Global.System.Web.UI.WebControls.PlaceHolder
     
     '''<summary>
-    '''GBT00004N コントロール。
+    '''GBT00030L コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents GBT00004N As Global.System.Web.UI.HtmlControls.HtmlForm
+    Protected WithEvents GBT00030L As Global.System.Web.UI.HtmlControls.HtmlForm
     
     '''<summary>
     '''lblTitleId コントロール。
@@ -77,13 +77,13 @@ Partial Public Class GBT00004NEWORDER
     Protected WithEvents lblTitleDate As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''btnSave コントロール。
+    '''btnExcelDownload コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents btnSave As Global.System.Web.UI.HtmlControls.HtmlInputButton
+    Protected WithEvents btnExcelDownload As Global.System.Web.UI.HtmlControls.HtmlInputButton
     
     '''<summary>
     '''btnBack コントロール。
@@ -113,373 +113,85 @@ Partial Public Class GBT00004NEWORDER
     Protected WithEvents btnLAST As Global.System.Web.UI.HtmlControls.HtmlGenericControl
     
     '''<summary>
-    '''lblBrId コントロール。
+    '''lblLeaseTankLabel コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents lblBrId As Global.System.Web.UI.WebControls.Label
+    Protected WithEvents lblLeaseTankLabel As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''txtBrId コントロール。
+    '''lblLeaseTank コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents txtBrId As Global.System.Web.UI.WebControls.TextBox
+    Protected WithEvents lblLeaseTank As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''lblOffice コントロール。
+    '''lblLeaseOutLabel コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents lblOffice As Global.System.Web.UI.WebControls.Label
+    Protected WithEvents lblLeaseOutLabel As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''lblSalesPic コントロール。
+    '''lblLeaseOut コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents lblSalesPic As Global.System.Web.UI.WebControls.Label
+    Protected WithEvents lblLeaseOut As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''lblCopy コントロール。
+    '''lblLeaseTotalLabel コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents lblCopy As Global.System.Web.UI.WebControls.Label
+    Protected WithEvents lblLeaseTotalLabel As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''txtCopy コントロール。
+    '''lblLeaseTotal コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents txtCopy As Global.System.Web.UI.WebControls.TextBox
+    Protected WithEvents lblLeaseTotal As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''txtOffice コントロール。
+    '''WF_LISTAREA_H1 コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents txtOffice As Global.System.Web.UI.WebControls.TextBox
+    Protected WithEvents WF_LISTAREA_H1 As Global.System.Web.UI.WebControls.Panel
     
     '''<summary>
-    '''txtSalesPic コントロール。
+    '''WF_LISTAREA_H コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents txtSalesPic As Global.System.Web.UI.WebControls.TextBox
+    Protected WithEvents WF_LISTAREA_H As Global.System.Web.UI.WebControls.Panel
     
     '''<summary>
-    '''lblNoOfTanks コントロール。
+    '''WF_LISTAREA コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents lblNoOfTanks As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtNoOfTanks コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtNoOfTanks As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''lblTotalTanks コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblTotalTanks As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtTotalTanks コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtTotalTanks As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''lblConsignee コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblConsignee As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtConsignee コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtConsignee As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''lblConsigneeText コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblConsigneeText As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''lblFillingDate コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblFillingDate As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtFillingDate コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtFillingDate As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''lblEtd1 コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblEtd1 As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtEtd1 コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtEtd1 As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''lblTotalInvoiced コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblTotalInvoiced As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtTotalInvoiced コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtTotalInvoiced As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''trTSEta コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents trTSEta As Global.System.Web.UI.HtmlControls.HtmlTableRow
-    
-    '''<summary>
-    '''lblTSEta コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblTSEta As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtTSEta コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtTSEta As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''trTSEtd コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents trTSEtd As Global.System.Web.UI.HtmlControls.HtmlTableRow
-    
-    '''<summary>
-    '''lblTSEtd コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblTSEtd As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtTSEtd コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtTSEtd As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''lblEta1 コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblEta1 As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtEta1 コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtEta1 As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''lblBookingNo コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblBookingNo As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtBookingNo コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtBookingNo As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''lblVesselName コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblVesselName As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtVesselName コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtVesselName As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''lblVoyageNo コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblVoyageNo As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtVoyageNo コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtVoyageNo As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''trEtd2 コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents trEtd2 As Global.System.Web.UI.HtmlControls.HtmlTableRow
-    
-    '''<summary>
-    '''lblEtd2 コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblEtd2 As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtEtd2 コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtEtd2 As Global.System.Web.UI.WebControls.TextBox
-    
-    '''<summary>
-    '''trEta2 コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents trEta2 As Global.System.Web.UI.HtmlControls.HtmlTableRow
-    
-    '''<summary>
-    '''lblEta2 コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lblEta2 As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''txtEta2 コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents txtEta2 As Global.System.Web.UI.WebControls.TextBox
+    Protected WithEvents WF_LISTAREA As Global.System.Web.UI.WebControls.Panel
     
     '''<summary>
     '''hdnSubmit コントロール。
@@ -590,193 +302,112 @@ Partial Public Class GBT00004NEWORDER
     Protected WithEvents hdnCanHelpOpen As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnCalcFunctionName コントロール。
+    '''hdnXMLsaveFile コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnCalcFunctionName As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnXMLsaveFile As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnBodyScrollTop コントロール。
+    '''hdnMouseWheel コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnBodyScrollTop As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnMouseWheel As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnAgentOrganizer コントロール。
+    '''hdnListPosition コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnAgentOrganizer As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnListPosition As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnSalesPic コントロール。
+    '''hdnListDBclick コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnSalesPic As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnListDBclick As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnBrId コントロール。
+    '''hdnListCurrentRownum コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnBrId As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnListCurrentRownum As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnOrderNo コントロール。
+    '''hdnListCellclick コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnOrderNo As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnListCellclick As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnSearchType コントロール。
+    '''hdnSelectedPort コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnSearchType As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnSelectedPort As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnETDStYMD コントロール。
+    '''hdnSelectedActy コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnETDStYMD As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnSelectedActy As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnETDEndYMD コントロール。
+    '''hdnSelectedMode コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnETDEndYMD As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnSelectedMode As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnETAStYMD コントロール。
+    '''hdnConfirmTitle コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnETAStYMD As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnConfirmTitle As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnETAEndYMD コントロール。
+    '''hdnMsgboShowFlg コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnETAEndYMD As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnMsgboShowFlg As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnShipper コントロール。
+    '''hdnThisMapVariant コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents hdnShipper As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnConsignee コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnConsignee As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnPortOfLoading コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnPortOfLoading As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnPortOfDischarge コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnPortOfDischarge As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnOffice コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnOffice As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnListId コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnListId As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnReportVariant コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnReportVariant As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnDoublePostCheck コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnDoublePostCheck As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnBrType コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnBrType As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnDeliveryCountry1 コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnDeliveryCountry1 As Global.System.Web.UI.WebControls.HiddenField
+    Protected WithEvents hdnThisMapVariant As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
     '''btnLeftBoxButtonSel コントロール。
@@ -804,60 +435,6 @@ Partial Public Class GBT00004NEWORDER
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
     Protected WithEvents mvLeft As Global.System.Web.UI.WebControls.MultiView
-    
-    '''<summary>
-    '''vLeftCal コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents vLeftCal As Global.System.Web.UI.WebControls.View
-    
-    '''<summary>
-    '''hdnCalendarValue コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnCalendarValue As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''vLeftBreakerType コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents vLeftBreakerType As Global.System.Web.UI.WebControls.View
-    
-    '''<summary>
-    '''lbBreakerType コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lbBreakerType As Global.System.Web.UI.WebControls.ListBox
-    
-    '''<summary>
-    '''vLeftConsignee コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents vLeftConsignee As Global.System.Web.UI.WebControls.View
-    
-    '''<summary>
-    '''lbConsignee コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents lbConsignee As Global.System.Web.UI.WebControls.ListBox
     
     '''<summary>
     '''divMessageType コントロール。
@@ -1029,4 +606,40 @@ Partial Public Class GBT00004NEWORDER
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
     Protected WithEvents lblFooterMessage As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''divConfirmBoxWrapper コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents divConfirmBoxWrapper As Global.System.Web.UI.HtmlControls.HtmlGenericControl
+    
+    '''<summary>
+    '''btnConfirmOk コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents btnConfirmOk As Global.System.Web.UI.HtmlControls.HtmlInputButton
+    
+    '''<summary>
+    '''btnConfirmCancel コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents btnConfirmCancel As Global.System.Web.UI.HtmlControls.HtmlInputButton
+    
+    '''<summary>
+    '''lblConfirmMessage コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblConfirmMessage As Global.System.Web.UI.WebControls.Label
 End Class

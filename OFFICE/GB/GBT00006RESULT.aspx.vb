@@ -127,53 +127,64 @@ Public Class GBT00006RESULT
 
                     '■■■ 一覧表示データ編集（性能対策） ■■■
                     Dim COA0013TableObject As New COA0013TableObject
-                        Dim listData As DataTable = COA0013TableObject.GetSortedDatatable(dt, Me.WF_LISTAREA, CONST_DSPROWCOUNT, 1, hdnListPosition)
+                    Dim listData As DataTable = COA0013TableObject.GetSortedDatatable(dt, Me.WF_LISTAREA, CONST_DSPROWCOUNT, 1, hdnListPosition)
 
-                        With COA0013TableObject
-                            .MAPID = CONST_MAPID
-                            .VARI = If(Me.hdnThisMapVariant.Value <> "GB_TankStatusList", "GB_Allocate", "Default")
-                            .SRCDATA = listData
-                            .TBLOBJ = WF_LISTAREA
-                            .SCROLLTYPE = "2"
-                            .LEVENT = If(Me.hdnListEvent.Value = "", Nothing, Me.hdnListEvent.Value)
-                            .LFUNC = If(Me.hdnListFunc.Value = "", Nothing, Me.hdnListFunc.Value)
-                            .TITLEOPT = True
-                            .NOCOLUMNWIDTHOPT = 60
-                            .OPERATIONCOLUMNWIDTHOPT = -1
-                            .USERSORTOPT = 1
-                        End With
-                        COA0013TableObject.COA0013SetTableObject()
-                        '現在の表示LINECNTを保持
-                        If listData IsNot Nothing AndAlso listData.Rows.Count > 0 Then
-                            Dim displayLineCnt As List(Of Integer) = (From dr As DataRow In listData
-                                                                      Select Convert.ToInt32(dr.Item("LINECNT"))).ToList
-                            ViewState("DISPLAY_LINECNT_LIST") = displayLineCnt
-                            For Each targetCheckBoxId As String In {"ALLOCATECHK"}
-
-                                '申請チェックボックスの加工
-                                Dim targetCheckBoxLineCnt = (From dr As DataRow In listData
-                                                             Where Convert.ToString(dr.Item(targetCheckBoxId)) <> ""
-                                                             Select Convert.ToInt32(dr.Item("LINECNT")))
-                                For Each lineCnt As Integer In targetCheckBoxLineCnt
-                                    Dim chkObjId As String = "chk" & Me.WF_LISTAREA.ID & targetCheckBoxId & lineCnt.ToString
-                                    Dim tmpObj As Control = Me.WF_LISTAREA.FindControl(chkObjId)
-                                    If tmpObj IsNot Nothing Then
-                                        Dim chkObj As CheckBox = DirectCast(tmpObj, CheckBox)
-                                        chkObj.Checked = True
-                                    End If
-                                Next
-
-                            Next
+                    With COA0013TableObject
+                        .MAPID = CONST_MAPID
+                        If Me.hdnThisMapVariant.Value <> "GB_TankStatusList" Then
+                            Dim orderInfo As GBT00006ROrderInfo = DirectCast(ViewState("ORDERINFO"), GBT00006ROrderInfo)
+                            If Not IsNothing(orderInfo) AndAlso orderInfo.HISLeaseIO = "1" Then
+                                .VARI = "GB_AllocateHIS1"
+                            ElseIf Not IsNothing(orderInfo) AndAlso orderInfo.HISLeaseIO = "2" Then
+                                .VARI = "GB_AllocateHIS2"
+                            Else
+                                .VARI = "GB_Allocate"
+                            End If
                         Else
-                            ViewState("DISPLAY_LINECNT_LIST") = Nothing
+                            .VARI = "Default"
                         End If
+                        .SRCDATA = listData
+                        .TBLOBJ = WF_LISTAREA
+                        .SCROLLTYPE = "2"
+                        .LEVENT = If(Me.hdnListEvent.Value = "", Nothing, Me.hdnListEvent.Value)
+                        .LFUNC = If(Me.hdnListFunc.Value = "", Nothing, Me.hdnListFunc.Value)
+                        .TITLEOPT = True
+                        .NOCOLUMNWIDTHOPT = 60
+                        .OPERATIONCOLUMNWIDTHOPT = -1
+                        .USERSORTOPT = 1
+                    End With
+                    COA0013TableObject.COA0013SetTableObject()
+                    '現在の表示LINECNTを保持
+                    If listData IsNot Nothing AndAlso listData.Rows.Count > 0 Then
+                        Dim displayLineCnt As List(Of Integer) = (From dr As DataRow In listData
+                                                                  Select Convert.ToInt32(dr.Item("LINECNT"))).ToList
+                        ViewState("DISPLAY_LINECNT_LIST") = displayLineCnt
+                        For Each targetCheckBoxId As String In {"ALLOCATECHK"}
 
-                    End Using 'DataTable
-                End If
-                '**********************************************
-                'ポストバック時
-                '**********************************************
-                If IsPostBack Then
+                            '申請チェックボックスの加工
+                            Dim targetCheckBoxLineCnt = (From dr As DataRow In listData
+                                                         Where Convert.ToString(dr.Item(targetCheckBoxId)) <> ""
+                                                         Select Convert.ToInt32(dr.Item("LINECNT")))
+                            For Each lineCnt As Integer In targetCheckBoxLineCnt
+                                Dim chkObjId As String = "chk" & Me.WF_LISTAREA.ID & targetCheckBoxId & lineCnt.ToString
+                                Dim tmpObj As Control = Me.WF_LISTAREA.FindControl(chkObjId)
+                                If tmpObj IsNot Nothing Then
+                                    Dim chkObj As CheckBox = DirectCast(tmpObj, CheckBox)
+                                    chkObj.Checked = True
+                                End If
+                            Next
+
+                        Next
+                    Else
+                        ViewState("DISPLAY_LINECNT_LIST") = Nothing
+                    End If
+
+                End Using 'DataTable
+            End If
+            '**********************************************
+            'ポストバック時
+            '**********************************************
+            If IsPostBack Then
                 Me.GBT00020LEASEValues = DirectCast(ViewState("AGREEMENTVAL"), GBT00020AGREEMENT.GBT0020AGREEMENTDispItem)
                 '画面の入力情報を保持
                 Dim messageNo As String = FileSaveDisplayInput()
@@ -847,6 +858,10 @@ Public Class GBT00006RESULT
         Dim organizer As String = ""
         Dim shipperCode As String = ""
         Dim countryCode As String = ""
+        Dim port As String = ""
+
+        Dim listSortString As String = ""
+
         If Me.hdnThisMapVariant.Value = "GB_TankSelect" Then
             'オーダー入力から引当時
             isAllocateOnly = 1 'セールス・オペレーションの基本引き当て
@@ -862,6 +877,13 @@ Public Class GBT00006RESULT
                 productCode = orderInfo.ProductCode
                 shipperCode = orderInfo.ShipperCode
                 organizer = orderInfo.AgentOrganizer
+                'HIS輸送オーダー時はTKAL可能条件追加
+                If orderInfo.HISLeaseIO = "1" Then
+                    port = "JPSDJ"
+                    listSortString = "ETADATE"
+                ElseIf orderInfo.HISLeaseIO = "2" Then
+                    listSortString = "DEPOTINDATE"
+                End If
             Else
                 countryCode = GBA00003UserSetting.COUNTRYCODE
             End If
@@ -888,7 +910,7 @@ Public Class GBT00006RESULT
         '一旦国コードのパラメータは付与していない
         Dim GBA00012TankInfo As New GBA00012TankInfo With {.ISALLOCATEONLY = isAllocateOnly, .ALLOCATEORDERNO = allocateOrderNo,
                                                            .SHIPPERCODE = shipperCode, .PRODUCTCODE = productCode, .AGENTORGANIZER = organizer,
-                                                           .TANKNOLIST = tankNoList, .COUNTRYCODE = countryCode}
+                                                           .TANKNOLIST = tankNoList, .COUNTRYCODE = countryCode, .POLPORT = port}
         GBA00012TankInfo.GBA00012getTankStatusTable()
         If Not {C_MESSAGENO.NORMAL, C_MESSAGENO.NOENTRYDATA}.Contains(GBA00012TankInfo.ERR) Then
             CommonFunctions.ShowMessage(GBA00012TankInfo.ERR, Me.lblFooterMessage)
@@ -899,6 +921,11 @@ Public Class GBT00006RESULT
         Dim sqlFieldList As List(Of String) = (From col In dtDbResult.Columns.Cast(Of DataColumn) Select col.ColumnName).ToList
         '表示対象データテーブルとテーブル抽出結果に含まれるフィールド名が一致する一覧
         Dim copyFieldList As List(Of String) = (From col In dt.Columns.Cast(Of DataColumn) Where sqlFieldList.Contains(col.ColumnName) Select col.ColumnName).ToList
+
+        '必要があればSORT
+        If dtDbResult.Rows.Count > 0 AndAlso Not String.IsNullOrEmpty(listSortString) Then
+            dtDbResult = dtDbResult.Select("", listSortString).CopyToDataTable
+        End If
 
         Dim lineCnt As Integer = 0
         '点検日付格納
@@ -974,7 +1001,8 @@ Public Class GBT00006RESULT
             If {"ETYD", "ETYC", ""}.Contains(acty) _
               OrElse ({"TKAL", "TAEC", "TAED"}.Contains(acty) AndAlso tkalStat.Trim <> C_APP_STATUS.APPLYING AndAlso
                       orderNo = allocateOrderNo) _
-              OrElse ({3, 5}.Contains(isAllocateOnly) AndAlso acty = "LESD") Then
+              OrElse ({3, 5}.Contains(isAllocateOnly) AndAlso acty = "LESD") _
+              OrElse (Not String.IsNullOrEmpty(port) AndAlso {"SHIP", "TRAV", "TRSH", "ARVD"}.Contains(acty)) Then
                 dr.Item("CANALLOCATE") = "1"
             End If
             '対象オーダー該当タンクNoにてSHIP済の場合チェックを外せなくする
@@ -1198,7 +1226,7 @@ Public Class GBT00006RESULT
         '                                         "CLEANSCHEDULE", "CLEANFINISH", "ORDERINFO", "REPAIRSTATUS",
         '                                         "COMMENT", "CANPROVISION"}
         Dim colList As New List(Of String) From {"TANKNO", "ACTY", "TYPE", "FDA", "FROMAREA", "TOAREA",
-                                                 "ETAARR", "DISCHDATE", "DEMMYN", "DEMMSTART",
+                                                 "ETDARR", "ETAARR", "DISCHDATE", "DEMMYN", "DEMMSTART",
                                                  "DEPOTINDATE", "LOCATION", "CLEANDATE", "JOBNO",
                                                  "ALLOCATIONDATE", "DEPOTOUT", "LADENDATE", "DEPOINFINISH",
                                                  "EF", "NEXTPRODUCT", "ETDDATE", "ETADATE", "DESTINATION",
@@ -1218,7 +1246,7 @@ Public Class GBT00006RESULT
                                                  "NEXTA2_5YTEST", "NEXTA5YTEST",
                                                  "POD_PODCOUNTRY",
                                                  "DEPO_DEPOTCODE", "DEPO_NAMES", 'リース用(直近のデポをデポアウトとするため)
-                                                 "LEASETANK"}
+                                                 "LEASETANK", "RECENTDATE"}
 
         For Each colName As String In colList
             retDt.Columns.Add(colName, GetType(String))
@@ -1446,7 +1474,19 @@ Public Class GBT00006RESULT
         Dim listData As DataTable = COA0013TableObject.GetSortedDatatable(dt, Me.WF_LISTAREA, CONST_DSPROWCOUNT, ListPosition, hdnListPosition)
         '一覧作成
         COA0013TableObject.MAPID = CONST_MAPID
-        COA0013TableObject.VARI = If(Me.hdnThisMapVariant.Value <> "GB_TankStatusList", "GB_Allocate", "Default")
+        '        COA0013TableObject.VARI = If(Me.hdnThisMapVariant.Value <> "GB_TankStatusList", "GB_Allocate", "Default")
+        If Me.hdnThisMapVariant.Value <> "GB_TankStatusList" Then
+            Dim orderInfo As GBT00006ROrderInfo = DirectCast(ViewState("ORDERINFO"), GBT00006ROrderInfo)
+            If Not IsNothing(orderInfo) AndAlso orderInfo.HISLeaseIO = "1" Then
+                COA0013TableObject.VARI = "GB_AllocateHIS1"
+            ElseIf Not IsNothing(orderInfo) AndAlso orderInfo.HISLeaseIO = "2" Then
+                COA0013TableObject.VARI = "GB_AllocateHIS2"
+            Else
+                COA0013TableObject.VARI = "GB_Allocate"
+            End If
+        Else
+            COA0013TableObject.VARI = "Default"
+        End If
         COA0013TableObject.SRCDATA = listData
         COA0013TableObject.TBLOBJ = Me.WF_LISTAREA
         COA0013TableObject.SCROLLTYPE = "2"
@@ -1636,6 +1676,10 @@ Public Class GBT00006RESULT
             tankInfoList(tankSeq).TankNo = tankNo
             If Convert.ToString(dr.Item("NEEDSAPPLY")) = "1" Then
                 tankInfoList(tankSeq).NeedsApply = True
+            End If
+            '仮引当フラグ設定
+            If {"SHIP", "TRAV", "TRSH", "ARVD"}.Contains(Convert.ToString(dr.Item("ACTY"))) Then
+                tankInfoList(tankSeq).IsReserve = True
             End If
         Next
 
@@ -2306,6 +2350,18 @@ Public Class GBT00006RESULT
         sqlStat.AppendLine("     ,DATEINTERVAL")
         sqlStat.AppendLine("     ,BRADDEDCOST")
         sqlStat.AppendLine("     ,AGENTORGANIZER")
+
+        sqlStat.AppendLine("     ,CURRENCYSEGMENT")
+        sqlStat.AppendLine("     ,ACCCRERATE")
+        sqlStat.AppendLine("     ,ACCCREYEN")
+        sqlStat.AppendLine("     ,ACCCREFOREIGN")
+        sqlStat.AppendLine("     ,ACCCURRENCYSEGMENT")
+        sqlStat.AppendLine("     ,FORCECLOSED")
+        sqlStat.AppendLine("     ,AMOUNTFIXBFC")
+        sqlStat.AppendLine("     ,ACCCREYENBFC")
+        sqlStat.AppendLine("     ,ACCCREFOREIGNBFC")
+        sqlStat.AppendLine("     ,TANKCONDITION")
+
         sqlStat.AppendLine("     ,DELFLG")
         sqlStat.AppendLine("     ,INITYMD")
         sqlStat.AppendLine("     ,INITUSER")
@@ -2356,6 +2412,18 @@ Public Class GBT00006RESULT
         sqlStat.AppendLine("         ,DATEINTERVAL")
         sqlStat.AppendLine("         ,BRADDEDCOST")
         sqlStat.AppendLine("         ,AGENTORGANIZER")
+
+        sqlStat.AppendLine("         ,CURRENCYSEGMENT")
+        sqlStat.AppendLine("         ,ACCCRERATE")
+        sqlStat.AppendLine("         ,ACCCREYEN")
+        sqlStat.AppendLine("         ,ACCCREFOREIGN")
+        sqlStat.AppendLine("         ,ACCCURRENCYSEGMENT")
+        sqlStat.AppendLine("         ,FORCECLOSED")
+        sqlStat.AppendLine("         ,AMOUNTFIXBFC")
+        sqlStat.AppendLine("         ,ACCCREYENBFC")
+        sqlStat.AppendLine("         ,ACCCREFOREIGNBFC")
+        sqlStat.AppendLine("         ,TANKCONDITION")
+
         sqlStat.AppendLine("         ,'" & CONST_FLAG_YES & "'             AS DELFLG")
         sqlStat.AppendLine("         ,INITYMD")
         sqlStat.AppendLine("         ,INITUSER")
@@ -2529,8 +2597,12 @@ Public Class GBT00006RESULT
                     '申請必須タンクの場合は予定のみ
                     .Add("@SCHEDELDATE", SqlDbType.NVarChar).Value = updDateString
                     .Add("@ACTUALDATE", SqlDbType.NVarChar).Value = ""
+                ElseIf tankInfo.IsReserve Then
+                    '仮引当タンクの場合は予定のみ
+                    .Add("@SCHEDELDATE", SqlDbType.NVarChar).Value = updDateString
+                    .Add("@ACTUALDATE", SqlDbType.NVarChar).Value = ""
                 Else
-                    '申請必須タンクの場合は予定のみ
+                    '上記以外の通常引当
                     .Add("@SCHEDELDATE", SqlDbType.NVarChar).Value = updDateString
                     .Add("@ACTUALDATE", SqlDbType.NVarChar).Value = updDateString
                 End If
@@ -2887,6 +2959,68 @@ Public Class GBT00006RESULT
         ''' </summary>
         ''' <returns></returns>
         Public Property IsShepped As Boolean = False
+
+        Private Property _dicHISLeaseCheck As Dictionary(Of String, String)
+        ''' <summary>
+        ''' HISリースオーダー判定用(1:HISリース輸送、2:HISリース回送：以外:null)
+        ''' </summary>
+        ''' <returns></returns>
+        Public ReadOnly Property HISLeaseIO As String
+            Get
+                If Me.UsingLeaseTank <> "1" Then
+                    Return String.Empty
+                End If
+                If String.IsNullOrEmpty(Me.ShipperCode) Then
+                    Return String.Empty
+                End If
+                If String.IsNullOrEmpty(Me.ProductCode) Then
+                    Return String.Empty
+                End If
+
+                If _dicHISLeaseCheck Is Nothing Then
+                    _dicHISLeaseCheck = New Dictionary(Of String, String)
+                End If
+
+                If Not _dicHISLeaseCheck.ContainsKey(Me.ShipperCode) Then
+                    _dicHISLeaseCheck.Add(ShipperCode, String.Empty)
+
+                    Dim sqlStat As New Text.StringBuilder
+                    sqlStat.AppendLine("SELECT CUS.INCTORICODE")
+                    sqlStat.AppendLine("  FROM GBM0004_CUSTOMER CUS")
+                    sqlStat.AppendLine(" WHERE CUS.COMPCODE = @COMPCODE")
+                    sqlStat.AppendLine("   AND CUS.CUSTOMERCODE = @CUSTOMERCODE")
+                    sqlStat.AppendLine("   AND CUS.TORICOMP <> ''")
+                    sqlStat.AppendLine("   AND CUS.DELFLG   <> @DELFLG")
+                    Using sqlConn As New SqlConnection(Convert.ToString(COA0019Session.DBcon)) _
+                    , sqlCmd As New SqlCommand(sqlStat.ToString, sqlConn)
+                        'パラメータの設定
+                        With sqlCmd.Parameters
+                            .Add("@DELFLG", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
+                            .Add("@CUSTOMERCODE", SqlDbType.NVarChar).Value = Me.ShipperCode
+                            .Add("@COMPCODE", SqlDbType.NVarChar, 20).Value = HttpContext.Current.Session("APSRVCamp")
+                        End With
+
+                        Using sqlDa As New SqlDataAdapter(sqlCmd) _
+                            , dt As New DataTable
+                            sqlDa.Fill(dt)
+                            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+                                Dim rec = From rowItem In dt Where Convert.ToString(rowItem("INCTORICODE")) = "0439000010"
+                                If rec.Any Then
+                                    If Me.ProductCode = "000417" Then
+                                        _dicHISLeaseCheck(ShipperCode) = "2"
+                                    Else
+                                        _dicHISLeaseCheck(ShipperCode) = "1"
+                                    End If
+                                End If
+                            End If
+                        End Using
+                    End Using
+                End If
+
+                Return _dicHISLeaseCheck(Me.ShipperCode)
+            End Get
+        End Property
+
     End Class
     ''' <summary>
     ''' タンク単位情報(オーダータンク引当情報)
@@ -2932,6 +3066,12 @@ Public Class GBT00006RESULT
         ''' <remarks>ACTYが発のACTUALDATEが初期値以外でTrue</remarks>
         Public Property IsShipped As Boolean = False
         ''' <summary>
+        ''' 仮引当可能か(True:可能,False:不可)
+        ''' </summary>
+        ''' <returns></returns>
+        ''' <remarks>仮引当可能なACTYのACTUALDATEが初期値以外でTrue</remarks>
+        Public Property IsReserve As Boolean = False
+        ''' <summary>
         ''' コンストラクタ
         ''' </summary>
         ''' <param name="tankSeq"></param>
@@ -2944,6 +3084,7 @@ Public Class GBT00006RESULT
             Me.LastStep = ""
             Me.NeedsApply = False
             Me.IsShipped = isShipped
+            Me.IsReserve = False
         End Sub
     End Class
 End Class

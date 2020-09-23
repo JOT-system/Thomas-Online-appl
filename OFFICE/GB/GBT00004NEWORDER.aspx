@@ -84,7 +84,7 @@
             text-align:right;
         }
         #lblFillingDate,
-        #lblEtd1,#lblEta1,#lblEtd2,#lblEta2 {
+        #lblEtd1,#lblEta1,#lblEtd2,#lblEta2 ,#lblTSEta,#lblTSEtd {
             text-decoration:underline;
         }
 
@@ -131,6 +131,8 @@
                                    ['<%= Me.txtEtd1.ClientID %>', viewCalId],
                                    ['<%= Me.txtEta2.ClientID %>',viewCalId],
                                    ['<%= Me.txtEtd2.ClientID %>', viewCalId],
+                                   ['<%= Me.txtTSEta.ClientID %>',viewCalId],
+                                   ['<%= Me.txtTSEtd.ClientID %>', viewCalId],
                                    ['<%= Me.txtConsignee.ClientID %>', viewConsignee]];
 
             bindLeftBoxShowEvent(dblClickObjects);
@@ -343,6 +345,18 @@
                             <th rowspan="2"><asp:Label ID="lblTotalInvoiced" runat="server" Text="TOTAL INVOINCED"></asp:Label></th>
                             <td colspan="2" rowspan="2"><asp:TextBox ID="txtTotalInvoiced" runat="server"  Enabled="false" CssClass="textRight"></asp:TextBox></td>
                             <td rowspan="2" class="empty"></td>
+                        </tr>
+                        <tr id="trTSEta" runat="server">
+                            <th><asp:Label ID="lblTSEta" runat="server" Text="ETA(T/S)" ></asp:Label></th>
+                            <td><asp:TextBox ID="txtTSEta" runat="server"></asp:TextBox></td>
+                            <td colspan="7" class="empty"></td>
+                            <td class="empty"></td>
+                        </tr>
+                        <tr id="trTSEtd" runat="server">
+                            <th><asp:Label ID="lblTSEtd" runat="server" Text="ETD(T/S)" ></asp:Label></th>
+                            <td><asp:TextBox ID="txtTSEtd" runat="server"></asp:TextBox></td>
+                            <td colspan="7" class="empty"></td>
+                            <td class="empty"></td>
                         </tr>
                         <tr>
                             <th><asp:Label ID="lblEta1" runat="server" Text="ETA1" CssClass="requiredMark2"></asp:Label></th>
