@@ -88,6 +88,7 @@ Public Class GBT00031SSDEPOLIST
                 Me.hdnXMLsaveFile.Value = String.Format("{0}\{1:yyyyMMdd}-{2}-{3}-{4}-{1:HHmmss}.txt", COA0019Session.XMLDir, Date.Now, COA0019Session.USERID, CONST_MAPID, HttpContext.Current.Session("MAPvariant"))
                 '初回ロード時のデータ保持用(保存ボタン押下時にて上記ファイルと比較し変更を判断)
                 Me.hdnOrgXMLsaveFile.Value = String.Format("{0}\{1:yyyyMMdd}-{2}-{3}-{4}-{1:HHmmss}_org.txt", COA0019Session.XMLDir, Date.Now, COA0019Session.USERID, CONST_MAPID, HttpContext.Current.Session("MAPvariant"))
+
                 '****************************************
                 '画面タイトル取得
                 '****************************************
@@ -1788,9 +1789,11 @@ Public Class GBT00031SSDEPOLIST
             '自身の行の日付を編集
             afterInputRow.Item(targetDateField) = dtValue
             If dtValue > reportDtValue Then
+                '報告日より先は予定日
                 afterInputRow.Item("SCHEDULE_" & targetDateField) = dtValue
                 afterInputRow.Item("ACTUAL_" & targetDateField) = "1900/01/01"
             Else
+                '報告日以前は実績日
                 afterInputRow.Item("ACTUAL_" & targetDateField) = dtValue
             End If
 

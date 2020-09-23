@@ -544,9 +544,19 @@ Public Class GBT00030ORDERLIST
         sb.Append("    select distinct ")
         sb.Append("      vt.ORDERNO ")
         sb.Append("    , vt.ACTIONID ")
-        sb.Append("	, vt.ACTUALDATE ")
+        sb.Append("	   , vt.ACTUALDATE ")
         sb.Append("    from GBV0001_TANKSTATUS as vt ")
-        sb.Append("    where vt.RECENT=1 ")
+        If Me.hdnSelectedMode.Value = GBT00030LIST.SelectedMode.ExportInTransit Then
+            '回送輸送時は仮引当は除外
+            sb.Append("    inner join ( ")
+            sb.Append("		select s.TANKNO, min(s.RECENT) as RECENT ")
+            sb.Append("		from GBV0001_TANKSTATUS as s ")
+            sb.Append("		where not (s.ACTIONID='TKAL' and s.ACTUALDATE=@INITDATE) ")
+            sb.Append("		group by s.TANKNO ")
+            sb.Append("	) as recent on recent.TANKNO=vt.TANKNO and recent.RECENT=vt.RECENT ")
+        Else
+            sb.Append("    where vt.RECENT=1 ")
+        End If
         sb.Append(") as ST ")
         sb.Append("on  ST.ORDERNO = ob.ORDERNO ")
         sb.Append("left join ( ")
