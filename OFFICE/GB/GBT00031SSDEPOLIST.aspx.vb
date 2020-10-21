@@ -1844,7 +1844,7 @@ Public Class GBT00031SSDEPOLIST
                 retMessage.AppendFormat("・{0} ： {1}", targetDateField, dummyLabelObj.Text).AppendLine()
             End If
 
-        ElseIf prevSchDtValue <= reportDtValue Then
+        ElseIf prevSchDtValue <> "1900/01/01" AndAlso prevSchDtValue <= reportDtValue Then
             '日付が予定→実績とみなす（報告日より以前）場合
             afterInputRow.Item("ACTUAL_" & targetDateField) = dtValue
             afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "1"
@@ -2111,11 +2111,11 @@ Public Class GBT00031SSDEPOLIST
                     Dim dateBuff As Date
                     '日付項目が空白は初期値で更新
                     ' 日付のクリア
-                    If dateString = "" Then
-                        dateString = "1900/01/01"
-                    End If
+                    'If dateString = "" Then
+                    '    dateString = "1900/01/01"
+                    'End If
                     '日付に変換できない場合は次のフィールドにスキップ
-                    If Date.TryParse(dateString, dateBuff) = False Then
+                    If Date.TryParse(dateString, dateBuff) = False AndAlso dateString <> "" Then
                         Continue For
                     End If
                     If dateString <> "" Then
