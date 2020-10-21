@@ -9,7 +9,7 @@ Public Class GBT00031SSDEPOLIST
 
     Private Const CONST_MAPID As String = "GBT00031L" '自身のMAPID
     Private Const CONST_DSPROWCOUNT = 44                '指定数＋１が表示対象
-    Private Const CONST_SCROLLROWCOUNT = 25              'マウススクロール時の増分
+    Private Const CONST_SCROLLROWCOUNT = 8              'マウススクロール時の増分
 
     Private Const CONST_EXCEL_SHEET_NAME = "新港　在庫表"
     Private Const CONST_EXCEL_ADD_SHEET_NAME = "新港　在庫表 (STOCK分)"
@@ -1532,6 +1532,18 @@ Public Class GBT00031SSDEPOLIST
             '添付ファイル数取得
             GetAttachmentCnt(newRow)
         Next
+
+        '到着日順に並び替え
+        Dim sortDt = From row In retDt.AsEnumerable
+                     Order By row("ARVD").ToString
+        If Not sortDt Is Nothing Then
+            lineCnt = 0
+            For Each row As DataRow In sortDt
+                lineCnt += 1
+                row("LINECNT") = lineCnt
+            Next
+            retDt = sortDt.CopyToDataTable
+        End If
 
         Return retDt
     End Function

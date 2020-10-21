@@ -92,6 +92,8 @@ Public Class GBT00030LIST
             '初回ロード時
             '****************************************
             If IsPostBack = False Then
+                Me.Form.Attributes.Add("data-profid", If(GBA00003UserSetting.IS_JPOPERATOR, "JpOperation", "default"))
+
                 Me.hdnThisMapVariant.Value = Convert.ToString(HttpContext.Current.Session("MAPvariant"))
                 '一覧情報保存先のファイル名
                 Me.hdnXMLsaveFile.Value = String.Format("{0}\{1:yyyyMMdd}-{2}-{3}-{4}-{1:HHmmss}.txt", COA0019Session.XMLDir, Date.Now, COA0019Session.USERID, CONST_MAPID, HttpContext.Current.Session("MAPvariant"))
