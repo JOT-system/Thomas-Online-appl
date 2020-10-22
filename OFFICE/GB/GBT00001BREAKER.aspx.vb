@@ -2858,6 +2858,8 @@ Public Class GBT00001BREAKER
                     For Each applyField In {"APPROVEDTEXT", "APPLYDATE", "APPLICANTID", "APPLICANTNAME", "APPROVEDATE", "APPROVERID", "APPROVERNAME"}
                         dr.Item(applyField) = ""
                     Next
+                    '総額変更（確認）もクリア
+                    dr.Item("AMTPRINCIPAL") = ""
                 End With
 
                 ViewState("DICBRINFO") = dicBrInfo
