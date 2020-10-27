@@ -2858,6 +2858,8 @@ Public Class GBT00001BREAKER
                     For Each applyField In {"APPROVEDTEXT", "APPLYDATE", "APPLICANTID", "APPLICANTNAME", "APPROVEDATE", "APPROVERID", "APPROVERNAME"}
                         dr.Item(applyField) = ""
                     Next
+                    '総額変更（確認）もクリア
+                    dr.Item("AMTPRINCIPAL") = ""
                 End With
 
                 ViewState("DICBRINFO") = dicBrInfo
@@ -4427,7 +4429,8 @@ Public Class GBT00001BREAKER
                         visibleControls.Add(Me.btnSave)
                     End If
                 Case Else '他のステータス
-                    visibleControls.AddRange({Me.btnApproval, Me.btnAppReject, Me.btnReject})
+                    'visibleControls.AddRange({Me.btnApproval, Me.btnAppReject, Me.btnReject})
+                    visibleControls.AddRange({Me.btnApproval, Me.btnAppReject})
             End Select
         Else
             '通常パターン
@@ -4542,7 +4545,7 @@ Public Class GBT00001BREAKER
         If Me.hdnIsViewFromApprove.Value <> "1" Then
 
             Select Case Me.hdnStatus.Value
-                Case "", C_APP_STATUS.APPAGAIN, C_APP_STATUS.REJECT '新規入力、否認後
+                Case "", C_APP_STATUS.APPAGAIN '新規入力
                     If isOwner Then 'オーガナイザタブ選択
                         'オーガナイザ情報（上部）
                         enabledObjectList.AddRange({Me.txtBrStYmd, Me.txtBrEndYmd, Me.txtBrTerm, Me.lblBrRemarkText,
@@ -4600,6 +4603,8 @@ Public Class GBT00001BREAKER
                     enabledObjectList.AddRange({Me.btnOutputExcel, Me.btnPrint})
                 Case C_APP_STATUS.REVISE '否認時 入力
                     '承認画面から来ない限り操作不可
+                    enabledObjectList.AddRange({Me.btnOutputExcel, Me.btnPrint})
+                Case C_APP_STATUS.REJECT '否認後
                     enabledObjectList.AddRange({Me.btnOutputExcel, Me.btnPrint})
                 Case C_APP_STATUS.APPROVED, C_APP_STATUS.COMPLETE '承認後、自動承認後
                     enabledObjectList.AddRange({Me.btnOutputExcel, Me.btnPrint})

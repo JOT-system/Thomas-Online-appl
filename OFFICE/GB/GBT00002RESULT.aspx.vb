@@ -156,7 +156,7 @@ Public Class GBT00002RESULT
                             chk.Checked = checkedValue
                         End If
 
-                        If {C_APP_STATUS.APPROVED, C_APP_STATUS.COMPLETE, C_APP_STATUS.APPLYING}.Contains(Trim(Convert.ToString(dr.Item("STATUSIF")))) Then
+                        If {C_APP_STATUS.APPROVED, C_APP_STATUS.COMPLETE, C_APP_STATUS.APPLYING, C_APP_STATUS.REJECT}.Contains(Trim(Convert.ToString(dr.Item("STATUSIF")))) Then
                             chk.Enabled = False
                         Else
                             If Convert.ToString(dr.Item("FILLINGRATECHECK")).Equals("") AndAlso
@@ -2343,7 +2343,7 @@ Public Class GBT00002RESULT
             For Each dr As DataRow In listData.Rows
 
                 If Convert.ToString(dr.Item("FILLINGRATECHECK")).Equals("ERROR") OrElse
-                    {C_APP_STATUS.APPROVED, C_APP_STATUS.COMPLETE, C_APP_STATUS.APPLYING}.Contains(Trim(Convert.ToString(dr.Item("STATUSIF")))) OrElse
+                    {C_APP_STATUS.APPROVED, C_APP_STATUS.COMPLETE, C_APP_STATUS.APPLYING, C_APP_STATUS.REJECT}.Contains(Trim(Convert.ToString(dr.Item("STATUSIF")))) OrElse
                     Not ((Convert.ToString(dr.Item("POL1")) = Me.hdnComplete.Value AndAlso Convert.ToString(dr.Item("POD1")) = Me.hdnComplete.Value) AndAlso
                     ((Convert.ToString(dr.Item("POL2")) = Me.hdnComplete.Value AndAlso Convert.ToString(dr.Item("POD2")) = Me.hdnComplete.Value) Or
                     (Convert.ToString(dr.Item("POL2")) = C_HYPHEN AndAlso Convert.ToString(dr.Item("POD2")) = C_HYPHEN))) Then

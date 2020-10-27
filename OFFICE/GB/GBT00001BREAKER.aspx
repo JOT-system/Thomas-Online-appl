@@ -347,8 +347,20 @@
             setDisplayNameTip();
             var brRemark = document.getElementById('lblBrRemarkText');
             brRemark.removeAttribute('title');
+
             /* アップロードボタンの設定 */
             addUploadExtention('<%= Me.btnOutputExcel.ClientID %>', 'AFTER', false, 'divContainer');
+
+            /* アップロードボタン処理 */
+            var saveObj = document.getElementById('btnSave');
+            if (saveObj !== null) {
+                if (saveObj.disabled == true) {
+                    var uploadObj = document.getElementById('btnFileUploadExtention');
+                    if (uploadObj !== null) {
+                        uploadObj.disabled = true
+                    }
+                }
+            }
 
             /* 画面ロック解除 */
             screenUnlock();
