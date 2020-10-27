@@ -9,7 +9,7 @@ Public Class GBT00031SSDEPOLIST
 
     Private Const CONST_MAPID As String = "GBT00031L" '自身のMAPID
     Private Const CONST_DSPROWCOUNT = 44                '指定数＋１が表示対象
-    Private Const CONST_SCROLLROWCOUNT = 25              'マウススクロール時の増分
+    Private Const CONST_SCROLLROWCOUNT = 8              'マウススクロール時の増分
 
     Private Const CONST_EXCEL_SHEET_NAME = "新港　在庫表"
     Private Const CONST_EXCEL_ADD_SHEET_NAME = "新港　在庫表 (STOCK分)"
@@ -88,6 +88,7 @@ Public Class GBT00031SSDEPOLIST
                 Me.hdnXMLsaveFile.Value = String.Format("{0}\{1:yyyyMMdd}-{2}-{3}-{4}-{1:HHmmss}.txt", COA0019Session.XMLDir, Date.Now, COA0019Session.USERID, CONST_MAPID, HttpContext.Current.Session("MAPvariant"))
                 '初回ロード時のデータ保持用(保存ボタン押下時にて上記ファイルと比較し変更を判断)
                 Me.hdnOrgXMLsaveFile.Value = String.Format("{0}\{1:yyyyMMdd}-{2}-{3}-{4}-{1:HHmmss}_org.txt", COA0019Session.XMLDir, Date.Now, COA0019Session.USERID, CONST_MAPID, HttpContext.Current.Session("MAPvariant"))
+
                 '****************************************
                 '画面タイトル取得
                 '****************************************
@@ -1532,6 +1533,18 @@ Public Class GBT00031SSDEPOLIST
             GetAttachmentCnt(newRow)
         Next
 
+        '到着日順に並び替え
+        Dim sortDt = From row In retDt.AsEnumerable
+                     Order By row("ARVD").ToString
+        If Not sortDt Is Nothing Then
+            lineCnt = 0
+            For Each row As DataRow In sortDt
+                lineCnt += 1
+                row("LINECNT") = lineCnt
+            Next
+            retDt = sortDt.CopyToDataTable
+        End If
+
         Return retDt
     End Function
 
@@ -1788,9 +1801,11 @@ Public Class GBT00031SSDEPOLIST
             '自身の行の日付を編集
             afterInputRow.Item(targetDateField) = dtValue
             If dtValue > reportDtValue Then
+                '報告日より先は予定日
                 afterInputRow.Item("SCHEDULE_" & targetDateField) = dtValue
                 afterInputRow.Item("ACTUAL_" & targetDateField) = "1900/01/01"
             Else
+                '報告日以前は実績日
                 afterInputRow.Item("ACTUAL_" & targetDateField) = dtValue
             End If
 
@@ -1829,7 +1844,7 @@ Public Class GBT00031SSDEPOLIST
                 retMessage.AppendFormat("・{0} ： {1}", targetDateField, dummyLabelObj.Text).AppendLine()
             End If
 
-        ElseIf prevSchDtValue <= reportDtValue Then
+        ElseIf prevSchDtValue <> "1900/01/01" AndAlso prevSchDtValue <= reportDtValue Then
             '日付が予定→実績とみなす（報告日より以前）場合
             afterInputRow.Item("ACTUAL_" & targetDateField) = dtValue
             afterInputRow.Item("UPDATE_" & targetDateField.Replace("CHECK_", "")) = "1"
@@ -2096,11 +2111,11 @@ Public Class GBT00031SSDEPOLIST
                     Dim dateBuff As Date
                     '日付項目が空白は初期値で更新
                     ' 日付のクリア
-                    If dateString = "" Then
-                        dateString = "1900/01/01"
-                    End If
+                    'If dateString = "" Then
+                    '    dateString = "1900/01/01"
+                    'End If
                     '日付に変換できない場合は次のフィールドにスキップ
-                    If Date.TryParse(dateString, dateBuff) = False Then
+                    If Date.TryParse(dateString, dateBuff) = False AndAlso dateString <> "" Then
                         Continue For
                     End If
                     If dateString <> "" Then

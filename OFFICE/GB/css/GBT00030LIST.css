@@ -74,6 +74,11 @@
     #WF_LISTAREA_H div[id$="_HR"] th:nth-child(19) {
         border-top: hidden;
     }
+/*JP以外は２段目非表示*/
+form:not([data-profid="JpOperation"]) #WF_LISTAREA_H {
+    display: none;
+}
+
 /* 共通関数で自動生成した表のスタイル */
 #WF_LISTAREA {
     margin-left: 10px;
