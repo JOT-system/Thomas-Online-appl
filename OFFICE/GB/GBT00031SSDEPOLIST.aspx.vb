@@ -1536,7 +1536,7 @@ Public Class GBT00031SSDEPOLIST
         '到着日順に並び替え
         Dim sortDt = From row In retDt.AsEnumerable
                      Order By row("ARVD").ToString
-        If Not sortDt Is Nothing Then
+        If Not sortDt Is Nothing And sortDt.Any Then
             lineCnt = 0
             For Each row As DataRow In sortDt
                 lineCnt += 1
