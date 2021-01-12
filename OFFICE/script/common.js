@@ -44,6 +44,7 @@ window.addEventListener('load', function () {
             });
         }
     }
+
     // ポストバック時のスクロール崩れ補正
     var contensBox = document.getElementById("divContensbox");
     var detailBox = document.getElementById("detailbox");
@@ -66,7 +67,29 @@ window.addEventListener('load', function () {
             popUpObj.focus();
         }
     }
+
+    // ICPリンク追加
+    addIcpLink("lblFooterMessage");
 });
+
+/**
+ * ICPリンクの配置
+ * @param {target} ターゲットオブジェクト
+ * @return {undefined} なし
+ */
+function addIcpLink(target) {
+    var targetObj = document.getElementById(target);
+    if (targetObj === null) {
+        return;
+    }
+    // 中国proxyサイト経由時に追加
+//    if (location.hostname === "jotthomas.cn") {
+        var addPosition = 'afterend';
+        var addLink = '<div id="divIcpLink"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">辽ICP备14000691号</a></div>';
+        targetObj.insertAdjacentHTML(addPosition, addLink);
+//    }
+    return;
+ }
 
 /**
  * ボタンクリックイベントをバインド
