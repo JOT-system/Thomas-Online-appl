@@ -199,7 +199,7 @@ input[type=button][disabled=""]:hover {
     /*background-color: rgb(211,148,122); */
     background-color: #FFDDDD;
     width: 100%;
-    z-index: 30;
+    z-index: 30; 
 }
 /* フッターメッセージ表示部分 */
 #lblFooterMessage {
@@ -223,6 +223,15 @@ input[type=button][disabled=""]:hover {
 #lblFooterMessage.ABNORMAL {
     color: red;
     font-weight: bold;
+}
+/* ICPリンク */
+#divIcpLink {
+    display: inline-block;
+    position: fixed;
+    right: 20px;
+    bottom: 2px;
+    height: 17px;
+    z-index: 1;
 }
 /* ?ボタン表示 */
 form #divShowHelp {
