@@ -83,11 +83,11 @@ function addIcpLink(target) {
         return;
     }
     // 中国proxyサイト経由時に追加
-//    if (location.hostname === "jotthomas.cn") {
+    if (location.hostname === "jotthomas.cn") {
         var addPosition = 'afterend';
         var addLink = '<div id="divIcpLink"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">辽ICP备14000691号</a></div>';
         targetObj.insertAdjacentHTML(addPosition, addLink);
-//    }
+    }
     return;
  }
 
