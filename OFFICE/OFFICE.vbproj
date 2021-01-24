@@ -130,6 +130,8 @@
     <Content Include="GB\css\GBT00030LIST.css" />
     <Content Include="GB\css\GBT00030ORDERLIST.css" />
     <Content Include="GB\css\GBT00030TANKLIST.css" />
+    <Content Include="GB\GBM00025BANK.aspx" />
+    <Content Include="GB\GBM00025SELECT.aspx" />
     <Content Include="GB\GBM00021CLIENT.aspx" />
     <Content Include="GB\GBM00021SELECT.aspx" />
     <Content Include="GB\GBM00022ORG.aspx" />
@@ -494,6 +496,20 @@
     </Compile>
     <Compile Include="GB\GBM00020EXRATE.aspx.vb">
       <DependentUpon>GBM00020EXRATE.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00025BANK.aspx.designer.vb">
+      <DependentUpon>GBM00025BANK.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00025BANK.aspx.vb">
+      <DependentUpon>GBM00025BANK.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00025SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00025SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00025SELECT.aspx.vb">
+      <DependentUpon>GBM00025SELECT.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="GB\GBM00020SELECT.aspx.designer.vb">
