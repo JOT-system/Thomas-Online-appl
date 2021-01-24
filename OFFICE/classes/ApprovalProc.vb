@@ -5853,5 +5853,463 @@ Public Class ApprovalProc
         End Function
     End Class
 
+    ''' <summary>
+    ''' 銀行マスタ関連処理
+    ''' </summary>
+    Private Class GBM00025
+        Inherits ApprovalMasterClass '基底クラスを継承
+        Private Const CONST_MAPID As String = "GBM00025"   '自身のMAPID
+        Private Const CONST_EVENTCODE As String = "MasterApplyBank"
+
+        ''' <summary>
+        ''' 退避した一覧テキスト保存のデータ受け渡し用データテーブル作成
+        ''' </summary>
+        ''' <returns></returns>
+        Public Overrides Function CreateDataTable() As DataTable
+            Dim dt As New DataTable
+
+            '共通項目
+            dt.Columns.Add("LINECNT", GetType(Integer))             'DBの固定フィールド
+            dt.Columns.Add("OPERATION", GetType(String))            'DBの固定フィールド
+            dt.Columns.Add("TIMSTP", GetType(String))               'DBの固定フィールド
+            dt.Columns.Add("SELECT", GetType(Integer))              'DBの固定フィールド
+            dt.Columns.Add("HIDDEN", GetType(Integer))              'DBの固定フィールド
+            '画面固有項目
+            dt.Columns.Add("APPLYID", GetType(String))              '申請ID
+            dt.Columns.Add("COMPCODE", GetType(String))             '会社コード
+            dt.Columns.Add("JOTBANKCODE", GetType(String))          'JOT銀行コード
+            dt.Columns.Add("STYMD", GetType(String))                '有効開始日
+            dt.Columns.Add("ENDYMD", GetType(String))               '有効終了日
+            dt.Columns.Add("BANKCODE", GetType(String))             '銀行コード
+            dt.Columns.Add("SWIFTCODE", GetType(String))            'SWIFTコード
+            dt.Columns.Add("NAME", GetType(String))                 '銀行名
+            dt.Columns.Add("NAMEJP", GetType(String))               '銀行名JP
+            dt.Columns.Add("NAMEK", GetType(String))                '銀行名（カナ）
+            dt.Columns.Add("BRANCHNAME", GetType(String))           '支店コード
+            dt.Columns.Add("BRANCHCODE", GetType(String))           '支店名
+            dt.Columns.Add("BRANCHNAMEJP", GetType(String))         '支店名JP
+            dt.Columns.Add("BRANCHNAMEK", GetType(String))          '支店名（カナ）
+            dt.Columns.Add("ZIPCODE", GetType(String))              '郵便番号
+            dt.Columns.Add("ADDR", GetType(String))                 '住所
+            dt.Columns.Add("ADDRJP", GetType(String))               '住所JP
+            dt.Columns.Add("TEL", GetType(String))                  '電話番号
+            dt.Columns.Add("TYPEOFACCOUNT", GetType(String))        '口座種別
+            dt.Columns.Add("ACCOUNTNO", GetType(String))            '口座番号
+            dt.Columns.Add("ACCOUNTHOLDER", GetType(String))        '名義人
+            dt.Columns.Add("ACCOUNTHOLDERK", GetType(String))       '名義人（カナ）
+            dt.Columns.Add("CURRENCYCODE", GetType(String))         '通貨
+            dt.Columns.Add("REMARK", GetType(String))               '備考
+            dt.Columns.Add("DELFLG", GetType(String))               '削除フラグ
+
+            dt.Columns.Add("APPROVALOBJECT", GetType(String))       '承認対象
+            dt.Columns.Add("APPROVALORREJECT", GetType(String))     '承認or否認
+            dt.Columns.Add("CHECK", GetType(String))                'チェック
+            dt.Columns.Add("STEP", GetType(String))                 'ステップ
+            dt.Columns.Add("STATUS", GetType(String))               'ステータス
+            dt.Columns.Add("CURSTEP", GetType(String))              '承認ステップ
+            dt.Columns.Add("STEPSTATE", GetType(String))            'ステップ状況
+            dt.Columns.Add("APPROVALTYPE", GetType(String))         '承認区分
+            dt.Columns.Add("APPROVERID", GetType(String))           '承認者
+            dt.Columns.Add("LASTSTEP", GetType(String))             'ラストステップ
+
+            Return dt
+        End Function
+        ''' <summary>
+        ''' データ取得メソッド
+        ''' </summary>
+        ''' <returns></returns>
+        Public Overrides Function GetData(stYMD As String, endYMD As String) As DataTable
+            Dim dt As New DataTable
+
+            Dim COA0020ProfViewSort As New BASEDLL.COA0020ProfViewSort    'テーブルソート文字列取得
+
+            'ソート順取得
+            COA0020ProfViewSort.MAPID = CONST_MAPID
+            COA0020ProfViewSort.VARI = "Default"
+            COA0020ProfViewSort.TAB = ""
+            COA0020ProfViewSort.COA0020getProfViewSort()
+
+            Dim sqlStat As New StringBuilder
+            '承認情報取得
+            sqlStat.AppendLine("SELECT ROW_NUMBER() OVER(ORDER BY " & COA0020ProfViewSort.SORTSTR & ") As LINECNT")
+            sqlStat.AppendLine("      ,TBL.* ")
+            sqlStat.AppendLine("FROM (")
+            sqlStat.AppendLine("SELECT ")
+            sqlStat.AppendLine("       '' AS OPERATION")
+            sqlStat.AppendLine("      ,TIMSTP = cast(BA.UPDTIMSTP as bigint)")
+            sqlStat.AppendLine("      ,'1' AS 'SELECT' ")
+            sqlStat.AppendLine("      ,'0' AS HIDDEN ")
+            sqlStat.AppendLine("      ,BA.COMPCODE")
+            sqlStat.AppendLine("      ,BA.JOTBANKCODE")
+            sqlStat.AppendLine("      ,convert(nvarchar, BA.STYMD , 111) as STYMD")
+            sqlStat.AppendLine("      ,convert(nvarchar, BA.ENDYMD , 111) as ENDYMD")
+            sqlStat.AppendLine("      ,BA.BANKCODE")
+            sqlStat.AppendLine("      ,BA.SWIFTCODE")
+            sqlStat.AppendLine("      ,BA.NAME")
+            sqlStat.AppendLine("      ,BA.NAMEJP")
+            sqlStat.AppendLine("      ,BA.NAMEK")
+            sqlStat.AppendLine("      ,BA.BRANCHCODE")
+            sqlStat.AppendLine("      ,BA.BRANCHNAME")
+            sqlStat.AppendLine("      ,BA.BRANCHNAMEJP")
+            sqlStat.AppendLine("      ,BA.BRANCHNAMEK")
+            sqlStat.AppendLine("      ,BA.ZIPCODE")
+            sqlStat.AppendLine("      ,BA.ADDR")
+            sqlStat.AppendLine("      ,BA.ADDRJP")
+            sqlStat.AppendLine("      ,BA.TEL")
+            sqlStat.AppendLine("      ,BA.TYPEOFACCOUNT")
+            sqlStat.AppendLine("      ,BA.ACCOUNTNO")
+            sqlStat.AppendLine("      ,BA.ACCOUNTHOLDER")
+            sqlStat.AppendLine("      ,BA.ACCOUNTHOLDERK")
+            sqlStat.AppendLine("      ,BA.CURRENCYCODE")
+            sqlStat.AppendLine("      ,BA.REMARK")
+            sqlStat.AppendLine("      ,BA.DELFLG")
+            sqlStat.AppendLine("      ,CASE WHEN @LANGDISP = '" & C_LANG.JA & "' THEN ISNULL(FV1.VALUE1,'') ")
+            sqlStat.AppendLine("            WHEN @LANGDISP = '" & C_LANG.EN & "' THEN ISNULL(FV1.VALUE2,'') END AS APPROVALOBJECT ")
+            sqlStat.AppendLine("      ,CASE WHEN @LANGDISP = '" & C_LANG.JA & "' THEN ISNULL(FV2.VALUE1,'') ")
+            sqlStat.AppendLine("            WHEN @LANGDISP = '" & C_LANG.EN & "' THEN ISNULL(FV2.VALUE2,'') END AS APPROVALORREJECT")
+            sqlStat.AppendLine("      ,'' AS ""CHECK""")
+            sqlStat.AppendLine("      ,AH.APPLYID")
+            sqlStat.AppendLine("      ,AH.STEP")
+            sqlStat.AppendLine("      ,AH.STATUS")
+            sqlStat.AppendLine("      ,CASE WHEN (AH4.STEP = AH3.LASTSTEP AND AH5.STATUS = '" & C_APP_STATUS.APPROVED & "') THEN 'APPROVED' ") '承認
+            sqlStat.AppendLine("            WHEN (AH4.STEP = AH3.LASTSTEP AND AH5.STATUS = '" & C_APP_STATUS.REJECT & "') THEN 'REJECT' ") '否認
+            sqlStat.AppendLine("            ELSE trim(convert(char,(convert(int,isnull(AH4.STEP,'00'))))) + '/' + trim(convert(char,convert(int,AH3.LASTSTEP))) END as STEPSTATE")
+            sqlStat.AppendLine("      ,CASE WHEN AH.STATUS = '" & C_APP_STATUS.APPROVED & "' THEN '--' ") '承認
+            sqlStat.AppendLine("            WHEN AH.STATUS = '" & C_APP_STATUS.REJECT & "' THEN '--' ") '否認
+            sqlStat.AppendLine("            ELSE isnull(AH2.STEP,'" & C_APP_FIRSTSTEP & "') END as CURSTEP")
+            sqlStat.AppendLine("      ,AP.APPROVALTYPE")
+            sqlStat.AppendLine("      ,AH.APPROVERID AS APPROVERID")
+            sqlStat.AppendLine("      ,AH3.LASTSTEP AS LASTSTEP")
+            sqlStat.AppendLine("  FROM COT0002_APPROVALHIST AH ") '承認履歴
+            sqlStat.AppendLine("  INNER JOIN COS0022_APPROVAL AP") '承認設定マスタ
+            sqlStat.AppendLine("    ON  AP.COMPCODE     = @COMPCODE")
+            sqlStat.AppendLine("   AND  AP.MAPID        = AH.MAPID")
+            sqlStat.AppendLine("   AND  AP.EVENTCODE    = AH.EVENTCODE")
+            sqlStat.AppendLine("   AND  AP.SUBCODE      = AH.SUBCODE")
+            sqlStat.AppendLine("   AND  AP.STEP         = AH.STEP")
+            sqlStat.AppendLine("   AND  AP.USERID       = @USERID")
+            sqlStat.AppendLine("   AND  AP.STYMD       <= @STYMD")
+            sqlStat.AppendLine("   AND  AP.ENDYMD      >= @ENDYMD")
+            sqlStat.AppendLine("   AND  AP.DELFLG      <> @DELFLG")
+            sqlStat.AppendLine("  INNER JOIN GBM0030_BANKAPPLY BA") '銀行マスタ(申請)
+            sqlStat.AppendLine("    ON  BA.APPLYID      = AH.APPLYID")
+            sqlStat.AppendLine("   AND  BA.STYMD       <= @STYMD")
+            sqlStat.AppendLine("   AND  BA.ENDYMD      >= @ENDYMD")
+            sqlStat.AppendLine("  LEFT JOIN ( ")
+            sqlStat.AppendLine("  SELECT APPLYID,MAPID,SUBCODE,MIN(STEP) AS STEP")
+            sqlStat.AppendLine("  FROM COT0002_APPROVALHIST ")
+            sqlStat.AppendLine("  WHERE STATUS <= '" & C_APP_STATUS.REVISE & "' ")
+            sqlStat.AppendLine("    AND DELFLG <> @DELFLG ")
+            sqlStat.AppendLine("  GROUP BY APPLYID,MAPID,SUBCODE ) AS AH2 ")
+            sqlStat.AppendLine("    ON  AH2.APPLYID      = AH.APPLYID")
+            sqlStat.AppendLine("   AND  AH2.MAPID        = AH.MAPID")
+            sqlStat.AppendLine("   AND  AH2.SUBCODE      = AH.SUBCODE")
+
+            sqlStat.AppendLine("  LEFT JOIN ( ") 'LastStep取得
+            sqlStat.AppendLine("  SELECT APPLYID,MAX(STEP) AS LASTSTEP ")
+            sqlStat.AppendLine("  FROM COT0002_APPROVALHIST ")
+            sqlStat.AppendLine("  WHERE COMPCODE  = @COMPCODE ")
+            sqlStat.AppendLine("    AND DELFLG   <> @DELFLG")
+            sqlStat.AppendLine("  GROUP BY APPLYID ) AS AH3 ")
+            sqlStat.AppendLine("    ON  AH3.APPLYID      = AH.APPLYID")
+
+            sqlStat.AppendLine("  LEFT JOIN ( ")
+            sqlStat.AppendLine("  SELECT APPLYID,MAX(STEP) AS STEP ")
+            sqlStat.AppendLine("  FROM COT0002_APPROVALHIST ")
+            sqlStat.AppendLine("  WHERE COMPCODE  = @COMPCODE ")
+            sqlStat.AppendLine("    AND STATUS    > '" & C_APP_STATUS.REVISE & "' ")
+            sqlStat.AppendLine("    AND DELFLG   <> @DELFLG")
+            sqlStat.AppendLine("  GROUP BY APPLYID ) AS AH4 ")
+            sqlStat.AppendLine("    ON  AH4.APPLYID      = AH.APPLYID")
+
+            sqlStat.AppendLine("  LEFT JOIN  COT0002_APPROVALHIST AH5 ")
+            sqlStat.AppendLine("    ON AH5.APPLYID = AH4.APPLYID ")
+            sqlStat.AppendLine("   AND AH5.STEP    = AH4.STEP ")
+            sqlStat.AppendLine("   AND AH5.DELFLG <> @DELFLG")
+
+            sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FV1") '承認対象名称用JOIN
+            sqlStat.AppendLine("    ON  FV1.COMPCODE     = '" & GBC_COMPCODE_D & "'")
+            sqlStat.AppendLine("   AND  FV1.SYSCODE      = '" & C_SYSCODE_GB & "'")
+            sqlStat.AppendLine("   AND  FV1.CLASS        = 'APPROVALTYPE'")
+            sqlStat.AppendLine("   AND  FV1.KEYCODE      = AP.APPROVALTYPE")
+            sqlStat.AppendLine("   AND  FV1.STYMD       <= @STYMD")
+            sqlStat.AppendLine("   AND  FV1.ENDYMD      >= @ENDYMD")
+            sqlStat.AppendLine("   AND  FV1.DELFLG      <> @DELFLG")
+            sqlStat.AppendLine("  LEFT JOIN COS0017_FIXVALUE FV2") '承認否認名称用JOIN
+            sqlStat.AppendLine("    ON  FV2.COMPCODE     = '" & GBC_COMPCODE_D & "'")
+            sqlStat.AppendLine("   AND  FV2.SYSCODE      = '" & C_SYSCODE_GB & "'")
+            sqlStat.AppendLine("   AND  FV2.CLASS        = 'APPROVAL'")
+            sqlStat.AppendLine("   AND  FV2.KEYCODE      = AH.STATUS")
+            sqlStat.AppendLine("   AND  FV2.STYMD       <= @STYMD")
+            sqlStat.AppendLine("   AND  FV2.ENDYMD      >= @ENDYMD")
+            sqlStat.AppendLine("   AND  FV2.DELFLG      <> @DELFLG")
+            sqlStat.AppendLine(" WHERE AH.DELFLG        <> @DELFLG")
+            sqlStat.AppendLine("   AND AH.COMPCODE       = @COMPCODE")
+            sqlStat.AppendLine("   AND AH.MAPID          = @MAPID")
+            sqlStat.AppendLine("   AND AH.EVENTCODE      = @EVENTCODE")
+
+            '申請開始日
+            If (String.IsNullOrEmpty(stYMD) = False) Then
+                sqlStat.AppendFormat(" AND AH.APPLYDATE >= '{0} '", stYMD).AppendLine()
+            End If
+            '申請終了日
+            If (String.IsNullOrEmpty(endYMD) = False) Then
+                sqlStat.AppendFormat(" AND AH.APPLYDATE <= '{0} '", endYMD & " 23:59:59:999").AppendLine()
+            End If
+
+            sqlStat.AppendLine("   ) TBL")
+            sqlStat.AppendLine(" ORDER BY " & COA0020ProfViewSort.SORTSTR)
+            'DB接続
+            Using sqlCon As New SqlConnection(COA0019Session.DBcon),
+              sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
+                sqlCon.Open() '接続オープン
+
+                With sqlCmd.Parameters
+                    .Add("@COMPCODE", SqlDbType.NVarChar).Value = HttpContext.Current.Session("APSRVCamp")
+                    .Add("@DELFLG", SqlDbType.NVarChar).Value = CONST_FLAG_YES
+                    .Add("@USERID", SqlDbType.NVarChar).Value = COA0019Session.USERID
+                    .Add("@MAPID", SqlDbType.NVarChar).Value = CONST_MAPID
+                    .Add("@LANGDISP", SqlDbType.NVarChar).Value = COA0019Session.LANGDISP
+                    .Add("@STYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@ENDYMD", SqlDbType.Date).Value = Date.Now
+                    .Add("@EVENTCODE", SqlDbType.NVarChar).Value = CONST_EVENTCODE
+                End With
+
+                Using sqlDa As New SqlDataAdapter(sqlCmd)
+                    sqlDa.Fill(dt)
+                End Using
+            End Using
+
+            Return dt
+        End Function
+
+        ''' <summary>
+        ''' 本マスタ登録処理
+        ''' </summary>
+        ''' <param name="dtRow"></param>
+        Public Overrides Sub MstDbUpdate(dtRow As DataRow)
+
+            Dim nowDate As DateTime = Date.Now
+            Dim sqlStat As New Text.StringBuilder
+            Dim COA0030Journal As New BASEDLL.COA0030Journal            'Journal Out
+
+            '申請テーブル更新処理
+            ApplyMstDbUpdate(dtRow)
+
+            'DB接続
+            Using sqlCon As New SqlConnection(COA0019Session.DBcon)
+                sqlCon.Open()
+
+                '******************************
+                ' 銀行マスタ更新
+                '******************************
+                sqlStat.Clear()
+                sqlStat.AppendLine(" DECLARE @timestamp as bigint ; ")
+                sqlStat.AppendLine(" set @timestamp = 0 ; ")
+                sqlStat.AppendLine(" DECLARE timestamp CURSOR FOR ")
+                sqlStat.AppendLine(" SELECT CAST(UPDTIMSTP as bigint) as timestamp ")
+                sqlStat.AppendLine(" FROM GBM0025_BANK ")
+                sqlStat.AppendLine(" WHERE COMPCODE = @COMPCODE ")
+                sqlStat.AppendLine("   AND JOTBANKCODE = @JOTBANKCODE ")
+                sqlStat.AppendLine("   AND STYMD = @STYMD ")
+                sqlStat.AppendLine(" OPEN timestamp ; ")
+                sqlStat.AppendLine(" FETCH NEXT FROM timestamp INTO @timestamp ; ")
+                sqlStat.AppendLine(" IF ( @@FETCH_STATUS = 0 ) ")
+                sqlStat.AppendLine("  UPDATE GBM0025_BANK ")
+                sqlStat.AppendLine("  SET ENDYMD = @ENDYMD , ")
+                sqlStat.AppendLine("      BANKCODE = @BANKCODE , ")
+                sqlStat.AppendLine("      SWIFTCODE = @SWIFTCODE , ")
+                sqlStat.AppendLine("      NAME = @NAME , ")
+                sqlStat.AppendLine("      NAMEJP = @NAMEJP , ")
+                sqlStat.AppendLine("      NAMEK = @NAMEK , ")
+                sqlStat.AppendLine("      BRANCHCODE = @BRANCHCODE , ")
+                sqlStat.AppendLine("      BRANCHNAME = @BRANCHNAME , ")
+                sqlStat.AppendLine("      BRANCHNAMEJP = @BRANCHNAMEJP , ")
+                sqlStat.AppendLine("      BRANCHNAMEK = @BRANCHNAMEK , ")
+                sqlStat.AppendLine("      ZIPCODE = @ZIPCODE , ")
+                sqlStat.AppendLine("      ADDR = @ADDR , ")
+                sqlStat.AppendLine("      ADDRJP = @ADDRJP , ")
+                sqlStat.AppendLine("      TEL = @TEL , ")
+                sqlStat.AppendLine("      TYPEOFACCOUNT = @TYPEOFACCOUNT , ")
+                sqlStat.AppendLine("      ACCOUNTNO = ACCOUNTNO , ")
+                sqlStat.AppendLine("      ACCOUNTHOLDER = @ACCOUNTHOLDER , ")
+                sqlStat.AppendLine("      ACCOUNTHOLDERK = @ACCOUNTHOLDERK , ")
+                sqlStat.AppendLine("      CURRENCYCODE = @CURRENCYCODE , ")
+                sqlStat.AppendLine("      REMARK = @REMARK , ")
+                sqlStat.AppendLine("      DELFLG = @DELFLG , ")
+                sqlStat.AppendLine("      UPDYMD             = @UPDYMD , ")
+                sqlStat.AppendLine("      UPDUSER            = @UPDUSER , ")
+                sqlStat.AppendLine("      UPDTERMID          = @UPDTERMID , ")
+                sqlStat.AppendLine("      RECEIVEYMD         = @RECEIVEYMD ")
+                sqlStat.AppendLine(" WHERE COMPCODE          = @COMPCODE ")
+                sqlStat.AppendLine("   AND JOTBANKCODE       = @JOTBANKCODE ")
+                sqlStat.AppendLine("   AND STYMD             = @STYMD ")
+                sqlStat.AppendLine("   ; ")
+                sqlStat.AppendLine(" IF ( @@FETCH_STATUS <> 0 ) ")
+                sqlStat.AppendLine(" INSERT INTO GBM0025_BANK ( ")
+                sqlStat.AppendLine("      COMPCODE , ")
+                sqlStat.AppendLine("      JOTBANKCODE , ")
+                sqlStat.AppendLine("      STYMD , ")
+                sqlStat.AppendLine("      ENDYMD , ")
+                sqlStat.AppendLine("      BANKCODE , ")
+                sqlStat.AppendLine("      SWIFTCODE , ")
+                sqlStat.AppendLine("      NAME , ")
+                sqlStat.AppendLine("      NAMEJP , ")
+                sqlStat.AppendLine("      NAMEK , ")
+                sqlStat.AppendLine("      BRANCHCODE , ")
+                sqlStat.AppendLine("      BRANCHNAME , ")
+                sqlStat.AppendLine("      BRANCHNAMEJP , ")
+                sqlStat.AppendLine("      BRANCHNAMEK , ")
+                sqlStat.AppendLine("      ZIPCODE , ")
+                sqlStat.AppendLine("      ADDR , ")
+                sqlStat.AppendLine("      ADDRJP , ")
+                sqlStat.AppendLine("      TEL , ")
+                sqlStat.AppendLine("      TYPEOFACCOUNT , ")
+                sqlStat.AppendLine("      ACCOUNTNO , ")
+                sqlStat.AppendLine("      ACCOUNTHOLDER , ")
+                sqlStat.AppendLine("      ACCOUNTHOLDERK , ")
+                sqlStat.AppendLine("      CURRENCYCODE , ")
+                sqlStat.AppendLine("      REMARK , ")
+                sqlStat.AppendLine("      DELFLG , ")
+                sqlStat.AppendLine("      INITYMD , ")
+                sqlStat.AppendLine("      UPDYMD , ")
+                sqlStat.AppendLine("      UPDUSER , ")
+                sqlStat.AppendLine("      UPDTERMID , ")
+                sqlStat.AppendLine("      RECEIVEYMD ) ")
+                sqlStat.AppendLine(" VALUES ( ")
+                sqlStat.AppendLine("      @COMPCODE , ")
+                sqlStat.AppendLine("      @JOTBANKCODE , ")
+                sqlStat.AppendLine("      @STYMD , ")
+                sqlStat.AppendLine("      @ENDYMD , ")
+                sqlStat.AppendLine("      @BANKCODE , ")
+                sqlStat.AppendLine("      @SWIFTCODE , ")
+                sqlStat.AppendLine("      @NAME , ")
+                sqlStat.AppendLine("      @NAMEJP , ")
+                sqlStat.AppendLine("      @NAMEK , ")
+                sqlStat.AppendLine("      @BRANCHCODE , ")
+                sqlStat.AppendLine("      @BRANCHNAME , ")
+                sqlStat.AppendLine("      @BRANCHNAMEJP , ")
+                sqlStat.AppendLine("      @BRANCHNAMEK , ")
+                sqlStat.AppendLine("      @ZIPCODE , ")
+                sqlStat.AppendLine("      @ADDR , ")
+                sqlStat.AppendLine("      @ADDRJP , ")
+                sqlStat.AppendLine("      @TEL , ")
+                sqlStat.AppendLine("      @TYPEOFACCOUNT , ")
+                sqlStat.AppendLine("      @ACCOUNTNO , ")
+                sqlStat.AppendLine("      @ACCOUNTHOLDER , ")
+                sqlStat.AppendLine("      @ACCOUNTHOLDERK , ")
+                sqlStat.AppendLine("      @CURRENCYCODE , ")
+                sqlStat.AppendLine("      @REMARK , ")
+                sqlStat.AppendLine("      @DELFLG , ")
+                sqlStat.AppendLine(" @INITYMD,@UPDYMD,@UPDUSER,@UPDTERMID,@RECEIVEYMD); ")
+                sqlStat.AppendLine(" CLOSE timestamp ; ")
+                sqlStat.AppendLine(" DEALLOCATE timestamp ; ")
+
+                Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
+                    With sqlCmd.Parameters
+                        .Add("@COMPCODE", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("COMPCODE"))
+                        .Add("@JOTBANKCODE", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("JOTBANKCODE"))
+                        .Add("@STYMD", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("STYMD"))
+                        .Add("@ENDYMD", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("ENDYMD"))
+                        .Add("@BANKCODE", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("BANKCODE"))
+                        .Add("@SWIFTCODE", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("SWIFTCODE"))
+                        .Add("@NAME", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("NAME"))
+                        .Add("@NAMEJP", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("NAMEJP"))
+                        .Add("@NAMEK", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("NAMEK"))
+                        .Add("@BRANCHCODE", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("BRANCHCODE"))
+                        .Add("@BRANCHNAME", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("BRANCHNAME"))
+                        .Add("@BRANCHNAMEJP", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("BRANCHNAMEJP"))
+                        .Add("@BRANCHNAMEK", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("BRANCHNAMEK"))
+                        .Add("@ZIPCODE", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("ZIPCODE"))
+                        .Add("@ADDR", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("ADDR"))
+                        .Add("@ADDRJP", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("ADDRJP"))
+                        .Add("@TEL", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("TEL"))
+                        .Add("@TYPEOFACCOUNT", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("TYPEOFACCOUNT"))
+                        .Add("@ACCOUNTNO", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("ACCOUNTNO"))
+                        .Add("@ACCOUNTHOLDER", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("ACCOUNTHOLDER"))
+                        .Add("@ACCOUNTHOLDERK", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("ACCOUNTHOLDERK"))
+                        .Add("@CURRENCYCODE", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("CURRENCYCODE"))
+                        .Add("@REMARK", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("REMARK"))
+                        .Add("@DELFLG", SqlDbType.NVarChar).Value = Convert.ToString(dtRow("DELFLG"))
+                        .Add("@INITYMD", SqlDbType.DateTime).Value = nowDate
+                        .Add("@UPDYMD", SqlDbType.DateTime).Value = nowDate
+                        .Add("@UPDUSER", SqlDbType.NVarChar).Value = COA0019Session.USERID
+                        .Add("@UPDTERMID", SqlDbType.NVarChar).Value = COA0019Session.APSRVname
+                        .Add("@RECEIVEYMD", SqlDbType.DateTime).Value = CONST_DEFAULT_RECEIVEYMD
+                    End With
+
+                    'SQL実行
+                    sqlCmd.ExecuteNonQuery()
+                End Using
+
+                '更新ジャーナル追加
+                COA0030Journal.TABLENM = "GBM0025_BANK"
+                COA0030Journal.ACTION = "UPDATE_INSERT"
+                COA0030Journal.ROW = dtRow
+                COA0030Journal.COA0030SaveJournal()
+
+            End Using
+
+        End Sub
+        ''' <summary>
+        ''' 申請テーブル更新処理
+        ''' </summary>
+        ''' <param name="dtRow"></param>
+        Public Overrides Sub ApplyMstDbUpdate(dtRow As DataRow)
+
+            Dim sqlStat As New Text.StringBuilder
+            Dim nowDate As DateTime = Date.Now
+            'DB接続
+            Using sqlCon As New SqlConnection(COA0019Session.DBcon)
+                sqlCon.Open()
+
+                '******************************
+                ' 銀行マスタ(申請)更新
+                '******************************
+                sqlStat.Clear()
+                sqlStat.AppendLine("UPDATE GBM0025_BANKAPPLY")
+                sqlStat.AppendLine("   SET DELFLG        = '" & CONST_FLAG_YES & "' ")
+                sqlStat.AppendLine("      ,UPDYMD        = @UPDYMD ")
+                sqlStat.AppendLine("      ,UPDUSER       = @UPDUSER ")
+                sqlStat.AppendLine("      ,UPDTERMID     = @UPDTERMID ")
+                sqlStat.AppendLine("      ,RECEIVEYMD    = @RECEIVEYMD ")
+                sqlStat.AppendLine(" WHERE APPLYID       = @APPLYID")
+                sqlStat.AppendLine("   AND STYMD         = @STYMD")
+                sqlStat.AppendLine("   AND DELFLG       <> '" & CONST_FLAG_YES & "'")
+
+                'DB接続
+                Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
+
+                    With sqlCmd.Parameters
+                        .Add("@APPLYID", SqlDbType.NVarChar).Value = Convert.ToString(dtRow.Item("APPLYID"))
+                        .Add("@STYMD", SqlDbType.Date).Value = Convert.ToString(dtRow.Item("STYMD"))
+                        .Add("@UPDYMD", SqlDbType.DateTime).Value = nowDate
+                        .Add("@UPDUSER", SqlDbType.NVarChar).Value = COA0019Session.USERID
+                        .Add("@UPDTERMID", SqlDbType.NVarChar).Value = COA0019Session.APSRVname
+                        .Add("@RECEIVEYMD", SqlDbType.DateTime).Value = CONST_DEFAULT_RECEIVEYMD
+                    End With
+
+                    'SQL実行
+                    sqlCmd.ExecuteNonQuery()
+                End Using
+            End Using
+
+        End Sub
+        ''' <summary>
+        ''' 引き渡し情報取得
+        ''' </summary>
+        ''' <param name="dtRow"></param>
+        ''' <returns></returns>
+        Public Overrides Function GetDeliveryInfo(dtRow As DataRow) As List(Of String)
+            Dim li As New List(Of String)
+
+            li.Add(Convert.ToString(dtRow.Item("APPLYID")))
+            li.Add(Convert.ToString(dtRow.Item("STYMD")))
+            li.Add(Convert.ToString(dtRow.Item("ENDYMD")))
+
+            Return li
+
+        End Function
+    End Class
 End Class
 

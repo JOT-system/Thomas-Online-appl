@@ -139,6 +139,8 @@
     <Content Include="GB\GBM00023TRPATTERN.aspx" />
     <Content Include="GB\GBM00024SELECT.aspx" />
     <Content Include="GB\GBM00024TRPATTERNSUB.aspx" />
+    <Content Include="GB\GBM00025BANK.aspx" />
+    <Content Include="GB\GBM00025SELECT.aspx" />
     <Content Include="GB\GBT00006RESULTTST.aspx" />
     <Content Include="GB\GBT00007RESULT.aspx" />
     <Content Include="GB\GBT00013RESULT.aspx" />
@@ -558,6 +560,20 @@
     </Compile>
     <Compile Include="GB\GBM00024TRPATTERNSUB.aspx.vb">
       <DependentUpon>GBM00024TRPATTERNSUB.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00025BANK.aspx.designer.vb">
+      <DependentUpon>GBM00025BANK.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00025BANK.aspx.vb">
+      <DependentUpon>GBM00025BANK.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GB\GBM00025SELECT.aspx.designer.vb">
+      <DependentUpon>GBM00025SELECT.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GB\GBM00025SELECT.aspx.vb">
+      <DependentUpon>GBM00025SELECT.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="GB\GBT00001BREAKER.aspx.designer.vb">
