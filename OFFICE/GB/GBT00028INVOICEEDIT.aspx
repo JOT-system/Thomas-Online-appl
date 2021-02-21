@@ -38,9 +38,10 @@
             //changeCommonInfoArea();
             /* ボタンクリックイベントのバインド(適宜追加) */
 <%--                                       '<%= Me.btnDownloadFiles.ClientId %>',--%>
-            var targetButtonObjects = ['<%= Me.btnBack.ClientId  %>', '<%= Me.btnLeftBoxButtonSel.ClientId  %>',
-                                       '<%= Me.btnLeftBoxButtonCan.ClientId  %>', '<%= Me.btnOutputExcel.ClientId %>',
-                                       '<%= Me.btnOutput.ClientId %>', '<%= Me.btnSave.ClientId  %>'];
+            var targetButtonObjects = ['<%= Me.btnBack.ClientId  %>', '<%= Me.btnExtract.ClientID %>',
+                                       '<%= Me.btnLeftBoxButtonSel.ClientId  %>', '<%= Me.btnLeftBoxButtonCan.ClientId  %>',
+                                       '<%= Me.btnOutputExcel.ClientId %>', '<%= Me.btnOutput.ClientId %>',
+                                       '<%= Me.btnSave.ClientId  %>'];
             bindButtonClickEvent(targetButtonObjects);
             /* 左ボックス表示/非表示制御(hdnIsLeftBoxOpenが'Open'の場合表示) */
             displayLeftBox();
@@ -322,6 +323,13 @@
                                             <asp:HiddenField ID="hdnListHeaderAmount" runat="server" Value="AMOUNT FIX" />
                                             <asp:HiddenField ID="hdnListHeaderBRID" runat="server" Value="BRID" />
                                             <asp:HiddenField ID="hdnListHeaderCustomer" runat="server" Value="CUSTOMER" />
+
+                                            <asp:HiddenField ID="hdnListHeaderLeaseST" runat="server" Value="START" />
+                                            <asp:HiddenField ID="hdnListHeaderLeaseEND" runat="server" Value="END" />
+                                            <asp:HiddenField ID="hdnListHeaderLeaseDAYS" runat="server" Value="DAYS" />
+                                            <asp:HiddenField ID="hdnListHeaderTankCapacity" runat="server" Value="CAPACITY" />
+                                            <asp:HiddenField ID="hdnListHeaderUnitPrice" runat="server" Value="UNIT PRICE" />
+
                                             <asp:Repeater ID="repTankInfo" runat="server">
                                                 <HeaderTemplate>
                                                     <table id="tblTankInfoList">
@@ -366,6 +374,52 @@
                                                         <td title='<%# Eval("ETA") %>'     ><%# BASEDLL.FormatDateContrySettings(Eval("ETA"), OFFICE.GBA00003UserSetting.DATEFORMAT) %></td>
                                                         <td title='<%# Eval("SHIPDATE") %>'     ><%# BASEDLL.FormatDateContrySettings(Eval("SHIPDATE"), OFFICE.GBA00003UserSetting.DATEFORMAT) %></td>
                                                         <td title='<%# Eval("ARVDDATE") %>'     ><%# BASEDLL.FormatDateContrySettings(Eval("ARVDDATE"), OFFICE.GBA00003UserSetting.DATEFORMAT) %></td>
+                                                        <td title='<%# Eval("AMOUNT") %>'   ><%# Eval("AMOUNT") %></td>
+                                                        <td title='<%# Eval("BRID") %>'  ><%# Eval("BRID") %></td>
+                                                        <td title='<%# Eval("CUSTOMER") %>'  ><%# Eval("CUSTOMER") %></td>
+                                                        <td class="lineCnt"><asp:Label ID="lblLineCnt" runat="server" Text='<%# Eval("LINECNT") %>'></asp:Label></td>
+                                                    </tr>
+                                                </ItemTemplate>
+                                                <FooterTemplate>
+                                                    </table>
+                                                </FooterTemplate>
+                                            </asp:Repeater>
+                                            <asp:Repeater ID="repLeaseTankInfo" runat="server">
+                                                <HeaderTemplate>
+                                                    <table id="tblTankInfoList">
+                                                        <tr>
+                                                            <th class="shortCol"><%= Me.hdnListHeaderCheck.Value %>
+                                                                <asp:CheckBox ID="chkAllSelect" Checked='<%# If(Convert.ToString(Me.hdnAllSelectCheckValue.Value) = "TRUE", True, False) %>' runat="server" Enabled='<%# If(Convert.ToString(Me.txtInvoiceNo.Text) = "", True, False) %>' onclick="f_checkAllSelectEvent(event)"/>
+                                                            </th>
+                                                            <th class="shortCol"><%= Me.hdnListHeaderNo.Value %></th>
+                                                            <th class="idCol"><%= Me.hdnListHeaderOrder.Value %></th>
+                                                            <th class="nameCol"><%= Me.hdnListHeaderProduct.Value %></th>
+                                                            <th class="idCol"><%= Me.hdnListHeaderTankNo.Value %></th>
+                                                            <th class="shortCol"><%= Me.hdnListHeaderTankCapacity.Value %></th>
+                                                            <th class="dateCol"><%= Me.hdnListHeaderLeaseST.Value %></th>
+                                                            <th class="dateCol"><%= Me.hdnListHeaderLeaseEND.Value %></th>
+                                                            <th class="shortCol"><%= Me.hdnListHeaderLeaseDAYS.Value %></th>
+                                                            <th class="shortCol"><%= Me.hdnListHeaderUnitPrice.Value %></th>
+                                                            <th class="shortCol"><%= Me.hdnListHeaderAmount.Value %></th>
+                                                            <th class="idCol"><%= Me.hdnListHeaderBRID.Value %></th>
+                                                            <th class="idCol"><%= Me.hdnListHeaderCustomer.Value %></th>
+                                                            <th class="lineCnt">No.</th>
+                                                        </tr>
+                                                </HeaderTemplate>
+                                                <ItemTemplate>
+                                                    <tr ondblclick="ListDbClick(this,'<%# Eval("ORDERNO") %>');">
+                                                        <td><asp:CheckBox ID="chkToInvoice" Checked='<%# If(Convert.ToString(Eval("TOINVOICE")) = "1", True, False) %>' runat="server" Enabled='<%# If(Convert.ToString(Eval("INVOICENO")) = "", True, False) %>' onclick="f_checkEvent(this)"/>
+                                                        </td>
+                                                        <%--<td title=''>&nbsp;</td>--%>
+                                                        <td title='<%# Eval("LINECNT") %>'  ><%# Eval("LINECNT") %></td>
+                                                        <td title='<%# Eval("ORDERNO") %>'  ><%# Eval("ORDERNO") %></td>
+                                                        <td title='<%# Eval("PRODUCTNAME") %>'  ><%# Eval("PRODUCTNAME") %></td>
+                                                        <td title='<%# Eval("TANKNO") %>'  ><%# Eval("TANKNO") %></td>
+                                                        <td title='<%# Eval("TANKCAPACITY") %>'  ><%# Eval("TANKCAPACITY") %></td>
+                                                        <td title='<%# Eval("LEASEST") %>'     ><%# BASEDLL.FormatDateContrySettings(Eval("LEASEST"), OFFICE.GBA00003UserSetting.DATEFORMAT) %></td>
+                                                        <td title='<%# Eval("LEASEEND") %>'     ><%# BASEDLL.FormatDateContrySettings(Eval("LEASEEND"), OFFICE.GBA00003UserSetting.DATEFORMAT) %></td>
+                                                        <td title='<%# Eval("LEASEDAYS") %>'     ><%# Eval("LEASEDAYS") %></td>
+                                                        <td title='<%# Eval("UNITPRICE") %>'   ><%# Eval("UNITPRICE") %></td>
                                                         <td title='<%# Eval("AMOUNT") %>'   ><%# Eval("AMOUNT") %></td>
                                                         <td title='<%# Eval("BRID") %>'  ><%# Eval("BRID") %></td>
                                                         <td title='<%# Eval("CUSTOMER") %>'  ><%# Eval("CUSTOMER") %></td>
@@ -499,9 +553,9 @@
                         
                         <%-- エラー詳細のみ表示の場合はrbShowErrorの文言のみ表示 --%>
                         <%= IIf(Me.divMessageChooseArea.Visible = False And
-                                                                        Me.divMessageTypeName.Visible = False,
-                                                                        If(mvRightMessage.ActiveViewIndex = "1", Me.rbShowError.Text, Me.rbShowMemo.Text),
-                                                                                                            "") %>
+                                                                                    Me.divMessageTypeName.Visible = False,
+                                                                                    If(mvRightMessage.ActiveViewIndex = "1", Me.rbShowError.Text, Me.rbShowMemo.Text),
+                                                                                                                        "") %>
                     </div>
                 <%-- ****************************
                      右マルチラインテキストボックス

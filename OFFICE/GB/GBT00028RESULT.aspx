@@ -29,6 +29,7 @@
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
     <script type="text/javascript" src='<%= ResolveUrl("~/script/calendar.js") %>'  charset="utf-8"></script>
     <%--個別のスクリプトは以下に記載 --%>
+    <script type="text/javascript" src='<%= ResolveUrl("~/GB/script/GBT00028RESULT.js") %>'  charset="utf-8"></script>
     <script type="text/javascript">
         // ○画面ロード時処理(すべてのレンダリングが終了後実行されます。)
         window.addEventListener('DOMContentLoaded', function () {
@@ -37,8 +38,14 @@
             var targetButtonObjects = ['<%= Me.btnBack.ClientId  %>',
                                        '<%= Me.btnExcelDownload.ClientID %>',
                                        '<%= Me.btnSave.ClientID %>',
-                                       '<%= Me.btnDel.ClientID %>',
-                                       '<%= Me.btnInvoiceNew.ClientID %>'];
+                                       '<%= Me.btnDel.ClientID %>'];
+            var invoiceNewButtons = document.getElementsByName('btnInvoiceItem');
+            if (invoiceNewButtons !== null) {
+				for (let i = 0; i < invoiceNewButtons.length; i++) {
+                    let invoiceNewButton = invoiceNewButtons[i];
+                    targetButtonObjects.push(invoiceNewButton.id)
+				}
+            }
             bindButtonClickEvent(targetButtonObjects);
 
             /* 左ボックス表示/非表示制御(hdnIsLeftBoxOpenが'Open'の場合表示) */
@@ -69,6 +76,7 @@
 
             /* 共通一覧のスクロールイベント紐づけ */
             bindListCommonEvents('<%= Me.WF_LISTAREA.ClientId %>', '<%= if(IsPostBack = True, "1", "0") %>', true);
+            bindDisplayInvoiceNewBtn();
             /* 検索ボックス生成 */
             screenUnlock();
         });
@@ -132,7 +140,25 @@
                 <%--ご自由に！！(このコメントは消してください) --%>
                 <%-- ************************************** --%>
                 <div id="actionButtonsBox">
-                    <input id="btnInvoiceNew" type="button" value="請求書作成"  runat="server"  />
+                    <div id="divInvoiceNew">
+                        <asp:Label ID="lblInvoiceNew" runat="server" Text="請求書作成"></asp:Label>
+                        <asp:Repeater ID="repInvoiceNew" runat="server">
+                            <HeaderTemplate>
+                                <ul id="ulInvoiceNew">
+                                    <li>
+                                        <div id="divInvoiceItems" style="display:none;">
+                            </HeaderTemplate>
+                            <ItemTemplate>
+                                <input id="btnInvoiceItem<%# GetDataItem().ToString() %>" name="btnInvoiceItem" type="button" value="<%# GetDataItem().ToString() %>" />
+                            </ItemTemplate>
+                            <FooterTemplate>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </FooterTemplate>
+                        </asp:Repeater>                        
+                    </div>
+<%--                    <input id="btnInvoiceNew" type="button" value="請求書作成"  runat="server"  />--%>
                     <input id="btnDel" type="button" value="削除"  runat="server"  />
                     <input id="btnSave" type="button" value="保存"  runat="server"  />
                     <input id="btnExcelDownload" type="button" value="台帳出力" runat="server" />

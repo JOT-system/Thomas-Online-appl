@@ -249,6 +249,7 @@
     <Content Include="GB\script\GBT00022RESULT.js" />
     <Content Include="GB\script\GBT00023RESULT.js" />
     <Content Include="GB\script\GBT00026BLNOTRANSFER.js" />
+    <Content Include="GB\script\GBT00028RESULT.js" />
     <Content Include="GB\script\GBT00028INVOICEEDIT.js" />
     <Content Include="GB\script\GBT00031SSDEPOLIST.js" />
     <Content Include="GB\script\GBTcommonPanel.js" />

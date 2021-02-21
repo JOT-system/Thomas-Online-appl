@@ -846,9 +846,18 @@ Public Class GBT00028SELECT
             sqlStat.AppendLine("  where ov.DELFLG <> @DELFLG ")
             sqlStat.AppendLine("  and   ov.INVOICEDBY = 'JPA00001' ")
             sqlStat.AppendLine("  and   ov.TANKNO    <> '' ")
-            sqlStat.AppendLine("  and   ov.COSTCODE = 'A0001-01' ")
-            sqlStat.AppendLine("  and   ov.SOAAPPDATE = '1900/01/01' ")
-            sqlStat.AppendLine("  and   ov.BRID like 'BT%' ")
+            sqlStat.AppendLine("  and   ")
+            sqlStat.AppendLine("  ( ")
+            sqlStat.AppendLine("    (       ov.COSTCODE = 'A0001-01' ")
+            sqlStat.AppendLine("      and   ov.SOAAPPDATE = '1900/01/01' ")
+            sqlStat.AppendLine("      and   ov.BRID like 'BT%' ")
+            sqlStat.AppendLine("    ) ")
+            ' リース追加
+            sqlStat.AppendLine("    or ")
+            sqlStat.AppendLine("    (       ov.COSTCODE like 'S0103%' ")
+            sqlStat.AppendLine("      and   ov.SOAAPPDATE = '1900/01/01' ")
+            sqlStat.AppendLine("    ) ")
+            sqlStat.AppendLine("  ) ")
             ' 指定済み
             'If selectedValue <> "" Then
             '    sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
@@ -1001,9 +1010,18 @@ Public Class GBT00028SELECT
 
             sqlStat.AppendLine("  where ov.DELFLG <> @DELFLG ")
             sqlStat.AppendLine("  and   ov.INVOICEDBY = 'JPA00001' ")
-            sqlStat.AppendLine("  and   ov.COSTCODE = 'A0001-01' ")
-            sqlStat.AppendLine("  and   ov.SOAAPPDATE = '1900/01/01' ")
-            sqlStat.AppendLine("  and   ov.BRID like 'BT%' ")
+            sqlStat.AppendLine("  and   ")
+            sqlStat.AppendLine("  ( ")
+            sqlStat.AppendLine("    (       ov.COSTCODE = 'A0001-01' ")
+            sqlStat.AppendLine("      and   ov.SOAAPPDATE = '1900/01/01' ")
+            sqlStat.AppendLine("      and   ov.BRID like 'BT%' ")
+            sqlStat.AppendLine("    ) ")
+            ' リース追加
+            sqlStat.AppendLine("    or ")
+            sqlStat.AppendLine("    (       ov.COSTCODE like 'S0103%' ")
+            sqlStat.AppendLine("      and   ov.SOAAPPDATE = '1900/01/01' ")
+            sqlStat.AppendLine("    ) ")
+            sqlStat.AppendLine("  ) ")
 
             'If Me.txtCustomer.Text <> "" Then
             '    sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
@@ -1160,9 +1178,18 @@ Public Class GBT00028SELECT
 
             sqlStat.AppendLine("  where ov.DELFLG <> @DELFLG ")
             sqlStat.AppendLine("  and   ov.INVOICEDBY = 'JPA00001' ")
-            sqlStat.AppendLine("  and   ov.COSTCODE = 'A0001-01' ")
-            sqlStat.AppendLine("  and   ov.SOAAPPDATE = '1900/01/01' ")
-            sqlStat.AppendLine("  and   ov.BRID like 'BT%' ")
+            sqlStat.AppendLine("  and   ")
+            sqlStat.AppendLine("  ( ")
+            sqlStat.AppendLine("    (       ov.COSTCODE = 'A0001-01' ")
+            sqlStat.AppendLine("      and   ov.SOAAPPDATE = '1900/01/01' ")
+            sqlStat.AppendLine("      and   ov.BRID like 'BT%' ")
+            sqlStat.AppendLine("    ) ")
+            ' リース追加
+            sqlStat.AppendLine("    or ")
+            sqlStat.AppendLine("    (       ov.COSTCODE like 'S0103%' ")
+            sqlStat.AppendLine("      and   ov.SOAAPPDATE = '1900/01/01' ")
+            sqlStat.AppendLine("    ) ")
+            sqlStat.AppendLine("  ) ")
 
             'If Me.txtCustomer.Text <> "" Then
             '    sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
@@ -1318,9 +1345,18 @@ Public Class GBT00028SELECT
 
             sqlStat.AppendLine("  where ov.DELFLG <> @DELFLG ")
             sqlStat.AppendLine("  and   ov.INVOICEDBY = 'JPA00001' ")
-            sqlStat.AppendLine("  and   ov.COSTCODE = 'A0001-01' ")
-            sqlStat.AppendLine("  and   ov.SOAAPPDATE = '1900/01/01' ")
-            sqlStat.AppendLine("  and   ov.BRID like 'BT%' ")
+            sqlStat.AppendLine("  and   ")
+            sqlStat.AppendLine("  ( ")
+            sqlStat.AppendLine("    (       ov.COSTCODE = 'A0001-01' ")
+            sqlStat.AppendLine("      and   ov.SOAAPPDATE = '1900/01/01' ")
+            sqlStat.AppendLine("      and   ov.BRID like 'BT%' ")
+            sqlStat.AppendLine("    ) ")
+            ' リース追加
+            sqlStat.AppendLine("    or ")
+            sqlStat.AppendLine("    (       ov.COSTCODE like 'S0103%' ")
+            sqlStat.AppendLine("      and   ov.SOAAPPDATE = '1900/01/01' ")
+            sqlStat.AppendLine("    ) ")
+            sqlStat.AppendLine("  ) ")
 
             'If Me.txtCustomer.Text <> "" Then
             '    sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
