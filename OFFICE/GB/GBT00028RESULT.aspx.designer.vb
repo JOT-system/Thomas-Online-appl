@@ -77,13 +77,22 @@ Partial Public Class GBT00028RESULT
     Protected WithEvents lblTitleDate As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''btnInvoiceNew コントロール。
+    '''lblInvoiceNew コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents btnInvoiceNew As Global.System.Web.UI.HtmlControls.HtmlInputButton
+    Protected WithEvents lblInvoiceNew As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''repInvoiceNew コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents repInvoiceNew As Global.System.Web.UI.WebControls.Repeater
     
     '''<summary>
     '''btnDel コントロール。

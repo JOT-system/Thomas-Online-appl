@@ -19,6 +19,9 @@ Public Class GBT00028RESULT
     Private Const CONST_TBL_APPLY As String = "COS0022_APPROVAL"
     Private Const CONST_TBL_OV As String = "GBT0005_ODR_VALUE"
     Private Const CONST_TBL_OB As String = "GBT0004_ODR_BASE"
+    Private Const CONST_TBL_LC As String = "GBT0010_LBR_CONTRACT"
+    Private Const CONST_TBL_LA As String = "GBT0011_LBR_AGREEMENT"
+    Private Const CONST_TBL_LT As String = "GBT0012_RESRVLEASETANK"
 
     '承認イベント
     Private Const CONST_EVENT_APPLY As String = "INVOICE_Apply"
@@ -85,6 +88,12 @@ Public Class GBT00028RESULT
                 '右ボックス帳票タブ
                 Dim errMsg As String = ""
                 'errMsg = Me.RightboxInit()
+                '****************************************
+                'テンプレート情報取得
+                '****************************************
+                Dim item As New List(Of String) From {"BreakerTotal", "Lease"}
+                Me.repInvoiceNew.DataSource = item
+                Me.repInvoiceNew.DataBind()
                 '****************************************
                 '前画面情報取得
                 '****************************************
@@ -154,6 +163,11 @@ Public Class GBT00028RESULT
                     Dim btnEventName As String = Me.hdnButtonClick.Value & "_Click"
                     Dim param() As Object = Nothing
 
+                    If Me.hdnButtonClick.Value.StartsWith("btnInvoiceItem") Then
+                        btnEventName = "btnInvoiceItem" & "_Click"
+                        ReDim param(0)
+                        param(0) = Me.hdnButtonClick.Value.Replace("btnInvoiceItem", "")
+                    End If
                     Me.hdnButtonClick.Value = ""
                     CallByName(Me, btnEventName, CallType.Method, param)
                 End If
@@ -220,6 +234,7 @@ Public Class GBT00028RESULT
             COA0003LogFile.MESSAGENO = messageNo
             COA0003LogFile.COA0003WriteLog()
 
+            hdnSubmit.Value = "FALSE" 'サブミット可能にするためFalseを設定
             Return
 
         End Try
@@ -384,14 +399,21 @@ Public Class GBT00028RESULT
     ''' <summary>
     ''' 請求書新規作成ボタン押下時
     ''' </summary>
-    Public Sub btnInvoiceNew_Click()
-        '何かと準備
-        'TODO何か
+    ''' <param name="invoiceName">invoiceの種類</param>
+    Public Sub btnInvoiceItem_Click(invoiceName As String)
+
 
         Me.ThisScreenValues = GetDispValue()
         Me.ThisScreenValues.NewInvoiceCreate = True
         Me.ThisScreenValues.InvoiceNo = ""
         Me.ThisScreenValues.ToriCode = ""
+        Select Case invoiceName
+            Case "BreakerTotal"
+                Me.ThisScreenValues.InvoiceType = ""
+            Case "Lease"
+                Me.ThisScreenValues.InvoiceType = "L"
+        End Select
+
         Dim COA0012DoUrl As BASEDLL.COA0012DoUrl
 
         '画面遷移先URL取得
@@ -913,6 +935,7 @@ Public Class GBT00028RESULT
         sqlStat.AppendLine("      ,'' as 'DELCHK_PRV'")
         sqlStat.AppendLine("      ,II.UPDYMD as 'DELCHK_PRVDATE'")
         sqlStat.AppendLine("      ,ISNULL(APPLY.APPROVALTYPE,'0') as 'APPROVALTYPE'")
+        sqlStat.AppendLine("      ,II.WORK_C1 as 'INVOICETYPE'")
         sqlStat.AppendFormat("  FROM {0} II", CONST_TBL_INVOICEINFO).AppendLine()
         sqlStat.AppendFormat("    INNER JOIN {0} MTORI", CONST_TBL_TORI).AppendLine()
         sqlStat.AppendLine("      ON    MTORI.COMPCODE       = @COMPCODE")
@@ -928,6 +951,9 @@ Public Class GBT00028RESULT
         sqlStat.AppendLine("      AND   APPLY.SUBCODE        = 'Common'")
         sqlStat.AppendLine("      AND   APPLY.STEP           = '01'")
         sqlStat.AppendLine("      AND   APPLY.USERID         = @USERID")
+        sqlStat.AppendLine("      AND   APPLY.STYMD         <= @NOWDATE")
+        sqlStat.AppendLine("      AND   APPLY.ENDYMD        >= @NOWDATE")
+        sqlStat.AppendLine("      AND   APPLY.DELFLG        <> @DELFLG")
         sqlStat.AppendFormat("    LEFT OUTER JOIN {0} USERC", CONST_TBL_USER).AppendLine()
         sqlStat.AppendLine("      ON    USERC.USERID         = II.CREATEUSER")
         sqlStat.AppendLine("      AND   USERC.STYMD         <= @NOWDATE")
@@ -958,6 +984,8 @@ Public Class GBT00028RESULT
         End If
         sqlStat.AppendLine("   AND II.DELFLG      <> @DELFLG")
         If Me.hdnThisMapVariant.Value = "Management" Then
+            'BreakerTotal
+#Region "<< SQL BreakerTotal >>"
             sqlStat.AppendLine("   UNION ALL")
             sqlStat.AppendLine("      SELECT ")
             sqlStat.AppendLine("       ''                        AS CUSTOMERCODE ")
@@ -1018,6 +1046,7 @@ Public Class GBT00028RESULT
             sqlStat.AppendLine("      ,''               AS DELCHK_PRV")
             sqlStat.AppendLine("      ,''               AS 'DELCHK_PRVDATE'")
             sqlStat.AppendLine("      ,''               AS 'APPROVALTYPE'")
+            sqlStat.AppendLine("      ,''               AS 'INVOICETYPE'")
 
             sqlStat.AppendFormat("  FROM {0} OV", CONST_TBL_OV)
             sqlStat.AppendFormat("  INNER JOIN {0} OB", CONST_TBL_OB)
@@ -1059,6 +1088,116 @@ Public Class GBT00028RESULT
             sqlStat.AppendLine("                        AND   ITW.DELFLG <> @DELFLG ")
             sqlStat.AppendLine("                    ) ")
             sqlStat.AppendFormat("     GROUP BY MTORI.TORICODE,MTORI.{0} ", textCustomerTblField).AppendLine()
+#End Region
+
+            'Lease
+#Region "<< SQL Lease >>"
+            sqlStat.AppendLine("   UNION ALL")
+            sqlStat.AppendLine("      SELECT ")
+            sqlStat.AppendLine("       ''                        AS CUSTOMERCODE ")
+            sqlStat.AppendLine("      ,''                        AS INVOICEMONTH ")
+            sqlStat.AppendLine("      ,''                        AS INVOICENOSUB ")
+            sqlStat.AppendLine("      ,''                        AS STYMD ")
+            sqlStat.AppendLine("      ,''                        AS ENDYMD ")
+            sqlStat.AppendLine("      ,'999999999-' + MTORI.TORICODE   AS INVOICENO ")
+            sqlStat.AppendLine("      ,MTORI.TORICODE            AS INCTORICODE ")
+            sqlStat.AppendLine("      ,'－－未選択明細数(LEASE)－－'    AS REMARK ")
+            sqlStat.AppendLine("      ,''                        AS OUTLANGUAGE ")
+            sqlStat.AppendLine("      ,''                        AS INVOICEDATE ")
+            sqlStat.AppendLine("      ,0                         AS DRAFTOUTPUT ")
+            sqlStat.AppendLine("      ,0                         AS ORIGINALOUTPUT ")
+            sqlStat.AppendLine("      ,''               AS ACCCURRENCYSEGMENT ")
+            sqlStat.AppendLine("      ,0                AS AMOUNT ")
+            sqlStat.AppendLine("      ,0                AS INVOICEAMOUNT ")
+            sqlStat.AppendLine("      ,COUNT(*)         AS TANK ")
+            sqlStat.AppendLine("      ,''               AS DISPAMOUNT ")
+            sqlStat.AppendLine("      ,''               AS CREATEUSER ")
+            sqlStat.AppendLine("      ,''               AS CREATEUSERNAME ")
+            sqlStat.AppendLine("      ,''               AS CREATEDATE ")
+            sqlStat.AppendLine("      ,''               AS APPROVEUSER ")
+            sqlStat.AppendLine("      ,''               AS APPROVEUSERNAME ")
+            sqlStat.AppendLine("      ,''               AS APPROVEDATE ")
+            sqlStat.AppendLine("      ,'0'              AS 'CHECK_AP' ")
+            sqlStat.AppendLine("      ,'0'              AS 'CHECK_AP_DISP' ")
+            sqlStat.AppendLine("      ,''               AS 'CHECK_AP_DATE'")
+            sqlStat.AppendLine("      ,'0'              AS 'CHECK_AP_PRV' ")
+            sqlStat.AppendLine("      ,''               AS 'CHECK_AP_PRVDATE'")
+            sqlStat.AppendLine("      ,''               AS SENDUSER ")
+            sqlStat.AppendLine("      ,''               AS SENDUSERNAME ")
+            sqlStat.AppendLine("      ,''               AS SENDDATE ")
+            sqlStat.AppendLine("      ,'0'              AS 'CHECK_S' ")
+            sqlStat.AppendLine("      ,'0'              AS 'CHECK_S_DISP' ")
+            sqlStat.AppendLine("      ,''               AS 'CHECK_S_DATE'")
+            sqlStat.AppendLine("      ,'0'              AS 'CHECK_S_PRV' ")
+            sqlStat.AppendLine("      ,''               AS 'CHECK_S_PRVDATE'")
+            sqlStat.AppendLine("      ,''               AS ACCUSER ")
+            sqlStat.AppendLine("      ,''               AS ACCUSERNAME ")
+            sqlStat.AppendLine("      ,''               AS ACCDATE ")
+            sqlStat.AppendLine("      ,'0'              AS 'CHECK_AC' ")
+            sqlStat.AppendLine("      ,'0'              AS 'CHECK_AC_DISP' ")
+            sqlStat.AppendLine("      ,''               AS 'CHECK_AC_DATE'")
+            sqlStat.AppendLine("      ,'0'              AS 'CHECK_AC_PRV' ")
+            sqlStat.AppendLine("      ,''               AS 'CHECK_AC_PRVDATE'")
+            sqlStat.AppendLine("      ,''               AS DELFLG ")
+            sqlStat.AppendLine("      ,''               AS INITYMD ")
+            sqlStat.AppendLine("      ,''               AS UPDYMD ")
+            sqlStat.AppendLine("      ,''               AS UPDUSER ")
+            sqlStat.AppendLine("      ,''               AS UPDTERMID ")
+            sqlStat.AppendLine("      ,''               AS DRAFTDISP ")
+            sqlStat.AppendLine("      ,''               AS ORIGINALDISP ")
+            sqlStat.AppendFormat("    ,MTORI.{0} AS 'CUSTOMERNAME'", textCustomerTblField).AppendLine()
+            sqlStat.AppendLine("      ,''               AS DELCHK ")
+            sqlStat.AppendLine("      ,''               AS DELCHK_DISP ")
+            sqlStat.AppendLine("      ,''               AS DELCHK_DATE")
+            sqlStat.AppendLine("      ,''               AS DELCHK_PRV")
+            sqlStat.AppendLine("      ,''               AS 'DELCHK_PRVDATE'")
+            sqlStat.AppendLine("      ,''               AS 'APPROVALTYPE'")
+            sqlStat.AppendFormat("    ,'{0}'              AS 'INVOICETYPE'", "L").AppendLine()
+
+            sqlStat.AppendFormat("  FROM {0} OV", CONST_TBL_OV)
+            sqlStat.AppendFormat("  INNER JOIN {0} OB", CONST_TBL_OB)
+            sqlStat.AppendLine("      ON  OB.DELFLG       <> @DELFLG ")
+            sqlStat.AppendLine("     AND  OB.ORDERNO       = OV.ORDERNO ")
+            sqlStat.AppendFormat("  INNER JOIN {0} LA", CONST_TBL_LA)
+            sqlStat.AppendLine("      ON  LA.DELFLG       <> @DELFLG ")
+            sqlStat.AppendLine("     AND  LA.AGREEMENTNO   = OV.BRID ")
+            sqlStat.AppendFormat("  INNER JOIN {0} LC", CONST_TBL_LC)
+            sqlStat.AppendLine("      ON  LC.DELFLG       <> @DELFLG ")
+            sqlStat.AppendLine("     AND  LC.CONTRACTNO    = LA.CONTRACTNO ")
+            sqlStat.AppendFormat("  INNER JOIN {0} LT", CONST_TBL_LT)
+            sqlStat.AppendLine("      ON  LT.DELFLG       <> @DELFLG ")
+            sqlStat.AppendLine("     AND  LT.CONTRACTNO    = LC.CONTRACTNO ")
+            sqlStat.AppendLine("     AND  LT.AGREEMENTNO   = LA.AGREEMENTNO ")
+            sqlStat.AppendLine("     AND  LT.TANKNO        = OV.TANKNO ")
+
+            sqlStat.AppendFormat("  INNER JOIN {0} MC", CONST_TBL_CUSTOMER).AppendLine()
+            sqlStat.AppendLine("      ON MC.STYMD        <= @NOWDATE")
+            sqlStat.AppendLine("     AND MC.ENDYMD       >= @NOWDATE")
+            sqlStat.AppendLine("     AND MC.DELFLG       <> @DELFLG")
+            sqlStat.AppendLine("     AND MC.CUSTOMERCODE  = OV.CONTRACTORFIX")
+
+            sqlStat.AppendFormat("  INNER JOIN {0} MTORI", CONST_TBL_TORI).AppendLine()
+            sqlStat.AppendLine("     ON    MTORI.COMPCODE       = @COMPCODE")
+            sqlStat.AppendLine("     AND   MTORI.TORIKBN        = 'I'")
+            sqlStat.AppendLine("     AND   MTORI.TORICODE       = MC.INCTORICODE")
+            sqlStat.AppendLine("     AND   MTORI.STYMD         <= @NOWDATE")
+            sqlStat.AppendLine("     AND   MTORI.ENDYMD        >= @NOWDATE")
+            sqlStat.AppendLine("     AND   MTORI.DELFLG        <> @DELFLG")
+
+            sqlStat.AppendLine("   WHERE OV.DELFLG        <> @DELFLG ")
+            sqlStat.AppendLine("     AND OV.TANKNO        <> ''")
+            sqlStat.AppendLine("     AND OV.INVOICEDBY     = 'JPA00001'")
+            sqlStat.AppendLine("     AND OV.COSTCODE    LIKE 'S0103%'")
+            sqlStat.AppendLine("     AND ( OV.ACTUALDATE BETWEEN CONVERT(DATE, @INVOICEMONTH + '/01') AND EOMONTH(CONVERT(DATE, @INVOICEMONTH + '/01')) )")
+            sqlStat.AppendLine("     AND OV.SOAAPPDATE     = '1900/01/01'")
+            sqlStat.AppendLine("     AND NOT EXISTS (")
+            sqlStat.AppendFormat("                      SELECT * FROM {0} ITW", CONST_TBL_INVOICETANK)
+            sqlStat.AppendLine("                        WHERE ITW.ORDERNO = OV.ORDERNO ")
+            sqlStat.AppendLine("                        AND   ITW.TANKNO  = OV.TANKNO ")
+            sqlStat.AppendLine("                        AND   ITW.DELFLG <> @DELFLG ")
+            sqlStat.AppendLine("                    ) ")
+            sqlStat.AppendFormat("     GROUP BY MTORI.TORICODE,MTORI.{0} ", textCustomerTblField).AppendLine()
+#End Region
 
         End If
         sqlStat.AppendLine("   ) WORK")
@@ -1149,7 +1288,8 @@ Public Class GBT00028RESULT
         AddLangSetting(dicDisplayText, Me.btnExcelDownload, "台帳出力", "List Download")
         AddLangSetting(dicDisplayText, Me.btnSave, "保存", "Save")
 
-        AddLangSetting(dicDisplayText, Me.btnInvoiceNew, "請求書作成", "Invoice New")
+        'AddLangSetting(dicDisplayText, Me.btnInvoiceNew, "請求書作成", "Invoice New")
+        AddLangSetting(dicDisplayText, Me.lblInvoiceNew, "請求書作成", "Invoice New")
         AddLangSetting(dicDisplayText, Me.btnDel, "削除", "Delete")
 
         AddLangSetting(dicDisplayText, Me.btnLeftBoxButtonSel, "　選　択　", "Select")
@@ -1215,6 +1355,7 @@ Public Class GBT00028RESULT
             Me.ThisScreenValues.NewInvoiceCreate = False
             Me.ThisScreenValues.InvoiceNo = Convert.ToString(selectedRow.Item("INVOICENO"))
             Me.ThisScreenValues.ToriCode = Convert.ToString(selectedRow.Item("INCTORICODE"))
+            Me.ThisScreenValues.InvoiceType = Convert.ToString(selectedRow.Item("INVOICETYPE"))
 
             '■■■ 画面遷移先URL取得 ■■■
             Dim COA0012DoUrl As New COA0012DoUrl
@@ -1351,9 +1492,11 @@ Public Class GBT00028RESULT
 
         ' 後で移動
         If Me.GBT00028SValues.CustomerCode = "" Then
-            Me.btnInvoiceNew.Visible = False
+            'Me.btnInvoiceNew.Visible = False
+            Me.lblInvoiceNew.Visible = False
         Else
-            Me.btnInvoiceNew.Visible = True
+            'Me.btnInvoiceNew.Visible = True
+            Me.lblInvoiceNew.Visible = True
         End If
         Me.txtInvoiceDate.Text = Me.GBT00028SValues.InvoiceMonth
         Me.txtCustomerName.Text = Me.GBT00028SValues.CustomerName
@@ -1383,7 +1526,8 @@ Public Class GBT00028RESULT
 
             'ボタン
             Me.btnDel.Visible = False
-            Me.btnInvoiceNew.Visible = False
+            'Me.btnInvoiceNew.Visible = False
+            Me.lblInvoiceNew.Visible = False
 
             ' チェックボックス制御
             Dim COA0021ListTable As New COA0021ListTable
@@ -1504,6 +1648,11 @@ Public Class GBT00028RESULT
         ''' <returns></returns>
         ''' <remarks>選択した取引先コード</remarks>
         Public Property ToriCode As String = ""
+        ''' <summary>
+        ''' 請求書種類(NULL:BreakerTotal,L:Lease)
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property InvoiceType As String = ""
     End Class
 
 End Class

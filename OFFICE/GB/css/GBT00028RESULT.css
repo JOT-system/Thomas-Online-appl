@@ -23,4 +23,56 @@
 } 
 #WF_LISTAREA_DL button{
     cursor:pointer;
-} 
+}
+
+
+#divInvoiceNew {
+    display: inline-block;
+}
+
+#lblInvoiceNew {
+    display: inline-block;
+    color: blue;
+    font-size: 14px !important;
+    cursor: default;
+    border: solid 1px #ccc;
+    border-radius: 1px;
+    vertical-align: middle;
+    height: 20px;
+    padding-top: 4px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-bottom: 1px;
+    background-color: gainsboro;
+}
+
+#ulInvoiceNew {
+    left: 0;
+    top: 5px;
+    margin: 0;
+    padding: 0;
+}
+
+    #ulInvoiceNew li {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        float: left;
+    }
+
+    #ulInvoiceNew div {
+        position: absolute;
+        margin: 0;
+        padding: 2px;
+        border: solid 1px #ccc;
+        z-index: 23;
+        width: 250px;
+        background-color: #DE9292;
+    }
+
+        #ulInvoiceNew div input {
+            position: relative;
+            display: block;
+            width: 100%;
+            margin-bottom: 2px;
+        }
