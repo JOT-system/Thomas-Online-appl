@@ -236,7 +236,7 @@
 
                             <%-- 業者コード --%>
                             <a id="stCarrierCode">
-                                <asp:Label ID="lblCarrierCode" runat="server" Text="業者コード" CssClass="textLeft requiredMark"></asp:Label>
+                                <asp:Label ID="lblCarrierCode" runat="server" Text="業者コード" CssClass="textLeft"></asp:Label>
                                 <asp:TextBox ID="txtCarrierCode" runat="server" CssClass="textCss"></asp:TextBox>
                                 <asp:Label ID="lblCarrierCodeText" runat="server" CssClass="textLeftLabel"></asp:Label>
                             </a>
@@ -438,6 +438,8 @@
                     <asp:HiddenField ID="hdnIsHideDetailBox" Value="0" runat="server" />
                     <%-- MAPVARIANT保持用 --%>
                     <asp:HiddenField ID="hdnThisMapVariant" Value="" runat="server" Visible="false" />
+                     <%-- 新規レコード仮連番 --%>
+                    <asp:HiddenField ID="hdnNewRecordSeq" runat="server" Value="" />
                 </div>
             </div>
             <%-- 左ボックス --%>

@@ -205,6 +205,7 @@ Public Class GBM00008PRODUCT
                 'フォーカス設定
                 '****************************************
                 txtProductCodeEx.Focus()
+                txtProduct.Enabled = False
 
             End If
             '**********************************************
@@ -694,6 +695,9 @@ Public Class GBM00008PRODUCT
             INPtbl.Rows.Add(INProwWork)
         Next
 
+        'INPtbl新規データ仮採番
+        INPtblSetNewSeq()
+
         INPtblCheck()
 
         BASEtblUpdate()
@@ -1170,6 +1174,13 @@ Public Class GBM00008PRODUCT
 
                         End If
 
+                        '新規レコード
+                        Dim tempCode As String = Convert.ToString(BASEtbl.Rows(i)("PRODUCTCODE"))
+                        If Convert.ToString(BASEtbl.Rows(i)("TIMSTP")) = "0" Then
+                            '新規オーダー番号生成（シーケンスより取得）
+                            BASEtbl.Rows(i)("PRODUCTCODE") = GetNewSeq(SQLcon)
+                        End If
+
                         '更新SQL文･･･マスタへ更新
                         Dim nowDate As DateTime = Date.Now
                         SQLStr = ""
@@ -1369,7 +1380,7 @@ Public Class GBM00008PRODUCT
                         End While
 
                         'PDF更新処理
-                        PDFDBupdate(Convert.ToString(BASEtbl.Rows(i)("COMPCODE")), Convert.ToString(BASEtbl.Rows(i)("PRODUCTCODE")), Convert.ToString(BASEtbl.Rows(i)("APPLYID")))
+                        PDFDBupdate(Convert.ToString(BASEtbl.Rows(i)("COMPCODE")), Convert.ToString(BASEtbl.Rows(i)("PRODUCTCODE")), Convert.ToString(BASEtbl.Rows(i)("APPLYID")), tempCode)
 
                     End If
 
@@ -1589,6 +1600,9 @@ Public Class GBM00008PRODUCT
 
         'DetailBoxをINPtblへ退避
         DetailBoxToINPtbl()
+
+        'INPtbl新規データ仮採番
+        INPtblSetNewSeq()
 
         'INPtbl内容 チェック
         '　※チェックOKデータをUPDtblへ格納する
@@ -1867,6 +1881,11 @@ Public Class GBM00008PRODUCT
             Dim errorMessage As String = ""
             CommonFunctions.ShowMessage(errorCode, dummyMsgBox)
             errorMessage = dummyMsgBox.Text
+            Dim errorCodeNotFound As String = C_MESSAGENO.NOTFOUND
+            Dim errorMessageNotFound As String = ""
+            CommonFunctions.ShowMessage(errorCodeNotFound, dummyMsgBox)
+            errorMessageNotFound = dummyMsgBox.Text
+            Dim keyFind As Boolean = False
 
             If inpDateStart >= inpDateEnd Then
 
@@ -1891,6 +1910,9 @@ Public Class GBM00008PRODUCT
                         '日付以外の項目が等しい
                         If Convert.ToString(BASEtbl.Rows(j)("COMPCODE")) = Convert.ToString(workInpRow("COMPCODE")) AndAlso
                            Convert.ToString(BASEtbl.Rows(j)("PRODUCTCODE")) = Convert.ToString(workInpRow("PRODUCTCODE")) Then
+
+                            '更新対象レコードあり
+                            keyFind = True
 
                             'ENDYMDは変更扱い
                             If Convert.ToString(BASEtbl.Rows(j)("STYMD")) = Convert.ToString(workInpRow("STYMD")) Then
@@ -1930,13 +1952,31 @@ Public Class GBM00008PRODUCT
                         End If
                     End If
                 Next
+
+                If Convert.ToString(workInpRow("TEMPCODE")) = "" AndAlso keyFind = False Then
+                    If returnCode = C_MESSAGENO.NORMAL Then
+                        'KEY重複
+                        returnCode = C_MESSAGENO.NOTFOUND
+                    End If
+                    'エラーレポート編集
+                    errMessageStr = ""
+                    errMessageStr = "・" & errorMessageNotFound
+                    ' レコード内容を展開する
+                    errMessageStr = errMessageStr & Me.ErrItemSet(workInpRow)
+                    If txtRightErrorMessage.Text <> "" Then
+                        txtRightErrorMessage.Text = txtRightErrorMessage.Text & ControlChars.NewLine
+                    End If
+                    txtRightErrorMessage.Text = txtRightErrorMessage.Text & ControlChars.NewLine & errMessageStr
+                End If
             End If
             If returnCode <> C_MESSAGENO.NORMAL Then
                 If Convert.ToString(workInpRow("OPERATION")) <> warningDisp Then
                     workInpRow("OPERATION") = errDisp
                     errListAll.Add(C_MESSAGENO.RIGHTBIXOUT)
                     errList.Add(C_MESSAGENO.RIGHTBIXOUT)
-                    If returnCode = C_MESSAGENO.REQUIREDVALUE OrElse returnCode = C_MESSAGENO.HASAPPLYINGRECORD Then ' 一覧反映対象外
+                    If returnCode = C_MESSAGENO.REQUIREDVALUE OrElse
+                        returnCode = C_MESSAGENO.HASAPPLYINGRECORD OrElse
+                        returnCode = C_MESSAGENO.NOTFOUND Then ' 一覧反映対象外
                         workInpRow("HIDDEN") = "1"
                         returnCode = C_MESSAGENO.RIGHTBIXOUT
                     End If
@@ -2372,6 +2412,7 @@ Public Class GBM00008PRODUCT
         table.Columns.Add("UPDYMD", GetType(String))
         table.Columns.Add("UPDUSER", GetType(String))
         table.Columns.Add("UPDTERMID", GetType(String))
+        table.Columns.Add("TEMPCODE", GetType(String))
 
         For Each col As DataColumn In table.Columns
             If col.DataType = GetType(String) AndAlso
@@ -2420,8 +2461,33 @@ Public Class GBM00008PRODUCT
         workRow("REMARK") = ""
         workRow("DELFLG") = ""
         workRow("UPDYMD") = ""
+        workRow("TEMPCODE") = ""
 
         argTbl.Rows.Add(workRow)
+
+    End Sub
+    ''' <summary>
+    ''' INPtbl新規データ仮採番 
+    ''' </summary>
+    Protected Sub INPtblSetNewSeq()
+
+        If String.IsNullOrEmpty(hdnNewRecordSeq.Value) Then
+            hdnNewRecordSeq.Value = "0"
+        End If
+        Dim newSeq As Integer = Convert.ToInt32(hdnNewRecordSeq.Value)
+
+        For Each INProw As DataRow In INPtbl.Rows
+            '新規レコード仮連番設定
+            If Convert.ToString(INProw("COMPCODE")) <> "" AndAlso
+               Convert.ToString(INProw("PRODUCTCODE")) = "" AndAlso
+               Convert.ToString(INProw("STYMD")) <> "" Then
+                newSeq += 1
+                INProw("TEMPCODE") = "NEW" & newSeq.ToString("000000")
+                INProw("PRODUCTCODE") = INProw("TEMPCODE")
+            End If
+        Next
+
+        hdnNewRecordSeq.Value = newSeq.ToString
 
     End Sub
     ''' <summary>
@@ -4723,7 +4789,7 @@ Public Class GBM00008PRODUCT
     ''' </summary>
     ''' <param name="prmCompCode"></param>
     ''' <param name="prmProductCode"></param>
-    Protected Sub PDFDBupdate(ByVal prmCompCode As String, ByVal prmProductCode As String, ByVal prmApplyId As String)
+    Protected Sub PDFDBupdate(ByVal prmCompCode As String, ByVal prmProductCode As String, ByVal prmApplyId As String, ByVal prmTempProductCode As String)
         'セッション変数設定
         '固定項目設定
         Session("Class") = "PDFDBupdate"
@@ -4760,7 +4826,7 @@ Public Class GBM00008PRODUCT
 
             'Tempフォルダーが存在したら処理する（EXCEL入力の場合、Tempができないため）
             WW_DirH = COA0019Session.USERTEMPDir & "\" & COA0019Session.USERID & "\GBM00008PRODUCT\"
-            WW_DirH = WW_DirH & "MSDS\" & prmProductCode & "\Update_H"
+            WW_DirH = WW_DirH & "MSDS\" & prmTempProductCode & "\Update_H"
             If System.IO.Directory.Exists(WW_DirH) Then
 
                 'PDF正式格納フォルダクリア処理
@@ -4782,7 +4848,7 @@ Public Class GBM00008PRODUCT
 
                 'Update_Dフォルダクリア　※Update_Hフォルダは、連続処理に備えてクリアーしない
                 WW_DirD = COA0019Session.USERTEMPDir & "\" & COA0019Session.USERID & "\GBM00008PRODUCT\"
-                WW_DirD = WW_DirD & "MSDS\" & prmProductCode & "\Update_D"
+                WW_DirD = WW_DirD & "MSDS\" & prmTempProductCode & "\Update_D"
 
                 For Each tempFile As String In System.IO.Directory.GetFiles(WW_DirD, "*", System.IO.SearchOption.AllDirectories)
                     Try
@@ -5499,6 +5565,45 @@ Public Class GBM00008PRODUCT
         End Try
 
     End Sub
+    ''' <summary>
+    ''' 新規連番をシーケンスより取得
+    ''' </summary>
+    ''' <returns></returns>
+    Private Function GetNewSeq(Optional ByRef sqlCon As SqlConnection = Nothing) As String
+        Dim canCloseConnect As Boolean = False
+        Dim newSeq As String = ""
+        Try
+            If sqlCon Is Nothing Then
+                sqlCon = New SqlConnection(COA0019Session.DBcon)
+                sqlCon.Open()
+                canCloseConnect = True
+            End If
+            Dim sqlStat As New StringBuilder
+            sqlStat.AppendLine("SELECT right('000000' + trim(convert(char,NEXT VALUE FOR " & C_SQLSEQ.PRODUCT & ")),6)")
+            Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
+
+                Using sqlDa As New SqlDataAdapter(sqlCmd)
+                    Dim dt As New DataTable
+                    sqlDa.Fill(dt)
+                    If dt Is Nothing OrElse dt.Rows.Count = 0 Then
+                        Throw New Exception("Get new Seq error")
+                    End If
+
+                    newSeq = Convert.ToString(dt.Rows(0).Item(0))
+                End Using
+            End Using
+            Return newSeq
+        Catch ex As Exception
+            Throw
+        Finally
+            If canCloseConnect = True AndAlso sqlCon IsNot Nothing Then
+                sqlCon.Close()
+                sqlCon.Dispose()
+                sqlCon = Nothing
+            End If
+        End Try
+
+    End Function
 
     ''' <summary>
     ''' 頭文字チェック

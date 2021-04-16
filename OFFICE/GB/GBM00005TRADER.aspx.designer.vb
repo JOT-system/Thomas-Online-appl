@@ -743,6 +743,15 @@ Partial Public Class GBM00005TRADER
     Protected WithEvents hdnThisMapVariant As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
+    '''hdnNewRecordSeq コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnNewRecordSeq As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
     '''btnLeftBoxButtonSel コントロール。
     '''</summary>
     '''<remarks>
