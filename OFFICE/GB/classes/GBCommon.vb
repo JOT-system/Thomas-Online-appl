@@ -7428,6 +7428,14 @@ Public Structure GBA00013SoaInfo
             sqlStat.AppendLine("                      AND CSTS.DELFLG  <> @DELFLG")
             sqlStat.AppendLine("                  )")
             sqlStat.AppendLine("   AND NOT (OBS.BRTYPE IN ('SALES','OPERATION') AND VL.TANKNO = '')")
+            sqlStat.AppendLine("   AND NOT (OBS.BRTYPE = 'REPAIR'") 'REPAIRブレーカが無効化されていたら対象外
+            sqlStat.AppendLine("            AND EXISTS (SELECT 1 ")
+            sqlStat.AppendLine("                          FROM GBT0002_BR_BASE BB with(nolock) ")
+            sqlStat.AppendLine("                         WHERE BB.BRID     = OBS.BRID")
+            sqlStat.AppendLine("                           AND BB.DELFLG  <> @DELFLG")
+            sqlStat.AppendLine("                           AND BB.DISABLED = '" & CONST_FLAG_YES & "'")
+            sqlStat.AppendLine("                       )")
+            sqlStat.AppendLine("           )")
             'sqlStat.AppendLine(sqlDateCond.ToString)
             sqlStat.AppendLine(" UNION ALL")
             'ノンブレーカー分

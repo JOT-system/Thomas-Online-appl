@@ -122,6 +122,24 @@ Partial Public Class GBT00012REPAIR
     Protected WithEvents lblBrNo As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
+    '''lblDisabled コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblDisabled As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''chkDisabled コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents chkDisabled As Global.System.Web.UI.WebControls.CheckBox
+    
+    '''<summary>
     '''lblBrRemark コントロール。
     '''</summary>
     '''<remarks>
