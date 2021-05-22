@@ -204,7 +204,9 @@
     width: 110px !important;
     height: 16px !important;
 }
-
+#chkDisabled {
+    width: auto;
+}
 #commonInfo input[type=text] {
     width: 109px !important;
 }

@@ -375,8 +375,14 @@
                             <td>
                                 <asp:Label ID="lblBrNoTitle" runat="server" Text=""></asp:Label>
                             </td>
-                            <td colspan="3">
+                            <td colspan="1">
                                 <asp:Label ID="lblBrNo" runat="server" Text=""></asp:Label>
+                            </td>
+                            <td  class="textRightCell">
+                                <asp:Label ID="lblDisabled" runat="server" Text="Disabled"></asp:Label>
+                            </td>
+                            <td colspan="1">
+                                <asp:CheckBox ID="chkDisabled" runat="server" />
                             </td>
                             <td class="textRightCell">
                                 <asp:Label ID="lblBrRemark" runat="server" Text="BR注記" Font-Underline="true"></asp:Label>
