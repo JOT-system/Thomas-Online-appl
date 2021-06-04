@@ -1195,6 +1195,8 @@ Public Class GBT00012REPAIR
 
                 newDr.Item("COUNTRYORGANIZER") = GBA00003UserSetting.COUNTRYCODE
 
+                'ブレーカー使用不可フラグ
+                newDr.Item("DISABLED") = CONST_FLAG_NO 'N(使用可)
                 newDr.Item("TERMTYPE") = "CC" '一旦CY-CY
                 'メイン情報取得
                 retDataSet.Tables.Add(newDt)
@@ -1598,6 +1600,7 @@ Public Class GBT00012REPAIR
         retDt.Columns.Add("USETYPE", GetType(String))
         retDt.Columns.Add("VALIDITYFROM", GetType(String))
         retDt.Columns.Add("VALIDITYTO", GetType(String))
+        retDt.Columns.Add("DISABLED", GetType(String))
         retDt.Columns.Add("TERMTYPE", GetType(String))
         retDt.Columns.Add("NOOFTANKS", GetType(String))
         retDt.Columns.Add("SHIPPER", GetType(String))
@@ -1794,6 +1797,12 @@ Public Class GBT00012REPAIR
         Dim dr As DataRow = dt.Rows(0)
 
         Me.lblBrNo.Text = Convert.ToString(dr.Item("BRID"))
+
+        If Convert.ToString(dr.Item("DISABLED")) = CONST_FLAG_YES Then
+            Me.chkDisabled.Checked = True
+        Else
+            Me.chkDisabled.Checked = False
+        End If
 
         Me.lblApplyRemarks.Text = Convert.ToString(dr.Item("APPLYTEXT")) 'Apply Remarks(ラベルなのでHTMLエンコード)
         Me.lblAppJotRemarks.Text = Convert.ToString(dr.Item("APPROVEDTEXT")) 'Approved Remarks(ラベルなのでHTMLエンコード)
@@ -2268,7 +2277,7 @@ Public Class GBT00012REPAIR
     Private Sub visibleControl(ByVal isOwner As Boolean, ByVal selectedTab As String)
 
         '一旦入力項目の表示を非表示にする
-        Dim allVisibleControls As New List(Of HtmlControl)
+        Dim allVisibleControls As New List(Of Control)
         allVisibleControls.AddRange({Me.divBrDetailInfo,
                                      Me.btnOutputExcel,
                                      Me.hdnInputExcel,
@@ -2279,11 +2288,13 @@ Public Class GBT00012REPAIR
                                      Me.btnApproval,
                                      Me.btnReject,
                                      Me.divFileUpInfo,
-                                     Me.divDoneFileUpInfo})
+                                     Me.divDoneFileUpInfo,
+                                     Me.lblDisabled, Me.chkDisabled})
+
         For Each item In allVisibleControls
             item.Visible = False
         Next
-        Dim visibleControls As New List(Of HtmlControl)
+        Dim visibleControls As New List(Of Control)
         If selectedTab = Me.tabFileUp.ClientID Then
 
             visibleControls.AddRange({Me.divFileUpInfo, Me.btnOutputFile, Me.hdnInputFile})
@@ -2296,6 +2307,8 @@ Public Class GBT00012REPAIR
 
             If Me.hdnAppTranFlg.Value = "1" Then '承認済画面から来たフラグ(1:承認画面からの遷移)
                 visibleControls.AddRange({Me.divBrDetailInfo, Me.btnOutputExcel, Me.btnSave, Me.btnApproval, Me.btnReject})
+                visibleControls.Add(Me.lblDisabled)
+                visibleControls.Add(Me.chkDisabled)
                 ''申請画面からの当画面は申請中のみアップロード可能(申請チェックボックス,コメントのアップロードが可能になったら。現状使用不可)
                 'If Me.hdnStatus.Value = C_APP_STATUS.APPLYING Then
                 '    visibleControls.Add(Me.hdnInputExcel)
@@ -2940,7 +2953,11 @@ Public Class GBT00012REPAIR
         End If
         Dim dr As DataRow = retDt.Rows(0)
         dr.Item("BRID") = Me.lblBrNo.Text
-
+        If Me.chkDisabled.Checked = True Then
+            dr.Item("DISABLED") = CONST_FLAG_YES
+        Else
+            dr.Item("DISABLED") = CONST_FLAG_NO
+        End If
         dr.Item("REMARK") = HttpUtility.HtmlDecode(Me.lblBrRemarkText.Text)
         dr.Item("APPLYTEXT") = HttpUtility.HtmlDecode(Me.lblApplyRemarks.Text)
         dr.Item("APPROVEDTEXT") = HttpUtility.HtmlDecode(Me.lblAppJotRemarks.Text)
@@ -4114,6 +4131,7 @@ Public Class GBT00012REPAIR
             sqlStat.AppendLine("             ,STYMD")
             sqlStat.AppendLine("             ,VALIDITYFROM")
             sqlStat.AppendLine("             ,VALIDITYTO")
+            sqlStat.AppendLine("             ,DISABLED")
             sqlStat.AppendLine("             ,TERMTYPE")
             sqlStat.AppendLine("             ,NOOFTANKS")
             sqlStat.AppendLine("             ,SHIPPER")
@@ -4189,6 +4207,7 @@ Public Class GBT00012REPAIR
             sqlStat.AppendLine("             ,@STYMD")
             sqlStat.AppendLine("             ,@VALIDITYFROM")
             sqlStat.AppendLine("             ,@VALIDITYTO")
+            sqlStat.AppendLine("             ,@DISABLED")
             sqlStat.AppendLine("             ,@TERMTYPE")
             sqlStat.AppendLine("             ,@NOOFTANKS")
             sqlStat.AppendLine("             ,@SHIPPER")
@@ -4269,6 +4288,7 @@ Public Class GBT00012REPAIR
                     .Add("@STYMD", SqlDbType.Date).Value = procDateTime
                     .Add("@VALIDITYFROM", SqlDbType.Date).Value = procDateTime
                     .Add("@VALIDITYTO", SqlDbType.Date).Value = procDateTime
+                    .Add("@DISABLED", SqlDbType.NVarChar).Value = Convert.ToString(dr.Item("DISABLED"))
                     .Add("@TERMTYPE", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("TERMTYPE"))
                     .Add("@NOOFTANKS", SqlDbType.Int, 20).Value = IntStringToInt(Convert.ToString(dr.Item("NOOFTANKS")))
                     .Add("@SHIPPER", SqlDbType.NVarChar, 20).Value = Convert.ToString(dr.Item("SHIPPER"))
@@ -4655,6 +4675,7 @@ Public Class GBT00012REPAIR
         sqlStat.AppendLine("      ,BS.STYMD AS STYMD")
         sqlStat.AppendLine("      ,CASE BS.VALIDITYFROM WHEN '1900/01/01' THEN '' ELSE FORMAT(BS.VALIDITYFROM,'yyyy/MM/dd') END AS VALIDITYFROM")
         sqlStat.AppendLine("      ,CASE BS.VALIDITYTO   WHEN '1900/01/01' THEN '' ELSE FORMAT(BS.VALIDITYTO  ,'yyyy/MM/dd') END AS VALIDITYTO")
+        sqlStat.AppendLine("      ,BS.DISABLED AS DISABLED")
         sqlStat.AppendLine("      ,BS.TERMTYPE AS TERMTYPE")
         sqlStat.AppendLine("      ,BS.NOOFTANKS AS NOOFTANKS")
         sqlStat.AppendLine("      ,BS.SHIPPER AS SHIPPER")
@@ -8293,7 +8314,8 @@ Public Class GBT00012REPAIR
             {"APPLYTEXT", HttpUtility.HtmlDecode(Me.lblApplyRemarks.Text)}, {"APPROVEDTEXT", HttpUtility.HtmlDecode(Me.lblAppJotRemarks.Text)},
             {"DEPOTCODE", Me.txtDepoCode.Text}, {"REPAIRDEPOINDATE", BaseDllCommon.FormatDateYMD(Me.txtDepoInDate.Text, GBA00003UserSetting.DATEFORMAT)},
             {"REPAIRBRID", Me.txtBreakerNo.Text}, {"LASTORDERNO", Me.txtLastOrderNo.Text},
-            {"LASTPRODUCT", Me.txtLastProduct.Text}, {"TWOAGOPRODUCT", Me.txtTwoAgoProduct.Text}
+            {"LASTPRODUCT", Me.txtLastProduct.Text}, {"TWOAGOPRODUCT", Me.txtTwoAgoProduct.Text},
+            {"DISABLED", If(Me.chkDisabled.Checked, CONST_FLAG_YES, CONST_FLAG_NO)}
         }
         For Each item As KeyValuePair(Of String, String) In dicChk
             If item.Value <> Convert.ToString(orgDt.Rows(0).Item(item.Key)) Then

@@ -11,7 +11,7 @@ Option Strict On
 Option Explicit On
 
 
-Partial Public Class GBT00028RESULT
+Partial Public Class GBM00025SELECT
     
     '''<summary>
     '''phCommonHeader コントロール。
@@ -23,13 +23,13 @@ Partial Public Class GBT00028RESULT
     Protected WithEvents phCommonHeader As Global.System.Web.UI.WebControls.PlaceHolder
     
     '''<summary>
-    '''GBT00028R コントロール。
+    '''GBM00025S コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents GBT00028R As Global.System.Web.UI.HtmlControls.HtmlForm
+    Protected WithEvents GBM00025S As Global.System.Web.UI.HtmlControls.HtmlForm
     
     '''<summary>
     '''lblTitleId コントロール。
@@ -77,49 +77,13 @@ Partial Public Class GBT00028RESULT
     Protected WithEvents lblTitleDate As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''lblInvoiceNew コントロール。
+    '''btnEnter コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents lblInvoiceNew As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''repInvoiceNew コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents repInvoiceNew As Global.System.Web.UI.WebControls.Repeater
-    
-    '''<summary>
-    '''btnDel コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents btnDel As Global.System.Web.UI.HtmlControls.HtmlInputButton
-    
-    '''<summary>
-    '''btnSave コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents btnSave As Global.System.Web.UI.HtmlControls.HtmlInputButton
-    
-    '''<summary>
-    '''btnExcelDownload コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents btnExcelDownload As Global.System.Web.UI.HtmlControls.HtmlInputButton
+    Protected WithEvents btnEnter As Global.System.Web.UI.HtmlControls.HtmlInputButton
     
     '''<summary>
     '''btnBack コントロール。
@@ -131,49 +95,67 @@ Partial Public Class GBT00028RESULT
     Protected WithEvents btnBack As Global.System.Web.UI.HtmlControls.HtmlInputButton
     
     '''<summary>
-    '''lblInvoiceDate コントロール。
+    '''lblYMD1 コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents lblInvoiceDate As Global.System.Web.UI.WebControls.Label
+    Protected WithEvents lblYMD1 As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''txtInvoiceDate コントロール。
+    '''lblYMD2 コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents txtInvoiceDate As Global.System.Web.UI.WebControls.TextBox
+    Protected WithEvents lblYMD2 As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''lblCustomerName コントロール。
+    '''txtStYMD コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents lblCustomerName As Global.System.Web.UI.WebControls.Label
+    Protected WithEvents txtStYMD As Global.System.Web.UI.WebControls.TextBox
     
     '''<summary>
-    '''txtCustomerName コントロール。
+    '''lblTilde コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents txtCustomerName As Global.System.Web.UI.WebControls.TextBox
+    Protected WithEvents lblTilde As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''WF_LISTAREA コントロール。
+    '''txtEndYMD コントロール。
     '''</summary>
     '''<remarks>
     '''自動生成されたフィールド。
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
-    Protected WithEvents WF_LISTAREA As Global.System.Web.UI.WebControls.Panel
+    Protected WithEvents txtEndYMD As Global.System.Web.UI.WebControls.TextBox
+    
+    '''<summary>
+    '''lblJotBankCode コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lblJotBankCode As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''txtJotBankCode コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents txtJotBankCode As Global.System.Web.UI.WebControls.TextBox
     
     '''<summary>
     '''hdnSubmit コントロール。
@@ -284,51 +266,6 @@ Partial Public Class GBT00028RESULT
     Protected WithEvents hdnCanHelpOpen As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
-    '''hdnXMLsaveFile コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnXMLsaveFile As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnMouseWheel コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnMouseWheel As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnListPosition コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnListPosition As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnListDBclick コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnListDBclick As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnListCurrentRownum コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnListCurrentRownum As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
     '''hdnThisMapVariant コントロール。
     '''</summary>
     '''<remarks>
@@ -336,15 +273,6 @@ Partial Public Class GBT00028RESULT
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
     Protected WithEvents hdnThisMapVariant As Global.System.Web.UI.WebControls.HiddenField
-    
-    '''<summary>
-    '''hdnSelectedBrId コントロール。
-    '''</summary>
-    '''<remarks>
-    '''自動生成されたフィールド。
-    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
-    '''</remarks>
-    Protected WithEvents hdnSelectedBrId As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
     '''btnLeftBoxButtonSel コントロール。
@@ -372,6 +300,24 @@ Partial Public Class GBT00028RESULT
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
     Protected WithEvents mvLeft As Global.System.Web.UI.WebControls.MultiView
+    
+    '''<summary>
+    '''vLeftCal コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents vLeftCal As Global.System.Web.UI.WebControls.View
+    
+    '''<summary>
+    '''hdnCalendarValue コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnCalendarValue As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
     '''divMessageType コントロール。

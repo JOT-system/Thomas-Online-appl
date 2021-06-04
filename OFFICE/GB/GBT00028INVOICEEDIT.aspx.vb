@@ -13,6 +13,7 @@ Public Class GBT00028INVOICEEDIT
     Private Const CONST_TBL_OV As String = "GBT0005_ODR_VALUE"
     Private Const CONST_TBL_OB As String = "GBT0004_ODR_BASE"
     Private Const CONST_TBL_PM As String = "GBM0008_PRODUCT"
+    Private Const CONST_TBL_TK As String = "GBM0006_TANK"
     Private Const CONST_TBL_FV As String = "COS0017_FIXVALUE"
     Private Const CONST_TBL_OV2 As String = "GBT0007_ODR_VALUE2"
 
@@ -25,6 +26,10 @@ Public Class GBT00028INVOICEEDIT
     Private Const CONST_TBL_BANK As String = "GBM0024_BANK"
     Private Const CONST_TBL_INVOICEINFO As String = "GBT0016_INVOICE_INFO"
     Private Const CONST_TBL_INVOICETANK As String = "GBT0017_INVOICE_TANKINFO"
+
+    Private Const CONST_TBL_LC As String = "GBT0010_LBR_CONTRACT"
+    Private Const CONST_TBL_LA As String = "GBT0011_LBR_AGREEMENT"
+    Private Const CONST_TBL_LT As String = "GBT0012_RESRVLEASETANK"
 
     '内部保持のデータテーブル名称
     Private Const CONST_DT_NAME_CUSTOMERINFO As String = "CUSTOMERINFO"
@@ -40,6 +45,8 @@ Public Class GBT00028INVOICEEDIT
     Private Const CONST_VIEWID_MNG As String = "Management"
     '請求書タイプ
     Private Const CONST_REPTYPE_SHIP As String = "InvoiceShip"
+    '請求書タイプ
+    Private Const CONST_REPTYPE_LEASE As String = "InvoiceLease"
     ''' <summary>
     ''' 請求書のレンジ名()
     ''' </summary>
@@ -118,6 +125,9 @@ Public Class GBT00028INVOICEEDIT
                 ' Invoice New 押下時補正
                 If GBT00028RValues.NewInvoiceCreate = True Then
                     Me.lblTitleText.Text = "Create New Invoice"
+                End If
+                If Me.GBT00028RValues.InvoiceType = "L" Then
+                    Me.lblTitleText.Text += " (Lease)"
                 End If
                 '****************************************
                 'Fixvalueを元にリストボックスを作成
@@ -291,6 +301,13 @@ Public Class GBT00028INVOICEEDIT
     End Sub
 
     ''' <summary>
+    ''' 絞り込みボタン押下時処理 ※仮
+    ''' </summary>
+    Public Sub btnExtract_Click()
+
+    End Sub
+
+    ''' <summary>
     ''' Excel出力ボタン押下時 ※仮対応
     ''' </summary>
     Public Sub btnOutputExcel_Click()
@@ -324,7 +341,14 @@ Public Class GBT00028INVOICEEDIT
     Public Sub btnOutputOK_Click()
 
         Dim OutInvoiceDt As DataTable
-        OutInvoiceDt = GetOutPutInfo(GBT00028RValues.InvoiceNo, GBT00028RValues.GBT00028SValues.InvoiceMonth)
+        Dim repType As String
+        If Me.GBT00028RValues.InvoiceType <> "L" Then
+            OutInvoiceDt = GetOutPutInfo(GBT00028RValues.InvoiceNo, GBT00028RValues.GBT00028SValues.InvoiceMonth)
+            repType = CONST_REPTYPE_SHIP
+        Else
+            OutInvoiceDt = GetOutPutInfoLease(GBT00028RValues.InvoiceNo, GBT00028RValues.GBT00028SValues.InvoiceMonth)
+            repType = CONST_REPTYPE_LEASE
+        End If
 
         Dim dsCustomer As DataSet = DirectCast(ViewState(CONST_VS_NAME_CURRENT_VAL), DataSet)
         Dim dtCustomer As DataTable = dsCustomer.Tables(CONST_DT_NAME_CUSTOMERINFO)
@@ -351,9 +375,9 @@ Public Class GBT00028INVOICEEDIT
             COA0017FixValue.COA0017getListFixValue()
             If COA0017FixValue.ERR = C_MESSAGENO.NORMAL Then
                 Dim dicReportConf = COA0017FixValue.VALUEDIC
-                If dicReportConf.ContainsKey(CONST_REPTYPE_SHIP) Then
-                    RepMainCnt = Convert.ToInt32(dicReportConf(CONST_REPTYPE_SHIP)(1))
-                    RepSubCnt = Convert.ToInt32(dicReportConf(CONST_REPTYPE_SHIP)(2))
+                If dicReportConf.ContainsKey(repType) Then
+                    RepMainCnt = Convert.ToInt32(dicReportConf(repType)(1))
+                    RepSubCnt = Convert.ToInt32(dicReportConf(repType)(2))
                 End If
             Else
                 Throw New Exception("Fix value getError")
@@ -365,7 +389,7 @@ Public Class GBT00028INVOICEEDIT
             COA0027ReportTable.MAPID = CONST_MAPID                      'PARAM01:画面ID
             'PARAM02:帳票ID
             'COA0027ReportTable.REPORTID = CONST_REPTYPE_SHIP & "_" & Convert.ToString(drCustomer.Item("CURRENCY")) & "_" & Convert.ToString(drCustomer.Item("OUTLANGUAGE"))
-            COA0027ReportTable.REPORTID = CONST_REPTYPE_SHIP & "_" & Convert.ToString(drCustomer.Item("ACCCURRENCYSEGMENT")) & "_" & Convert.ToString(drCustomer.Item("OUTLANGUAGE"))
+            COA0027ReportTable.REPORTID = repType & "_" & Convert.ToString(drCustomer.Item("ACCCURRENCYSEGMENT")) & "_" & Convert.ToString(drCustomer.Item("OUTLANGUAGE"))
             'COA0027ReportTable.FILETYPE = "PDF"                         'PARAM03:出力ファイル形式
             COA0027ReportTable.FILETYPE = "XLSX"                         'PARAM03:出力ファイル形式
             COA0027ReportTable.TBLDATA = dtTmp                    'PARAM04:データ参照tabledata
@@ -403,7 +427,7 @@ Public Class GBT00028INVOICEEDIT
             For Each item As KeyValuePair(Of String, Integer) In dicPrint
 
                 Dim sheetId As String = Left(item.Key, Len(item.Key) - 1)
-                COA0027ReportTable.REPORTID = "InvoiceShip" & "_" & sheetId         'PARAM02:帳票ID
+                COA0027ReportTable.REPORTID = repType & "_" & sheetId         'PARAM02:帳票ID
                 COA0027ReportTable.ADDSHEET = sheetId                               'PARAM05:追記シート（任意）
                 COA0027ReportTable.FILETYPE = "XLSX"                                 'PARAM03:出力ファイル形式
 
@@ -784,20 +808,33 @@ Public Class GBT00028INVOICEEDIT
         Else
             AddLangSetting(dicDisplayText, Me.hdnListHeaderCheck, "発行対象", "Issued")
         End If
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderNo, "No.", "No.")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderOrder, "オーダー No.", "Order No.")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderTankNo, "タンク No.", "Tank No.")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderBlId, "B/L ID", "B/L ID")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderTermType, "TERM TYPE", "Term Type")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderPOL, "POL", "POL")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderPOD, "POD", "POD")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderProduct, "積載品", "Product")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderLoadDate, "LOAD", "Load")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderETD, "ETD", "ETD")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderETA, "ETA", "ETA")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderShipDate, "SHIP", "Ship")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderArvdDate, "ARVD", "Arvd")
-        AddLangSetting(dicDisplayText, Me.hdnListHeaderAmount, "AMOUNT", "Amount")
+        If GBT00028RValues.InvoiceType <> "L" Then
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderNo, "No.", "No.")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderOrder, "オーダー No.", "Order No.")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderTankNo, "タンク No.", "Tank No.")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderBlId, "B/L ID", "B/L ID")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderTermType, "TERM TYPE", "Term Type")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderPOL, "POL", "POL")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderPOD, "POD", "POD")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderProduct, "積載品", "Product")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderLoadDate, "LOAD", "Load")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderETD, "ETD", "ETD")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderETA, "ETA", "ETA")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderShipDate, "SHIP", "Ship")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderArvdDate, "ARVD", "Arvd")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderAmount, "AMOUNT", "Amount")
+        Else
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderNo, "No.", "No.")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderOrder, "オーダー No.", "Order No.")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderTankNo, "タンク No.", "Tank No.")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderTankCapacity, "屯数", "Tank Capacity")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderProduct, "積載品", "Product")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderLeaseST, "自", "LeaseStart")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderLeaseEND, "至", "LeaseEnd")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderLeaseDAYS, "日数", "Days")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderUnitPrice, "単価", "Unit Price")
+            AddLangSetting(dicDisplayText, Me.hdnListHeaderAmount, "金額", "Amount")
+        End If
 
         '****************************************
         ' 各種ボタン
@@ -843,7 +880,11 @@ Public Class GBT00028INVOICEEDIT
             Dim dtTankInfo As DataTable = CreateTankInfoTable()
             ''前画面のキー情報を元にデータをDBより取得
             dtCustomerInfo = GetCustomerInfo(dtCustomerInfo, GBT00028RValues.GBT00028SValues.CustomerCode, GBT00028RValues.GBT00028SValues.InvoiceMonth)
-            dtTankInfo = GetTankListInfo(dtTankInfo, GBT00028RValues)
+            If Me.GBT00028RValues.InvoiceType <> "L" Then
+                dtTankInfo = GetTankListInfo(dtTankInfo, GBT00028RValues)
+            Else
+                dtTankInfo = GetLeaseTankListInfo(dtTankInfo, GBT00028RValues)
+            End If
             retDataSet.Tables.AddRange({dtCustomerInfo, dtTankInfo})
             prevDs = retDataSet
 
@@ -871,7 +912,11 @@ Public Class GBT00028INVOICEEDIT
 
             'dtCustomerInfo = GetCustomerInfo(dtCustomerInfo, GBT00028RValues.GBT00028SValues.CustomerCode, GBT00028RValues.GBT00028SValues.InvoiceMonth)
             dtCustomerInfo = GetCustomerInfo(dtCustomerInfo, getToriCode, GBT00028RValues.GBT00028SValues.InvoiceMonth)
-            dtTankInfo = GetTankListInfo(dtTankInfo, GBT00028RValues)
+            If Me.GBT00028RValues.InvoiceType <> "L" Then
+                dtTankInfo = GetTankListInfo(dtTankInfo, GBT00028RValues)
+            Else
+                dtTankInfo = GetLeaseTankListInfo(dtTankInfo, GBT00028RValues)
+            End If
             retDataSet.Tables.AddRange({dtCustomerInfo, dtTankInfo})
             prevDs = retDataSet
         ElseIf Page.PreviousPage Is Nothing Then
@@ -924,6 +969,7 @@ Public Class GBT00028INVOICEEDIT
             .Add("AMOUNT", GetType(String)).DefaultValue = ""
             .Add("HOLIDAYFLG", GetType(String)).DefaultValue = ""
             '.Add("FIXFLG", GetType(String)).DefaultValue = ""
+            .Add("WORK_C1", GetType(String)).DefaultValue = ""
         End With
         Return retDt
     End Function
@@ -970,6 +1016,13 @@ Public Class GBT00028INVOICEEDIT
             .Add("INVOICENO", GetType(String)).DefaultValue = ""
             ''オーダー作成用TANKSEQ設定
             '.Add("TANKSEQ", GetType(String)).DefaultValue = ""
+            ''LEASE情報
+            .Add("TANKCAPACITY", GetType(String)).DefaultValue = ""
+            .Add("LEASEST", GetType(String)).DefaultValue = ""
+            .Add("LEASEEND", GetType(String)).DefaultValue = ""
+            .Add("LEASEDAYS", GetType(String)).DefaultValue = ""
+            .Add("UNITPRICE", GetType(String)).DefaultValue = ""
+            .Add("TAXATION", GetType(String)).DefaultValue = ""
         End With
         Return retDt
     End Function
@@ -1049,6 +1102,15 @@ Public Class GBT00028INVOICEEDIT
 
             End If
 
+
+        End If
+
+        If Me.GBT00028RValues.InvoiceType = "L" Then
+            Dim objSearch = Me.commonInfo.FindControl("trSearch")
+            If Not IsNothing(objSearch) Then
+                objSearch.Visible = False
+            End If
+            drCustomer.Item("WORK_C1") = "L"
         End If
 
         '帳票種類
@@ -1059,8 +1121,17 @@ Public Class GBT00028INVOICEEDIT
         End If
 
         'タンク一覧
-        Me.repTankInfo.DataSource = dtTankInfo
-        Me.repTankInfo.DataBind()
+        If Me.GBT00028RValues.InvoiceType <> "L" Then
+            Me.repTankInfo.DataSource = dtTankInfo
+            Me.repTankInfo.DataBind()
+            Me.repLeaseTankInfo.Visible = False
+        Else
+            Me.repLeaseTankInfo.DataSource = dtTankInfo
+            Me.repLeaseTankInfo.DataBind()
+            Me.repTankInfo.Visible = False
+
+            Me.txtlang.Enabled = False
+        End If
 
         '文言設定
         txtPOL_Change()
@@ -1198,7 +1269,7 @@ Public Class GBT00028INVOICEEDIT
             sqlStat.AppendLine("  ,TANK")
             sqlStat.AppendLine("  ,CREATEUSER")
             sqlStat.AppendLine("  ,CREATEDATE")
-            'sqlStat.AppendLine("  ,WORK_C1")
+            sqlStat.AppendLine("  ,WORK_C1")
             'sqlStat.AppendLine("  ,WORK_C2")
             'sqlStat.AppendLine("  ,WORK_C3")
             'sqlStat.AppendLine("  ,WORK_F1")
@@ -1227,7 +1298,7 @@ Public Class GBT00028INVOICEEDIT
             sqlStat.AppendLine("  ,@TANK")
             sqlStat.AppendLine("  ,@UPDUSER")
             sqlStat.AppendLine("  ,@INITYMD")
-            'sqlStat.AppendLine("  ,@WORK_C1")
+            sqlStat.AppendLine("  ,@WORK_C1")
             'sqlStat.AppendLine("  ,@WORK_C2")
             'sqlStat.AppendLine("  ,@WORK_C3")
             'sqlStat.AppendLine("  ,@WORK_F1")
@@ -1257,7 +1328,7 @@ Public Class GBT00028INVOICEEDIT
                     .Add("@ACCCURRENCYSEGMENT", SqlDbType.NVarChar).Value = dr.Item("ACCCURRENCYSEGMENT")
                     .Add("@AMOUNT", SqlDbType.Float).Value = DecimalStringToDecimal(Convert.ToString(dr.Item("AMOUNT")))
                     .Add("@TANK", SqlDbType.Int).Value = tankCount
-                    '.Add("@WORK_C1", SqlDbType.NVarChar).Value = dr.Item("WORK_C1")
+                    .Add("@WORK_C1", SqlDbType.NVarChar).Value = dr.Item("WORK_C1")
                     '.Add("@WORK_C2", SqlDbType.NVarChar).Value = dr.Item("WORK_C2")
                     '.Add("@WORK_C3", SqlDbType.NVarChar).Value = dr.Item("WORK_C3")
                     '.Add("@WORK_F1", SqlDbType.NVarChar).Value = DecimalStringToDecimal(Convert.ToString(dr.Item("WORK_F1")))
@@ -1591,6 +1662,7 @@ Public Class GBT00028INVOICEEDIT
         sqlStat.AppendLine("      ,MB.CURRENCYCODE as 'CURRENCY'")
         sqlStat.AppendLine("      ,ISNULL(II.OUTLANGUAGE,'') as 'OUTLANGUAGE', ISNULL(convert(char(10),II.INVOICEDATE,111),'') as 'INVOICEDATE',ISNULL(II.REMARK,'') as 'REMARK'")
         sqlStat.AppendLine("      ,ISNULL(II.DRAFTOUTPUT, '0') as 'DRAFTOUTPUT', ISNULL(II.ORIGINALOUTPUT, '0') as 'ORIGINALOUTPUT', ISNULL(II.AMOUNT, '0') as 'AMOUNT'")
+        sqlStat.AppendLine("      ,ISNULL(II.WORK_C1,'') as 'WORK_C1'")
         sqlStat.AppendFormat("FROM {0} MC", CONST_TBL_CUSTOMER).AppendLine()
         sqlStat.AppendFormat("  INNER JOIN {0} MT", CONST_TBL_TORI).AppendLine()
         sqlStat.AppendLine("    ON  MT.DELFLG     <> @DELFLG")
@@ -1794,7 +1866,7 @@ Public Class GBT00028INVOICEEDIT
             sqlStat.AppendLine("                    ) ")
         End If
         sqlStat.AppendLine(" ) TBL")
-            sqlStat.AppendLine(" ORDER BY TBL.ORDERNO,TBL.TANKNO")
+        sqlStat.AppendLine(" ORDER BY TBL.ORDERNO,TBL.TANKNO")
         Dim dtDbResult As New DataTable
         Using sqlCon = New SqlConnection(COA0019Session.DBcon),
               sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
@@ -1810,6 +1882,146 @@ Public Class GBT00028INVOICEEDIT
                 .Add("@CUSTOMER", SqlDbType.NVarChar).Value = GBT00028RVALUE.GBT00028SValues.CustomerCode
                 .Add("@POL", SqlDbType.NVarChar).Value = GBT00028RVALUE.GBT00028SValues.POL
                 .Add("@POD", SqlDbType.NVarChar).Value = GBT00028RVALUE.GBT00028SValues.POD
+                .Add("@PRODUCT", SqlDbType.NVarChar).Value = GBT00028RVALUE.GBT00028SValues.ProductCode
+                If GBT00028RVALUE.NewInvoiceCreate = True Then
+                    .Add("@TOINVOICE", SqlDbType.NVarChar).Value = "0"
+                    .Add("@INVOICENO", SqlDbType.NVarChar).Value = ""
+                Else
+                    .Add("@TOINVOICE", SqlDbType.NVarChar).Value = "1"
+                    .Add("@INVOICENO", SqlDbType.NVarChar).Value = GBT00028RVALUE.InvoiceNo
+                    .Add("@INVOICENOSUB", SqlDbType.NVarChar).Value = Convert.ToInt32(Right(GBT00028RVALUE.InvoiceNo, 2))
+                End If
+
+            End With
+            Using sqlDa As New SqlDataAdapter(sqlCmd)
+                sqlDa.Fill(dtDbResult)
+            End Using
+        End Using
+        Dim colNameList As New List(Of String)
+        For Each colOb As DataColumn In dtDbResult.Columns
+            If retDt.Columns.Contains(colOb.ColumnName) Then
+                colNameList.Add(colOb.ColumnName)
+            End If
+        Next
+
+        For Each readDr As DataRow In dtDbResult.Rows
+            '同一カラム名を単純転送
+            Dim writeDr As DataRow = retDt.NewRow
+            For Each colName In colNameList
+                writeDr.Item(colName) = readDr.Item(colName)
+            Next
+            retDt.Rows.Add(writeDr)
+        Next
+
+        Return retDt
+
+    End Function
+    ''' <summary>
+    ''' 請求書対象リースタンク取得
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>暫定</remarks>
+    Private Function GetLeaseTankListInfo(dt As DataTable, GBT00028RVALUE As GBT00028RESULT.GBT00028RValues) As DataTable
+
+        Dim retDt As DataTable = dt.Clone
+        Dim sqlStat As New StringBuilder
+        sqlStat.AppendLine("SELECT ROW_NUMBER() OVER(ORDER BY ORDERNO,TANKNO) As LINECNT")
+        sqlStat.AppendLine("      ,'' AS OPERATION")
+        sqlStat.AppendLine("      ,'1' AS 'SELECT' ")
+        sqlStat.AppendLine("      ,'0' AS HIDDEN ")
+        sqlStat.AppendLine("      ,''  AS ACTION ")
+        sqlStat.AppendLine("      ,TBL.*")
+        sqlStat.AppendLine("  FROM (")
+        sqlStat.AppendLine("      SELECT ")
+        sqlStat.AppendLine("      OB.ORDERNO, OV.TANKNO, OB.BLID1, '' as 'TERMTYPE', '' as 'POL', '' as 'POD', PM.PRODUCTNAME")
+        sqlStat.AppendLine("     ,'' as 'LOADDATE','' as 'ETD','' as 'ETA'")
+        sqlStat.AppendLine("     ,'' as 'SHIPDATE','' as 'ARVDDATE'")
+        sqlStat.AppendLine("     ,OV.AMOUNTFIX as 'AMOUNT'")
+        sqlStat.AppendLine("     ,0.0 as 'EXSHIPRATE'")
+        sqlStat.AppendLine("     ,0.0 as 'EXRATE'")
+        sqlStat.AppendLine("     ,OB.BRID as 'BRID'")
+        sqlStat.AppendLine("     ,OV.CONTRACTORFIX as 'CUSTOMER'")
+        sqlStat.AppendLine("     ,CONVERT(CHAR(10),case when (LT.LEASESTYMD  > @INVOICEMONTH and LT.LEASESTYMD  < EOMONTH(@INVOICEMONTH)) then LT.LEASESTYMD  else  @INVOICEMONTH end,111) as 'LEASEST'")
+        sqlStat.AppendLine("     ,CONVERT(CHAR(10),case when (LT.LEASEENDYMD > @INVOICEMONTH and LT.LEASEENDYMD < EOMONTH(@INVOICEMONTH)) then LT.LEASEENDYMD else  EOMONTH(@INVOICEMONTH) end,111) as 'LEASEEND'")
+        sqlStat.AppendLine("     ,datediff(Day,case when (LT.LEASESTYMD > @INVOICEMONTH And LT.LEASESTYMD < EOMONTH(@INVOICEMONTH)) then LT.LEASESTYMD else @INVOICEMONTH end, case when LT.LEASEENDYMD between @INVOICEMONTH And EOMONTH(@INVOICEMONTH) Then LT.LEASEENDYMD else EOMONTH(@INVOICEMONTH) end) + 1 as 'LEASEDAYS'")
+        sqlStat.AppendLine("     ,case when ((LT.LEASESTYMD > @INVOICEMONTH And LT.LEASESTYMD < EOMONTH(@INVOICEMONTH)) Or (LT.LEASEENDYMD > @INVOICEMONTH And LT.LEASEENDYMD < EOMONTH(@INVOICEMONTH))) then convert(decimal(16,0),round((LA.LEASEPAYMENTS * 12.0 / 365.0),0)) else LA.LEASEPAYMENTS end as 'UNITPRICE'")
+        sqlStat.AppendLine("     ,OV.TAXATION as 'TAXATION'")
+        sqlStat.AppendLine("     ,convert(decimal(16,1),ISNULL(TK.NOMINALCAPACITY, 0) / 1000) as 'TANKCAPACITY'")
+        sqlStat.AppendLine("     ,@TOINVOICE as 'TOINVOICE'")
+        sqlStat.AppendLine("     ,@INVOICENO as 'INVOICENO'")
+        sqlStat.AppendFormat("  FROM {0} OV", CONST_TBL_OV)
+        If GBT00028RVALUE.NewInvoiceCreate = False Then
+            sqlStat.AppendFormat("  INNER JOIN {0} IT", CONST_TBL_INVOICETANK)
+            sqlStat.AppendLine("      ON  IT.INVOICENO     = @INVOICENO ")
+            sqlStat.AppendLine("     AND  IT.INVOICENOSUB  = @INVOICENOSUB ")
+            sqlStat.AppendLine("     AND  IT.ORDERNO       = OV.ORDERNO  ")
+            sqlStat.AppendLine("     AND  IT.TANKNO        = OV.TANKNO  ")
+            sqlStat.AppendLine("     AND  IT.DELFLG       <> @DELFLG ")
+
+        End If
+        sqlStat.AppendFormat("  INNER JOIN {0} OB", CONST_TBL_OB)
+        sqlStat.AppendLine("      ON  OB.DELFLG       <> @DELFLG ")
+        sqlStat.AppendLine("     AND  OB.ORDERNO       = OV.ORDERNO ")
+        sqlStat.AppendFormat("  INNER JOIN {0} LA", CONST_TBL_LA)
+        sqlStat.AppendLine("      ON  LA.DELFLG       <> @DELFLG ")
+        sqlStat.AppendLine("     AND  LA.AGREEMENTNO   = OV.BRID ")
+        sqlStat.AppendFormat("  INNER JOIN {0} LC", CONST_TBL_LC)
+        sqlStat.AppendLine("      ON  LC.DELFLG       <> @DELFLG ")
+        sqlStat.AppendLine("     AND  LC.CONTRACTNO    = LA.CONTRACTNO ")
+        sqlStat.AppendFormat("  INNER JOIN {0} LT", CONST_TBL_LT)
+        sqlStat.AppendLine("      ON  LT.DELFLG       <> @DELFLG ")
+        sqlStat.AppendLine("     AND  LT.CONTRACTNO    = LC.CONTRACTNO ")
+        sqlStat.AppendLine("     AND  LT.AGREEMENTNO   = LA.AGREEMENTNO ")
+        sqlStat.AppendLine("     AND  LT.TANKNO        = OV.TANKNO ")
+        sqlStat.AppendFormat("  LEFT OUTER JOIN {0} PM", CONST_TBL_PM)
+        sqlStat.AppendLine("      ON  PM.COMPCODE      = '" & GBC_COMPCODE & "' ")
+        sqlStat.AppendLine("     AND  PM.PRODUCTCODE   = OB.PRODUCTCODE ")
+        sqlStat.AppendLine("     AND  PM.STYMD        <= @NOWDATE")
+        sqlStat.AppendLine("     AND  PM.ENDYMD       >= @NOWDATE")
+        sqlStat.AppendLine("     AND  PM.DELFLG       <> @DELFLG")
+        sqlStat.AppendFormat("  LEFT OUTER JOIN {0} TK", CONST_TBL_TK)
+        sqlStat.AppendLine("      ON  TK.COMPCODE      = '" & GBC_COMPCODE & "' ")
+        sqlStat.AppendLine("     AND  TK.TANKNO   = OV.TANKNO ")
+        sqlStat.AppendLine("     AND  TK.STYMD        <= @NOWDATE")
+        sqlStat.AppendLine("     AND  TK.ENDYMD       >= @NOWDATE")
+        sqlStat.AppendLine("     AND  TK.DELFLG       <> @DELFLG")
+        If GBT00028RVALUE.GBT00028SValues.CustomerCode <> "" Then
+            sqlStat.AppendFormat("INNER JOIN {0} MC", CONST_TBL_CUSTOMER).AppendLine()
+            sqlStat.AppendLine("     ON MC.INCTORICODE   = @CUSTOMER")
+            sqlStat.AppendLine("    AND MC.STYMD        <= @NOWDATE")
+            sqlStat.AppendLine("    AND MC.ENDYMD       >= @NOWDATE")
+            sqlStat.AppendLine("    AND MC.DELFLG       <> @DELFLG")
+            sqlStat.AppendLine("    AND MC.CUSTOMERCODE  = OV.CONTRACTORFIX")
+        End If
+        sqlStat.AppendLine("   WHERE OV.DELFLG        <> @DELFLG ")
+        sqlStat.AppendLine("     AND OV.TANKNO        <> ''")
+        sqlStat.AppendLine("     AND OV.INVOICEDBY     = 'JPA00001'")
+        sqlStat.AppendLine("     AND OV.COSTCODE    LIKE 'S0103%'")
+        sqlStat.AppendLine("     AND ( OV.ACTUALDATE BETWEEN @INVOICEMONTH AND EOMONTH(@INVOICEMONTH) )")
+        sqlStat.AppendLine("     AND OV.SOAAPPDATE     = '1900/01/01'")
+        If GBT00028RVALUE.NewInvoiceCreate = True Then
+            sqlStat.AppendLine("     AND NOT EXISTS (")
+            sqlStat.AppendFormat("                      SELECT * FROM {0} ITW", CONST_TBL_INVOICETANK)
+            sqlStat.AppendLine("                        WHERE ITW.ORDERNO = OV.ORDERNO ")
+            sqlStat.AppendLine("                        AND   ITW.TANKNO  = OV.TANKNO ")
+            sqlStat.AppendLine("                        AND   ITW.DELFLG <> @DELFLG ")
+            sqlStat.AppendLine("                    ) ")
+        End If
+        sqlStat.AppendLine(" ) TBL")
+        sqlStat.AppendLine(" ORDER BY TBL.ORDERNO,TBL.TANKNO")
+        Dim dtDbResult As New DataTable
+        Using sqlCon = New SqlConnection(COA0019Session.DBcon),
+              sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
+            sqlCon.Open()
+            'SQLパラメータ設定
+            With sqlCmd.Parameters
+                .Add("@COMPCODE", SqlDbType.NVarChar).Value = GBC_COMPCODE
+                .Add("@NOWDATE", SqlDbType.Date).Value = Now
+                .Add("@DELFLG", SqlDbType.NVarChar).Value = CONST_FLAG_YES
+                .Add("@ENABLED", SqlDbType.NVarChar).Value = CONST_FLAG_YES
+
+                .Add("@INVOICEMONTH", SqlDbType.NVarChar).Value = GBT00028RValues.GBT00028SValues.InvoiceMonth & "/01"
+                .Add("@CUSTOMER", SqlDbType.NVarChar).Value = GBT00028RVALUE.GBT00028SValues.CustomerCode
                 .Add("@PRODUCT", SqlDbType.NVarChar).Value = GBT00028RVALUE.GBT00028SValues.ProductCode
                 If GBT00028RVALUE.NewInvoiceCreate = True Then
                     .Add("@TOINVOICE", SqlDbType.NVarChar).Value = "0"
@@ -2014,6 +2226,152 @@ Public Class GBT00028INVOICEEDIT
         sqlStat.AppendLine("     AND  EM.STYMD        <= @NOWDATE")
         sqlStat.AppendLine("     AND  EM.ENDYMD       >= @NOWDATE")
         sqlStat.AppendLine("     AND  EM.DELFLG       <> @DELFLG")
+        sqlStat.AppendLine("   WHERE II.INVOICENO      = @INVOICENO ")
+        sqlStat.AppendLine("     AND II.DELFLG        <> @DELFLG")
+        sqlStat.AppendLine(" ORDER BY OV.ORDERNO,OV.TANKNO")
+
+        Using sqlCon = New SqlConnection(COA0019Session.DBcon),
+              sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
+            sqlCon.Open()
+            'SQLパラメータ設定
+            With sqlCmd.Parameters
+                .Add("@COMPCODE", SqlDbType.NVarChar).Value = GBC_COMPCODE
+                .Add("@NOWDATE", SqlDbType.Date).Value = Now
+                .Add("@DELFLG", SqlDbType.NVarChar).Value = CONST_FLAG_YES
+                .Add("@INVOICENO", SqlDbType.NVarChar).Value = invoiceNo
+                .Add("@INVOICEMONTH", SqlDbType.NVarChar).Value = invoiceMonth & "/01"
+
+            End With
+            Using sqlDa As New SqlDataAdapter(sqlCmd)
+                sqlDa.Fill(retDt)
+            End Using
+        End Using
+        Return retDt
+
+    End Function
+
+    ''' <summary>
+    ''' 請求書出力情報取得（リース）
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>暫定</remarks>
+    Private Function GetOutPutInfoLease(invoiceNo As String, invoiceMonth As String) As DataTable
+
+        Dim sqlStat As New StringBuilder
+
+        Dim AddColStr As String = ""
+        If (Me.txtlang.Text.ToUpper = "JP") Then
+            AddColStr = "JP"
+        End If
+
+        Dim retDt As New DataTable
+        sqlStat.AppendLine("SELECT ROW_NUMBER() OVER(ORDER BY OV.ORDERNO, OV.TANKNO) As LINECNT")
+        sqlStat.AppendLine("      ,'' AS OPERATION")
+        sqlStat.AppendLine("      ,'1' AS 'SELECT' ")
+        sqlStat.AppendLine("      ,'0' AS HIDDEN ")
+        sqlStat.AppendLine("      ,''  AS ACTION ")
+        sqlStat.AppendLine("      ,OV.ORDERNO ")
+        sqlStat.AppendLine("      ,OV.TANKNO")
+        sqlStat.AppendLine("      ,convert(decimal(16,1),ISNULL(TK.NOMINALCAPACITY, 0))/1000 as 'TANKCAPACITY'")
+        sqlStat.AppendLine("      ,OB.PRODUCTCODE ")
+        sqlStat.AppendLine("      ,PM.PRODUCTNAME ")
+        sqlStat.AppendLine("      ,CONVERT(CHAR(10),case when (LT.LEASESTYMD  > @INVOICEMONTH and LT.LEASESTYMD  < EOMONTH(@INVOICEMONTH)) then LT.LEASESTYMD  else  @INVOICEMONTH end,111) as 'LEASEST'")
+        sqlStat.AppendLine("      ,CONVERT(CHAR(10),case when (LT.LEASEENDYMD > @INVOICEMONTH and LT.LEASEENDYMD < EOMONTH(@INVOICEMONTH)) then LT.LEASEENDYMD else  EOMONTH(@INVOICEMONTH) end,111) as 'LEASEEND'")
+        sqlStat.AppendLine("      ,datediff(Day,case when (LT.LEASESTYMD > @INVOICEMONTH And LT.LEASESTYMD < EOMONTH(@INVOICEMONTH)) then LT.LEASESTYMD else @INVOICEMONTH end, case when LT.LEASEENDYMD between @INVOICEMONTH And EOMONTH(@INVOICEMONTH) Then LT.LEASEENDYMD else EOMONTH(@INVOICEMONTH) end) + 1 as 'LEASEDAYS'")
+        sqlStat.AppendLine("      ,case when ((LT.LEASESTYMD > @INVOICEMONTH And LT.LEASESTYMD < EOMONTH(@INVOICEMONTH)) Or (LT.LEASEENDYMD > @INVOICEMONTH And LT.LEASEENDYMD < EOMONTH(@INVOICEMONTH))) then convert(decimal(16,0),round((LA.LEASEPAYMENTS * 12.0 / 365.0),0)) else LA.LEASEPAYMENTS end as 'UNITPRICE'")
+        sqlStat.AppendLine("      ,OV.AMOUNTFIX ")
+        sqlStat.AppendLine("      ,OV.TAXATION ")
+        sqlStat.AppendLine("      ,OV.CURRENCYCODE ")
+        sqlStat.AppendLine("      ,CM.ACCCURRENCYSEGMENT ")
+        sqlStat.AppendFormat("    ,TM.NAMES{0}1 as 'NAMES1' ", AddColStr)
+        sqlStat.AppendFormat("    ,TM.NAMES{0}2 as 'NAMES2'", AddColStr)
+        sqlStat.AppendFormat("    ,TM.NAMES{0}3 as 'NAMES3'", AddColStr)
+        sqlStat.AppendFormat("    ,TM.NAMEL{0}1 as 'NAMEL1'", AddColStr)
+        sqlStat.AppendFormat("    ,TM.NAMEL{0}2 as 'NAMEL2'", AddColStr)
+        sqlStat.AppendFormat("    ,TM.NAMEL{0}3 as 'NAMEL3'", AddColStr)
+        sqlStat.AppendFormat("    ,TM.POSTNUM{0} as 'POSTNUM'", AddColStr)
+        sqlStat.AppendFormat("    ,TM.ADDR{0}1 as 'ADDR1'", AddColStr)
+        sqlStat.AppendFormat("    ,TM.ADDR{0}2 as 'ADDR2'", AddColStr)
+        sqlStat.AppendFormat("    ,TM.ADDR{0}3 as 'ADDR3'", AddColStr)
+        sqlStat.AppendLine("      ,BM.BANKCODE ")
+        sqlStat.AppendLine("      ,BM.SWIFTCODE ")
+        sqlStat.AppendLine("      ,BM.NAME ")
+        sqlStat.AppendLine("      ,BM.NAMEJP ")
+        sqlStat.AppendLine("      ,BM.NAMEK ")
+        sqlStat.AppendLine("      ,BM.BRANCHCODE ")
+        sqlStat.AppendLine("      ,BM.BRANCHNAME ")
+        sqlStat.AppendLine("      ,BM.BRANCHNAMEJP ")
+        sqlStat.AppendLine("      ,BM.BRANCHNAMEK ")
+        sqlStat.AppendLine("      ,BM.ZIPCODE ")
+        sqlStat.AppendLine("      ,BM.ADDR as 'ADDR_BM' ")
+        sqlStat.AppendLine("      ,BM.ADDRJP ")
+        sqlStat.AppendLine("      ,BM.TEL ")
+        sqlStat.AppendLine("      ,BM.TYPEOFACCOUNT ")
+        sqlStat.AppendLine("      ,BM.ACCOUNTNO ")
+        sqlStat.AppendLine("      ,BM.ACCOUNTHOLDER ")
+        sqlStat.AppendLine("      ,BM.ACCOUNTHOLDERK ")
+        sqlStat.AppendLine("      ,BM.CURRENCYCODE as 'CURRENCYCODE_BM' ")
+        sqlStat.AppendLine("      ,CM.DEPOSITDAY ")
+        sqlStat.AppendLine("      ,CM.DEPOSITADDMM ")
+        sqlStat.AppendLine("      ,II.INVOICENO ")
+        sqlStat.AppendLine("      ,II.INVOICEMONTH ")
+        sqlStat.AppendLine("      ,II.REMARK ")
+        sqlStat.AppendLine("      ,CONVERT(CHAR(10),II.INVOICEDATE,111) as 'INVOICEDATE' ")
+        sqlStat.AppendFormat("  FROM {0} II", CONST_TBL_INVOICEINFO)
+        sqlStat.AppendFormat("  INNER JOIN {0} IT", CONST_TBL_INVOICETANK)
+        sqlStat.AppendLine("      ON  IT.INVOICENO     = II.INVOICENO  ")
+        sqlStat.AppendLine("     AND  IT.DELFLG       <> @DELFLG ")
+        sqlStat.AppendFormat("  INNER JOIN {0} OV", CONST_TBL_OV)
+        sqlStat.AppendLine("      ON  OV.ORDERNO       = IT.ORDERNO  ")
+        sqlStat.AppendLine("     AND  OV.TANKNO        = IT.TANKNO ")
+        sqlStat.AppendLine("     AND  OV.COSTCODE   LIKE 'S0103%' ")
+        sqlStat.AppendLine("     AND  ( OV.ACTUALDATE BETWEEN CONVERT(DATE, @INVOICEMONTH) AND EOMONTH(CONVERT(DATE, @INVOICEMONTH)) )")
+        sqlStat.AppendLine("     AND  OV.DELFLG       <> @DELFLG ")
+        sqlStat.AppendFormat("  INNER JOIN {0} OB", CONST_TBL_OB)
+        sqlStat.AppendLine("      ON  OB.ORDERNO       = OV.ORDERNO  ")
+        sqlStat.AppendLine("     AND  OB.DELFLG       <> @DELFLG ")
+        sqlStat.AppendFormat("  INNER JOIN {0} LA", CONST_TBL_LA)
+        sqlStat.AppendLine("      ON  LA.DELFLG       <> @DELFLG ")
+        sqlStat.AppendLine("     AND  LA.AGREEMENTNO   = OV.BRID ")
+        sqlStat.AppendFormat("  INNER JOIN {0} LC", CONST_TBL_LC)
+        sqlStat.AppendLine("      ON  LC.DELFLG       <> @DELFLG ")
+        sqlStat.AppendLine("     AND  LC.CONTRACTNO    = LA.CONTRACTNO ")
+        sqlStat.AppendFormat("  INNER JOIN {0} LT", CONST_TBL_LT)
+        sqlStat.AppendLine("      ON  LT.DELFLG       <> @DELFLG ")
+        sqlStat.AppendLine("     AND  LT.CONTRACTNO    = LC.CONTRACTNO ")
+        sqlStat.AppendLine("     AND  LT.AGREEMENTNO   = LA.AGREEMENTNO ")
+        sqlStat.AppendLine("     AND  LT.TANKNO        = OV.TANKNO ")
+        sqlStat.AppendFormat("  LEFT OUTER JOIN {0} CM", CONST_TBL_CUSTOMER)
+        sqlStat.AppendLine("      ON  CM.COMPCODE      = '" & GBC_COMPCODE & "' ")
+        sqlStat.AppendLine("     AND  CM.CUSTOMERCODE  = OV.CONTRACTORFIX ")
+        sqlStat.AppendLine("     AND  CM.STYMD        <= @NOWDATE")
+        sqlStat.AppendLine("     AND  CM.ENDYMD       >= @NOWDATE")
+        sqlStat.AppendLine("     AND  CM.DELFLG       <> @DELFLG")
+        sqlStat.AppendFormat("  LEFT OUTER JOIN {0} TM", CONST_TBL_TORI)
+        sqlStat.AppendLine("      ON  TM.COMPCODE      = '" & GBC_COMPCODE & "' ")
+        sqlStat.AppendLine("     AND  TM.TORIKBN       = 'I' ")
+        sqlStat.AppendLine("     AND  TM.TORICODE      = CM.INCTORICODE ")
+        sqlStat.AppendLine("     AND  TM.STYMD        <= @NOWDATE")
+        sqlStat.AppendLine("     AND  TM.ENDYMD       >= @NOWDATE")
+        sqlStat.AppendLine("     AND  TM.DELFLG       <> @DELFLG")
+        sqlStat.AppendFormat("  LEFT OUTER JOIN {0} BM", CONST_TBL_BANK)
+        sqlStat.AppendLine("      ON  BM.COMPCODE      = '" & GBC_COMPCODE & "' ")
+        sqlStat.AppendLine("     AND  BM.JOTBANKCODE   = TM.BANKCODE ")
+        sqlStat.AppendLine("     AND  BM.STYMD        <= @NOWDATE")
+        sqlStat.AppendLine("     AND  BM.ENDYMD       >= @NOWDATE")
+        sqlStat.AppendLine("     AND  BM.DELFLG       <> @DELFLG")
+        sqlStat.AppendFormat("  LEFT OUTER JOIN {0} PM", CONST_TBL_PM)
+        sqlStat.AppendLine("      ON  PM.COMPCODE      = '" & GBC_COMPCODE & "' ")
+        sqlStat.AppendLine("     AND  PM.PRODUCTCODE   = OB.PRODUCTCODE ")
+        sqlStat.AppendLine("     AND  PM.STYMD        <= @NOWDATE")
+        sqlStat.AppendLine("     AND  PM.ENDYMD       >= @NOWDATE")
+        sqlStat.AppendLine("     AND  PM.DELFLG       <> @DELFLG")
+        sqlStat.AppendFormat("  LEFT OUTER JOIN {0} TK", CONST_TBL_TK)
+        sqlStat.AppendLine("      ON  TK.COMPCODE      = '" & GBC_COMPCODE & "' ")
+        sqlStat.AppendLine("     AND  TK.TANKNO        = OV.TANKNO ")
+        sqlStat.AppendLine("     AND  TK.STYMD        <= @NOWDATE")
+        sqlStat.AppendLine("     AND  TK.ENDYMD       >= @NOWDATE")
+        sqlStat.AppendLine("     AND  TK.DELFLG       <> @DELFLG")
         sqlStat.AppendLine("   WHERE II.INVOICENO      = @INVOICENO ")
         sqlStat.AppendLine("     AND II.DELFLG        <> @DELFLG")
         sqlStat.AppendLine(" ORDER BY OV.ORDERNO,OV.TANKNO")
@@ -2344,10 +2702,16 @@ Public Class GBT00028INVOICEEDIT
         Dim amountTotal As Double = 0.0
         Dim ds As DataSet = DirectCast(ViewState(CONST_VS_NAME_CURRENT_VAL), DataSet)
         Dim dtTankInfo As DataTable = ds.Tables(CONST_DT_NAME_TANKINFO)
-        If dtTankInfo.Rows.Count = 0 OrElse repTankInfo.Items Is Nothing OrElse repTankInfo.Items.Count = 0 Then
+        Dim repTmpTankInfo As Repeater
+        If Me.GBT00028RValues.InvoiceType <> "L" Then
+            repTmpTankInfo = repTankInfo
+        Else
+            repTmpTankInfo = repLeaseTankInfo
+        End If
+        If dtTankInfo.Rows.Count = 0 OrElse repTmpTankInfo.Items Is Nothing OrElse repTmpTankInfo.Items.Count = 0 Then
             Return
         End If
-        For Each repItem As RepeaterItem In repTankInfo.Items
+        For Each repItem As RepeaterItem In repTmpTankInfo.Items
             Dim lblLineCntObj As Label = DirectCast(repItem.FindControl("lblLineCnt"), Label)
             Dim chkToInvoice As CheckBox = DirectCast(repItem.FindControl("chkToInvoice"), CheckBox)
 
@@ -2966,13 +3330,18 @@ Public Class GBT00028INVOICEEDIT
             sqlStat.AppendLine("      and pm.ENDYMD >= getdate()")
             sqlStat.AppendLine("  where ov.DELFLG <> @DELFLG ")
             sqlStat.AppendLine("  and   ov.INVOICEDBY = 'JPA00001' ")
-            sqlStat.AppendLine("  and   ov.COSTCODE = 'A0001-01' ")
-            sqlStat.AppendLine("  and   ov.SOAAPPDATE = '1900/01/01' ")
-            sqlStat.AppendLine("  and   ov.BRID like 'BT%' ")
+            If Me.GBT00028RValues.InvoiceType <> "L" Then
+                sqlStat.AppendLine("  and   ov.COSTCODE = 'A0001-01' ")
+                sqlStat.AppendLine("  and   ov.SOAAPPDATE = '1900/01/01' ")
+                sqlStat.AppendLine("  and   ov.BRID like 'BT%' ")
+            Else
+                sqlStat.AppendLine("  and   ov.COSTCODE LIKE 'S0103%' ")
+                sqlStat.AppendLine("  and   ov.SOAAPPDATE = '1900/01/01' ")
+            End If
 
             ' 指定済み
             If GBT00028RValues.GBT00028SValues.CustomerCode <> "" Then
-                sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
+                '               sqlStat.AppendLine("  and   ov.CONTRACTORFIX = @CUSTOMER ")
             End If
             If Me.txtPOL.Text <> "" Then
                 sqlStat.AppendLine("  and   ob.LOADPORT1 = @POL ")

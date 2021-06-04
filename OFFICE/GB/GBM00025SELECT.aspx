@@ -1,19 +1,106 @@
-﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="GBT00028RESULT.aspx.vb" Inherits="OFFICE.GBT00028RESULT" %>
-
+﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="GBM00025SELECT.aspx.vb" Inherits="OFFICE.GBM00025SELECT" %>
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <asp:PlaceHolder ID="phCommonHeader" runat="server"></asp:PlaceHolder>
-    <link rel="icon" type="image/png" href="~/images/favicon.png" />
     <%--フォームのID以外でタイトルを設定する場合は適宜変更--%>
     <title><%= Me.Form.ClientId %></title>
     <%--全画面共通のスタイルシート --%>
     <link href="~/css/commonStyle.css" rel="stylesheet" type="text/css" />
     <%--個別のスタイルは以下に記載 OR 外部ファイルに逃す --%>
-    <link href="~/GB/css/GBT00028RESULT.css" rel="stylesheet" />
     <style>
+       /* テキスト表示情報 */
+       #itemTable{
+           table-layout:fixed; 
+           margin-top :5px;
+           margin-left: 65px;
+           width:785px;
+	   }
+
+       /* 共通セル設定 */
+       #itemTable td{
+           padding-bottom:20px;
+	   }
+	   
+       /* 1列目幅 */
+	   #itemTable td:nth-child(1){
+           width:170px;
+           height:22.4px;
+           font-weight:bold;
+           text-decoration:underline;
+           overflow:hidden;
+           color: black ;
+           font-size: small;
+           vertical-align:middle;
+           text-align:left;
+	   }
+	   
+       /* 2列名幅 */
+	   #itemTable td:nth-child(2){
+           width:100px;
+           height:22.4px;
+           overflow:hidden;
+           color: black ;
+           font-size: small;
+           vertical-align:middle;
+           text-align:left;
+	   }
+	   
+       /* 3列名幅 */
+	   #itemTable td:nth-child(3){
+		   width:200px;
+           height:22.4px;
+           overflow:hidden;
+           color: blue ;
+           font-size: small;
+           vertical-align:middle;
+	    }
+	   
+       /* 4列名幅 */
+	   #itemTable td:nth-child(4){
+           text-align:right;
+		   width:100px;
+           height:22.4px;
+           overflow:hidden;
+           color: black ;
+           font-size: small;
+           vertical-align:middle;
+	    }
+
+	    /* 5列名幅 */
+	   #itemTable td:nth-child(5){
+           width:200px;
+           height:22.4px;
+	    }
+
+       #itemTable tr:nth-child(1) td:nth-child(2){
+           text-align:right;
+       }
+       
+       .ja #itemTable tr:nth-child(1) td:nth-child(2){
+           text-align:left;
+       }
+
+        /* 開始日 */
+	   #txtStYMD{
+           height:22.4px;
+	    }
+
+        /* 終了日 */
+	   #txtEndYMD{
+           height:22.4px;
+	    }
+
+        /* JOT銀行コード */
+        #txtJotBankCode{
+           height:22.4px;
+        }
+
+        #itemTable tr:nth-child(2) td:nth-child(1){
+            text-decoration:none;
+        }
     </style>
 <%--    <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
@@ -29,37 +116,49 @@
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
     <script type="text/javascript" src='<%= ResolveUrl("~/script/calendar.js") %>'  charset="utf-8"></script>
     <%--個別のスクリプトは以下に記載 --%>
-    <script type="text/javascript" src='<%= ResolveUrl("~/GB/script/GBT00028RESULT.js") %>'  charset="utf-8"></script>
     <script type="text/javascript">
+        // 必要な場合適宜関数、処理を追加
+
         // ○画面ロード時処理(すべてのレンダリングが終了後実行されます。)
         window.addEventListener('DOMContentLoaded', function () {
             screenLock();
             /* ボタンクリックイベントのバインド(適宜追加) */
-            var targetButtonObjects = ['<%= Me.btnBack.ClientId  %>',
-                                       '<%= Me.btnExcelDownload.ClientID %>',
-                                       '<%= Me.btnSave.ClientID %>',
-                                       '<%= Me.btnDel.ClientID %>'];
-            var invoiceNewButtons = document.getElementsByName('btnInvoiceItem');
-            if (invoiceNewButtons !== null) {
-				for (let i = 0; i < invoiceNewButtons.length; i++) {
-                    let invoiceNewButton = invoiceNewButtons[i];
-                    targetButtonObjects.push(invoiceNewButton.id)
-				}
-            }
+            /* 実行 */
+            var targetButtonObjects = ['<%= Me.btnEnter.ClientId  %>', '<%= Me.btnLeftBoxButtonSel.ClientId  %>',
+                                       '<%= Me.btnLeftBoxButtonCan.ClientId  %>'];
+            bindButtonClickEvent(targetButtonObjects);
+            /* 終了 */
+            var targetButtonObjects = ['<%= Me.btnBack.ClientId  %>', '<%= Me.btnLeftBoxButtonSel.ClientId  %>',
+                                       '<%= Me.btnLeftBoxButtonCan.ClientId  %>'];
             bindButtonClickEvent(targetButtonObjects);
 
             /* 左ボックス表示/非表示制御(hdnIsLeftBoxOpenが'Open'の場合表示) */
             displayLeftBox();
 
             /* 左ボックス表示ダブルクリックイベントのバインド */
+            var viewCalId = '<%= Me.vLeftCal.ClientID %>';                      /* 年月日 */
+            var dblClickObjects = [['<%= Me.txtStYMD.ClientID %>', viewCalId],
+                                   ['<%= Me.txtEndYMD.ClientID %>', viewCalId]
+                                  ];
+            bindLeftBoxShowEvent(dblClickObjects);
+
             /* 手入力変更時のイベント */
 
             /* 左ボックスのリストボックスダブルクリックイベントバインド */
-            
+            bindLeftListBoxDblClickEvent();
+
+            /* 左ボックスの拡張機能 */
+            /* 拡張機能を紐づけるリスト及び機能のフラグの配列 
+             * 2階層 1次元:コントロールのID,二次元:ソート機能フラグ(0,無し,1:名称のみ,2:コードのみ,3:両方),フィルタ機能フラグ(0,無し,1:設定)
+             */ 
+<%--            var leftListExtentionTarget = [['<%= Me.lbJotBankCode.ClientID %>', '3', '1']];
+            addLeftBoxExtention(leftListExtentionTarget);--%>
+
             /* 画面テキストボックス変更イベントのバインド(変更検知したいテキストボックスIDを指定 */
-            //var targetOnchangeObjects = [''];
-            //bindTextOnchangeEvent(targetOnchangeObjects);
-            //focusAfterChange();
+<%--            var targetOnchangeObjects = [
+                                         ['<%= Me.txtJotBankCode.ClientID %>']
+                                        ];
+            bindTextOnchangeEvent(targetOnchangeObjects);--%>
 
             /* 右ボックスの開閉ダブルクリックイベントバインド
                右上透明ボックス、下のメッセージ欄、他がある場合は個別で　*/
@@ -71,31 +170,16 @@
             openHelpPage(); /* hdnCanHelpOpenに"1"が立たない限り開きません。 */
 
             /* カレンダー描画処理 */
-
-            ///* グリッドのクリックイベント紐づけ */
-
-            /* 共通一覧のスクロールイベント紐づけ */
-            bindListCommonEvents('<%= Me.WF_LISTAREA.ClientId %>', '<%= if(IsPostBack = True, "1", "0") %>', true);
-            bindDisplayInvoiceNewBtn();
-            /* 検索ボックス生成 */
+            var calValueObj = document.getElementById('<%= Me.hdnCalendarValue.ClientID %>');
+            if (calValueObj !== null) {
+                /* 日付格納隠し項目がレンダリングされている場合のみ実行 */
+                carenda(0);
+                setAltMsg(firstAltYMD, firstAltMsg);
+            }
             screenUnlock();
+            focusAfterChange();
         });
 
-        // ○一覧用処理
-        function ListDbClick(obj, LineCnt) {
-            var objSubmit = document.getElementById("hdnSubmit");
-            var objListDBclick = document.getElementById("hdnListDBclick");
-            if (objSubmit === null || objListDBclick === null) {
-                return;
-            }
-
-            if (objSubmit.value === "FALSE") {
-                objSubmit.value = "TRUE";
-                objListDBclick.value = LineCnt;
-                commonDispWait();
-                document.forms[0].submit();                             //aspx起動
-            }
-        }
     </script>
 </head>
 <%-- 基本的にタグ内でのクライアントサイドのJavaScriptのイベント記述はせず、
@@ -104,7 +188,7 @@
     ※%付きのコメントはHTMLソース表示でもレンダリングされないものです --%>
 <body>
     <%--FormIDは適宜変更ください。 --%>
-    <form id="GBT00028R" runat="server">
+    <form id="GBM00025S" runat="server">
         <%--ヘッダーボックス --%>
         <div id="divContainer">
             <div id="divTitlebox">
@@ -136,46 +220,43 @@
             </div>
             <%--コンテンツボックス(このdiv内に適宜追加お願いします) --%>
             <div id="divContensbox">
-                <%-- ************************************** --%>
-                <%--ご自由に！！(このコメントは消してください) --%>
-                <%-- ************************************** --%>
                 <div id="actionButtonsBox">
-                    <div id="divInvoiceNew">
-                        <asp:Label ID="lblInvoiceNew" runat="server" Text="請求書作成"></asp:Label>
-                        <asp:Repeater ID="repInvoiceNew" runat="server">
-                            <HeaderTemplate>
-                                <ul id="ulInvoiceNew">
-                                    <li>
-                                        <div id="divInvoiceItems" style="display:none;">
-                            </HeaderTemplate>
-                            <ItemTemplate>
-                                <input id="btnInvoiceItem<%# GetDataItem().ToString() %>" name="btnInvoiceItem" type="button" value="<%# GetDataItem().ToString() %>" />
-                            </ItemTemplate>
-                            <FooterTemplate>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </FooterTemplate>
-                        </asp:Repeater>                        
-                    </div>
-<%--                    <input id="btnInvoiceNew" type="button" value="請求書作成"  runat="server"  />--%>
-                    <input id="btnDel" type="button" value="削除"  runat="server"  />
-                    <input id="btnSave" type="button" value="保存"  runat="server"  />
-                    <input id="btnExcelDownload" type="button" value="台帳出力" runat="server" />
-                    <input id="btnBack" type="button" value="戻る"  runat="server" />
+                    <input id="btnEnter" type="button" value="実行"  runat="server"  />
+                    <input id="btnBack" type="button" value="終了"  runat="server"  />
+                    <div class="firstPage" id="btnFIRST" style="visibility: hidden;"></div>
+                    <div class="lastPage" id="btnLAST" style="visibility: hidden;"></div>
                 </div>
-                <div id="invoiceInfo">
-                    <table class="itemTable">
-                        <tr>
-                            <th><asp:Label ID="lblInvoiceDate" runat="server" Text="請求月"></asp:Label></th>
-                            <td><asp:TextBox ID="txtInvoiceDate" runat="server" Text="" Enabled="false"></asp:TextBox></td>
-                            <th class="textRight"><asp:Label ID="lblCustomerName" runat="server" Text="顧客名"></asp:Label></th>
-                            <td><asp:TextBox ID="txtCustomerName" runat="server" Text="" Enabled="false"></asp:TextBox></td>
-                        </tr>
-                    </table>
-                </div>
-                <asp:panel id="WF_LISTAREA" runat="server" >
-                </asp:panel>
+
+                <table id="itemTable">
+                    <%-- 年度 --%>
+	                <tr>
+		                <td>
+			                <a><asp:Label ID="lblYMD1" runat="server" CssClass="requiredMark"></asp:Label></a>
+		                </td>
+		                <td>
+			                <a><asp:Label ID="lblYMD2" runat="server"></asp:Label></a>
+		                </td>
+		                <td>
+			                <a><asp:TextBox ID="txtStYMD" runat="server"></asp:TextBox></a>
+		                </td>
+		                <td>
+			                <a><asp:Label ID="lblTilde" runat="server"></asp:Label></a>
+		                </td>
+		                <td>
+			                <a><asp:TextBox ID="txtEndYMD" runat="server"></asp:TextBox></a>
+		                </td>
+	                </tr>
+                    <%-- JOT銀行コード --%>
+                    <tr>
+                        <td colspan="2">
+                            <a><asp:Label ID="lblJotBankCode" runat="server"></asp:Label></a>
+                        </td>
+                        <td>
+                            <a><asp:TextBox ID="txtJotBankCode" runat="server"></asp:TextBox></a>
+                        </td>
+                    </tr>
+                </table>
+
                 <div id="divHidden">
                     <%-- 必要な隠し要素はこちらに(共通で使用しそうなものは定義済) --%>
                     <asp:HiddenField ID="hdnSubmit" runat="server" Value="" />      <%-- サーバー処理中（TRUE:実行中、FALSE:未実行）--%>
@@ -194,16 +275,8 @@
                     <%-- フッターヘルプ関連処理で使用 --%>
                     <asp:HiddenField ID="hdnHelpChange" runat="server" Value="" />
                     <asp:HiddenField ID="hdnCanHelpOpen" runat="server" Value="" />
-                    <%-- 一覧表制御用 --%>
-                    <asp:HiddenField ID="hdnXMLsaveFile" runat="server" Value="" Visible="False" />  <%--  退避した一覧データのファイル保存先 --%>
-                    <asp:HiddenField ID="hdnMouseWheel" runat="server" Value="" />   <%--  マウスホイールのUPorDownを記憶 --%>
-                    <asp:HiddenField ID="hdnListPosition" runat="server" Value="" /> <%--  縦スクロールポジション --%>
-                    <asp:HiddenField ID="hdnListDBclick" runat="server" Value="" />  <%--  ダブルクリックした行番号を記録 --%>   
-                    <asp:HiddenField ID="hdnListCurrentRownum" runat="server" Value="" /> <%-- 一覧でボタンクリックイベントを発生させたRowNumを保持 --%>
                     <%-- MAPVARIANT保持用 --%>
                     <asp:HiddenField ID="hdnThisMapVariant" Value="" runat="server" Visible="false" />
-                    <%-- 行のBrId保持用 --%>
-                    <asp:HiddenField ID="hdnSelectedBrId" runat="server" Value="" />
                 </div>
             </div>
             <%-- 左ボックス --%>
@@ -214,6 +287,31 @@
                 </div>
                 <%--  　マルチビュー　 --%>
                 <asp:MultiView ID="mvLeft" runat="server">
+                    <%--  　カレンダー　 --%>
+                    <asp:View id="vLeftCal" runat="server" >
+                        <div class="leftViewContents">
+                            <asp:HiddenField ID="hdnCalendarValue" runat="server" />
+                            <input id="hdnDateValue" type="hidden" value="" />
+                            <table border="0">
+                                <tr>
+                                    <td>
+                                        <table border="1" >
+                                            <tr>
+                                                <td>
+                                                    <div id="carenda">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td id="altMsg" style="background:white">
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </asp:View> <%-- END カレンダー VIEW　 --%>
                 </asp:MultiView>
             </div> <%-- END 左ボックス --%>
             <%-- 右ボックス --%>
@@ -221,7 +319,8 @@
                 <%-- ****************************
                      右マルチラインテキスト表示エリア
                      **************************** --%>
-                <div id="divRightMessageBox">
+                <%--★<div id="divRightMessageBox">--%>
+                <div id="divRightMessageBox" visible="false">
                     <%-- 殆どの画面は"メモ"、"備考"の入力がないためエラーメッセージのみ
                         当選択項目を非表示及びエラーメッセージ表示を基準とするため
                         こちらはあまり意識する必要なし --%>
@@ -292,6 +391,7 @@
                 <div><asp:Label ID="lblFooterMessage" runat="server" Text=""></asp:Label></div>
                 <div id="divShowHelp" ></div>
             </div>
+
         </div>
     </form>
 </body>

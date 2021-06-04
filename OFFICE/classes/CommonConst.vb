@@ -119,6 +119,22 @@ Public Module CommonConst
         ''' </summary>
         ''' <returns></returns>
         Public Shared ReadOnly Property LEASEAGREEMENTAPPLY As String = "GBQ0012_LEASEAGREEMENTAPPLY"
+
+        ''' <summary>
+        ''' 顧客用SEQ
+        ''' </summary>
+        ''' <returns></returns>
+        Public Shared ReadOnly Property CUSTOMER As String = "GBQ0014_CUSTOMER"
+        ''' <summary>
+        ''' 業者用SEQ
+        ''' </summary>
+        ''' <returns></returns>
+        Public Shared ReadOnly Property TRADER As String = "GBQ0015_TRADER"
+        ''' <summary>
+        ''' 積載品用SEQ
+        ''' </summary>
+        ''' <returns></returns>
+        Public Shared ReadOnly Property PRODUCT As String = "GBQ0016_PRODUCT"
     End Class
     '1つの括りで複数ある場合は以下のように書いたほうが使うときに候補が出て便利です。
     '直下の場合「RETURNCODE.」で候補が出て「RETURNCODE.NORMAL」選択可能
@@ -368,6 +384,16 @@ Public Module CommonConst
         ''' </summary>
         ''' <returns></returns>
         Public Shared ReadOnly Property INPUTERROR As String = "30004"
+        ''' <summary>
+        ''' 書式エラー("30005")
+        ''' </summary>
+        ''' <returns></returns>
+        Public Shared ReadOnly Property FOURMATERROR As String = "30005"
+        ''' <summary>
+        ''' 更新レコードエラー("30006")
+        ''' </summary>
+        ''' <returns></returns>
+        Public Shared ReadOnly Property NOTFOUND As String = "30006"
         ''' <summary>
         ''' 参照されたアカウントは現在ロックアウトされているため、ログオンできない可能性があります。("70001")
         ''' </summary>

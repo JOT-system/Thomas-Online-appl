@@ -641,7 +641,7 @@ Public Class GBT00003RESULT
         sqlStat.AppendLine("      ,ISNULL(OBS.DISCHARGEPORT1,'')  AS POD1CODE")
         sqlStat.AppendLine("      ,ISNULL(OBS.LOADPORT2,'')       AS POL2CODE")
         sqlStat.AppendLine("      ,ISNULL(OBS.DISCHARGEPORT2,'')  AS POD2CODE")
-        sqlStat.AppendLine("      ,OVSCNT.NOOFORDER AS NOOFTANKS")
+        sqlStat.AppendLine("      ,ISNULL(OVSCNT.NOOFORDER, 0)    AS NOOFTANKS")
         sqlStat.AppendLine("      ,OBS.ORDERNO AS ODID")
         sqlStat.AppendLine("      ,'-'         AS BLISSUE")
         sqlStat.AppendLine("      ,CASE WHEN EXISTS(SELECT 1 ") 'SHIPの実績日が含まれてるレコード用

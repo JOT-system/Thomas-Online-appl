@@ -186,6 +186,7 @@ Public Class GBM00004CUSTOMER
                 'フォーカス設定
                 '****************************************
                 txtOperationEx.Focus()
+                txtCustomerCode.Enabled = False
 
             End If
             '**********************************************
@@ -750,6 +751,9 @@ Public Class GBM00004CUSTOMER
             INPtbl.Rows.Add(INProwWork)
         Next
 
+        'INPtbl新規データ仮採番
+        INPtblSetNewSeq()
+
         INPtblCheck()
 
         BASEtblUpdate()
@@ -1210,6 +1214,12 @@ Public Class GBM00004CUSTOMER
                             '    Return
                             'End If
 
+                        End If
+
+                        '新規レコード
+                        If Convert.ToString(BASEtbl.Rows(i)("TIMSTP")) = "0" Then
+                            '新規オーダー番号生成（シーケンスより取得）
+                            BASEtbl.Rows(i)("CUSTOMERCODE") = GetNewSeq(Convert.ToString(BASEtbl.Rows(i)("COUNTRYCODE")), SQLcon)
                         End If
 
                         '更新SQL文･･･マスタへ更新
@@ -1707,15 +1717,18 @@ Public Class GBM00004CUSTOMER
         'DetailBoxをINPtblへ退避
         DetailBoxToINPtbl()
 
-        '新規作成用にCustomerCode補正
-        If INPtbl.Rows(0).Item("CUSTOMERCODE").ToString = "" Then
-            Dim maxCode As String = BASEtbl.Rows.Cast(Of DataRow) _
-            .Where(Function(row) Left(row("CUSTOMERCODE").ToString, 4) = INPtbl.Rows(0).Item("COUNTRYCODE").ToString & "C0") _
-            .Select(Function(row) row("CUSTOMERCODE").ToString).Max()
-            Dim codeNoString As String = maxCode.Replace(INPtbl.Rows(0).Item("COUNTRYCODE").ToString & "C", "")
-            Dim newCode As String = INPtbl.Rows(0).Item("COUNTRYCODE").ToString & "C" & Format(Integer.Parse(codeNoString) + 1, "00000")
-            INPtbl.Rows(0).Item("CUSTOMERCODE") = newCode
-        End If
+        'INPtbl新規データ仮採番
+        INPtblSetNewSeq()
+
+        ''新規作成用にCustomerCode補正
+        'If INPtbl.Rows(0).Item("CUSTOMERCODE").ToString = "" Then
+        '    Dim maxCode As String = BASEtbl.Rows.Cast(Of DataRow) _
+        '    .Where(Function(row) Left(row("CUSTOMERCODE").ToString, 4) = INPtbl.Rows(0).Item("COUNTRYCODE").ToString & "C0") _
+        '    .Select(Function(row) row("CUSTOMERCODE").ToString).Max()
+        '    Dim codeNoString As String = maxCode.Replace(INPtbl.Rows(0).Item("COUNTRYCODE").ToString & "C", "")
+        '    Dim newCode As String = INPtbl.Rows(0).Item("COUNTRYCODE").ToString & "C" & Format(Integer.Parse(codeNoString) + 1, "00000")
+        '    INPtbl.Rows(0).Item("CUSTOMERCODE") = newCode
+        'End If
 
         'INPtbl内容 チェック
         '　※チェックOKデータをUPDtblへ格納する
@@ -1982,6 +1995,11 @@ Public Class GBM00004CUSTOMER
             Dim errorMessage As String = ""
             CommonFunctions.ShowMessage(errorCode, dummyMsgBox)
             errorMessage = dummyMsgBox.Text
+            Dim errorCodeNotFound As String = C_MESSAGENO.NOTFOUND
+            Dim errorMessageNotFound As String = ""
+            CommonFunctions.ShowMessage(errorCodeNotFound, dummyMsgBox)
+            errorMessageNotFound = dummyMsgBox.Text
+            Dim keyFind As Boolean = False
 
             If inpDateStart >= inpDateEnd Then
 
@@ -2008,6 +2026,9 @@ Public Class GBM00004CUSTOMER
                     If Convert.ToString(dr("DELFLG")) <> BaseDllCommon.CONST_FLAG_YES Then
                         '日付以外の項目が等しい
                         If CommonFunctions.CompareDataFields(BASEtbl.Rows(j), workInpRow, compareFieldList) Then
+
+                            '更新対象レコードあり
+                            keyFind = True
 
                             'ENDYMDは変更扱い
                             If Convert.ToString(dr("STYMD")) = Convert.ToString(workInpRow("STYMD")) Then
@@ -2047,12 +2068,29 @@ Public Class GBM00004CUSTOMER
                         End If
                     End If
                 Next
+                If Convert.ToString(workInpRow("TEMPCODE")) = "" AndAlso keyFind = False Then
+                    If returnCode = C_MESSAGENO.NORMAL Then
+                        'KEY重複
+                        returnCode = C_MESSAGENO.NOTFOUND
+                    End If
+                    'エラーレポート編集
+                    errMessageStr = ""
+                    errMessageStr = "・" & errorMessageNotFound
+                    ' レコード内容を展開する
+                    errMessageStr = errMessageStr & Me.ErrItemSet(workInpRow)
+                    If txtRightErrorMessage.Text <> "" Then
+                        txtRightErrorMessage.Text = txtRightErrorMessage.Text & ControlChars.NewLine
+                    End If
+                    txtRightErrorMessage.Text = txtRightErrorMessage.Text & ControlChars.NewLine & errMessageStr
+                End If
             End If
             If returnCode <> C_MESSAGENO.NORMAL Then
                 workInpRow("OPERATION") = errDisp
                 errListAll.Add(C_MESSAGENO.RIGHTBIXOUT)
                 errList.Add(C_MESSAGENO.RIGHTBIXOUT)
-                If returnCode = C_MESSAGENO.REQUIREDVALUE OrElse returnCode = C_MESSAGENO.HASAPPLYINGRECORD Then ' 一覧反映対象外
+                If returnCode = C_MESSAGENO.REQUIREDVALUE OrElse
+                    returnCode = C_MESSAGENO.HASAPPLYINGRECORD OrElse
+                    returnCode = C_MESSAGENO.NOTFOUND Then ' 一覧反映対象外
                     workInpRow("HIDDEN") = "1"
                     returnCode = C_MESSAGENO.RIGHTBIXOUT
                 End If
@@ -2415,6 +2453,7 @@ Public Class GBM00004CUSTOMER
         table.Columns("UPDTERMID").DefaultValue = ""
 
         table.Columns.Add("SAVESTATUS", GetType(String))
+        table.Columns.Add("TEMPCODE", GetType(String))
 
         For Each col As DataColumn In table.Columns
             If col.DataType = GetType(String) AndAlso
@@ -2483,8 +2522,34 @@ Public Class GBM00004CUSTOMER
         workRow("UPDYMD") = ""
 
         workRow("SAVESTATUS") = ""
+        workRow("TEMPCODE") = ""
 
         argTbl.Rows.Add(workRow)
+
+    End Sub
+    ''' <summary>
+    ''' INPtbl新規データ仮採番 
+    ''' </summary>
+    Protected Sub INPtblSetNewSeq()
+
+        If String.IsNullOrEmpty(hdnNewRecordSeq.Value) Then
+            hdnNewRecordSeq.Value = "0"
+        End If
+        Dim newSeq As Integer = Convert.ToInt32(hdnNewRecordSeq.Value)
+
+        For Each INProw As DataRow In INPtbl.Rows
+            '新規レコード仮連番設定
+            If Convert.ToString(INProw("COMPCODE")) <> "" AndAlso
+               Convert.ToString(INProw("COUNTRYCODE")) <> "" AndAlso
+               Convert.ToString(INProw("CUSTOMERCODE")) = "" AndAlso
+               Convert.ToString(INProw("STYMD")) <> "" Then
+                newSeq += 1
+                INProw("TEMPCODE") = "NEW" & newSeq.ToString("00000")
+                INProw("CUSTOMERCODE") = INProw("TEMPCODE")
+            End If
+        Next
+
+        hdnNewRecordSeq.Value = newSeq.ToString
 
     End Sub
     ''' <summary>
@@ -4085,5 +4150,44 @@ Public Class GBM00004CUSTOMER
         'フィールド名を元に発見した対象のラベル、テキストボックスを返却
         retItem.AddRange({txtObj, lblObj})
         Return retItem
+    End Function
+    ''' <summary>
+    ''' 新規連番をシーケンスより取得
+    ''' </summary>
+    ''' <returns></returns>
+    Private Function GetNewSeq(ByRef countryCode As String, Optional ByRef sqlCon As SqlConnection = Nothing) As String
+        Dim canCloseConnect As Boolean = False
+        Dim newSeq As String = ""
+        Try
+            If sqlCon Is Nothing Then
+                sqlCon = New SqlConnection(COA0019Session.DBcon)
+                sqlCon.Open()
+                canCloseConnect = True
+            End If
+            Dim sqlStat As New StringBuilder
+            sqlStat.AppendLine("SELECT '" & countryCode & "' + 'C' + right('00000' + trim(convert(char,NEXT VALUE FOR " & C_SQLSEQ.CUSTOMER & "_" & countryCode & ")),5)")
+            Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
+
+                Using sqlDa As New SqlDataAdapter(sqlCmd)
+                    Dim dt As New DataTable
+                    sqlDa.Fill(dt)
+                    If dt Is Nothing OrElse dt.Rows.Count = 0 Then
+                        Throw New Exception("Get new Seq error")
+                    End If
+
+                    newSeq = Convert.ToString(dt.Rows(0).Item(0))
+                End Using
+            End Using
+            Return newSeq
+        Catch ex As Exception
+            Throw
+        Finally
+            If canCloseConnect = True AndAlso sqlCon IsNot Nothing Then
+                sqlCon.Close()
+                sqlCon.Dispose()
+                sqlCon = Nothing
+            End If
+        End Try
+
     End Function
 End Class

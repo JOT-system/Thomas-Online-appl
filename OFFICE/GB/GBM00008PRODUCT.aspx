@@ -229,7 +229,7 @@
                         <div class="detailInputRow">
                             <%-- 積載品コード --%>
                             <a id="stProductCode">
-                                <asp:Label ID="lblProduct" runat="server" Text="積載品コード" CssClass="textLeft requiredMark" ></asp:Label>
+                                <asp:Label ID="lblProduct" runat="server" Text="積載品コード" CssClass="textLeft" ></asp:Label>
                                 <asp:TextBox ID="txtProduct" runat="server" CssClass="textCss"></asp:TextBox>
                                 <asp:Label ID="lblProductText" runat="server" CssClass="textLeftLabel"></asp:Label>
                             </a>
@@ -529,6 +529,8 @@
                     <asp:HiddenField ID="hdnThisMapVariant" Value="" runat="server" Visible="false" />
                     <%-- 会社コード --%>
                     <asp:HiddenField ID="hdnCompCode" runat="server" Value="" />
+                    <%-- 新規レコード仮連番 --%>
+                    <asp:HiddenField ID="hdnNewRecordSeq" runat="server" Value="" />
                 </div>
             </div>
             <%-- 左ボックス --%>

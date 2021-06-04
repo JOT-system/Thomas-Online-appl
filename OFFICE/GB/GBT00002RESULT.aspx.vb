@@ -1947,6 +1947,7 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("      ,ISNULL(PD.HAZARDCLASS,'') AS HAZARDCLASS")
         sqlStat.AppendLine("      ,BS.ORIGINALCOPYBRID AS ORIGINALCOPYBRID")
         sqlStat.AppendLine("      ,BS.INITUSER AS INITUSER")
+        sqlStat.AppendLine("      ,BS.CARRIER1 AS CARRIER1")
         sqlStat.AppendLine("  FROM GBT0002_BR_BASE BS ")
         sqlStat.AppendLine("  LEFT JOIN GBT0001_BR_INFO BIL1") 'ブレーカー(関連付け)
         sqlStat.AppendLine("    ON  BIL1.BRID         = BS.BRID")
@@ -2429,6 +2430,7 @@ Public Class GBT00002RESULT
             .Add("DELETEFLAG", GetType(String))
             .Add("NUMORDEROF", GetType(String))
             .Add("AGENTORGANIZER", GetType(String))
+            .Add("CARRIER1", GetType(String))
 
             .Add("APPLYIDINFO", GetType(String))
             .Add("STEPINFO", GetType(String))

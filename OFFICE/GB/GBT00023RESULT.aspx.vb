@@ -3569,6 +3569,7 @@ Public Class GBT00023RESULT
         sqlStat.AppendLine("        case ")
         sqlStat.AppendLine("            when @ACCCURRENCYSEGMENT = 'Y' then aw.DBACCOUNT")
         sqlStat.AppendLine("            when @ACCCURRENCYSEGMENT = 'F' then aw.DBACCOUNTFORIGN")
+        sqlStat.AppendLine("            else ''")
         sqlStat.AppendLine("        end 'DEBSUBJECT',")
         ' 07.26改E
         sqlStat.AppendLine("        @TORICODE as 'DEBPARTNER',")
@@ -3600,6 +3601,7 @@ Public Class GBT00023RESULT
         sqlStat.AppendLine("        case ")
         sqlStat.AppendLine("            when @ACCCURRENCYSEGMENT = 'Y' then aw.CRACCOUNT")
         sqlStat.AppendLine("            when @ACCCURRENCYSEGMENT = 'F' then aw.CRACCOUNTFORIGN")
+        sqlStat.AppendLine("            else ''")
         sqlStat.AppendLine("        end 'CRESUBJECT',")
         ' 07.26改E
         sqlStat.AppendLine("        @TORICODE as 'CREPARTNER',")
@@ -3938,6 +3940,7 @@ Public Class GBT00023RESULT
         sqlStat.AppendLine("        case ")
         sqlStat.AppendLine("            when @ACCCURRENCYSEGMENT = 'Y' then aw.CRACCOUNT")
         sqlStat.AppendLine("            when @ACCCURRENCYSEGMENT = 'F' then aw.CRACCOUNTFORIGN")
+        sqlStat.AppendLine("            else ''")
         sqlStat.AppendLine("        end 'CRESUBJECT',")
         ' 07.26改S
         sqlStat.AppendLine("        @TORICODE as 'DEBPARTNER',")
@@ -3969,6 +3972,7 @@ Public Class GBT00023RESULT
         sqlStat.AppendLine("        case ")
         sqlStat.AppendLine("            when @ACCCURRENCYSEGMENT = 'Y' then aw.DBACCOUNT")
         sqlStat.AppendLine("            when @ACCCURRENCYSEGMENT = 'F' then aw.DBACCOUNTFORIGN")
+        sqlStat.AppendLine("            else ''")
         sqlStat.AppendLine("        end 'DEBSUBJECT',")
         ' 07.26改S
         sqlStat.AppendLine("        @TORICODE as 'CREPARTNER',")

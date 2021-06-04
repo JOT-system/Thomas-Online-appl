@@ -923,6 +923,51 @@ Partial Public Class GBT00028INVOICEEDIT
     Protected WithEvents hdnListHeaderCustomer As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
+    '''hdnListHeaderLeaseST コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnListHeaderLeaseST As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
+    '''hdnListHeaderLeaseEND コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnListHeaderLeaseEND As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
+    '''hdnListHeaderLeaseDAYS コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnListHeaderLeaseDAYS As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
+    '''hdnListHeaderTankCapacity コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnListHeaderTankCapacity As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
+    '''hdnListHeaderUnitPrice コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnListHeaderUnitPrice As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
     '''repTankInfo コントロール。
     '''</summary>
     '''<remarks>
@@ -930,6 +975,15 @@ Partial Public Class GBT00028INVOICEEDIT
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
     Protected WithEvents repTankInfo As Global.System.Web.UI.WebControls.Repeater
+    
+    '''<summary>
+    '''repLeaseTankInfo コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents repLeaseTankInfo As Global.System.Web.UI.WebControls.Repeater
     
     '''<summary>
     '''hdnSubmit コントロール。

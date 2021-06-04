@@ -1,4 +1,4 @@
-﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="GBM00005TRADER.aspx.vb" Inherits="OFFICE.GBM00005TRADER" %>
+﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="GBM00025BANK.aspx.vb" Inherits="OFFICE.GBM00025BANK" %>
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -11,6 +11,14 @@
     <link href="~/css/commonStyle.css" rel="stylesheet" type="text/css" />
     <%--個別のスタイルは以下に記載 OR 外部ファイルに逃す --%>
     <link href="~/css/masterCommon.css" rel="stylesheet" type="text/css" />
+    <style>
+        #lblJotBankCode {
+            text-decoration:none;
+        }
+        .UnderLine {
+            text-decoration :none !important;
+        }
+    </style>
 <%--    <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
     <script>
@@ -39,13 +47,13 @@
                 ['<%= Me.btnLeftBoxButtonSel.ClientId  %>'],  /* 選択 */
                 ['<%= Me.btnLeftBoxButtonCan.ClientId  %>'],  /* キャンセル */
                 ['<%= Me.btnDbUpdate.ClientId  %>'],          /* DB更新 */
-                ['<%= Me.btnDownload.ClientId  %>'],          /*  ﾀﾞｳﾝﾛｰﾄﾞ */
+                ['<%= Me.btnDownload.ClientId  %>'],          /* ﾀﾞｳﾝﾛｰﾄﾞ */
                 ['<%= Me.btnPrint.ClientId  %>'],             /* 一覧印刷 */
                 ['<%= Me.btnBack.ClientId  %>'],              /* 終了 */
                 ['<%= Me.btnListUpdate.ClientId  %>'],        /* 表更新 */
                 ['<%= Me.btnClear.ClientId  %>'],             /* クリア */
                 ['<%= Me.btnFIRST.ClientId  %>'],             /* 先頭 */
-                ['<%= Me.btnLAST.ClientId  %>']              /* 最終 */
+                ['<%= Me.btnLAST.ClientId  %>']               /* 最終 */
                 ];             
 
             bindButtonClickEvent(targetButtonObjects);
@@ -57,15 +65,12 @@
             var viewOperationId = '<%= Me.vLeftOperation.ClientID %>';          /* オペレーション */
             var viewCalId = '<%= Me.vLeftCal.ClientID %>';                      /* 年月日 */
             var viewCompCodeId = '<%= Me.vLeftCompCode.ClientID %>';            /* 会社コード */
-            var viewCountryCodeId = '<%= Me.vLeftCountryCode.ClientID %>';      /* 国コード */
-            var viewClassId = '<%= Me.vLeftClass.ClientID %>';                  /* 分類 */
             var viewDelFlgId = '<%= Me.vLeftDelFlg.ClientID %>';                /* 削除フラグ */
-            var dblClickObjects = [['<%= Me.txtOperationEx.ClientID %>', viewOperationId],
-            ['<%= Me.txtStYMD.ClientID %>', viewCalId],
-            ['<%= Me.txtEndYMD.ClientID %>', viewCalId],
-            ['<%= Me.txtCountryCode.ClientID %>', viewCountryCodeId],
-            ['<%= Me.txtClass.ClientID %>', viewClassId],
-            ['<%= Me.txtDelFlg.ClientID %>', viewDelFlgId]
+            var dblClickObjects = [
+                ['<%= Me.txtOperationEx.ClientID %>', viewOperationId],
+                ['<%= Me.txtStYMD.ClientID %>', viewCalId],
+                ['<%= Me.txtEndYMD.ClientID %>', viewCalId],
+                ['<%= Me.txtDelFlg.ClientID %>', viewDelFlgId]
             ];
             bindLeftBoxShowEvent(dblClickObjects);
             /* 手入力変更時のイベント */
@@ -79,16 +84,12 @@
              */ 
             var leftListExtentionTarget = [['<%= Me.lbOperation.ClientID %>', '3', '1'],
                                            ['<%= Me.lbCompCode.ClientID %>', '3', '1'],
-                                           ['<%= Me.lbCountryCode.ClientID %>', '3', '1'],
-                                           ['<%= Me.lbClass.ClientID %>', '3', '1'],
                                            ['<%= Me.lbDelFlg.ClientID %>', '3', '1']
                                            ];
             addLeftBoxExtention(leftListExtentionTarget);
 
             /* 画面テキストボックス変更イベントのバインド(変更検知したいテキストボックスIDを指定 */
             var targetOnchangeObjects = [
-            ['<%= Me.txtCountryCode.ClientID %>'],
-            ['<%= Me.txtClass.ClientID %>'],
             ['<%= Me.txtDelFlg.ClientID %>']
             ];
             bindTextOnchangeEvent(targetOnchangeObjects);
@@ -136,7 +137,7 @@
     ※%付きのコメントはHTMLソース表示でもレンダリングされないものです --%>
 <body>
     <%--FormIDは適宜変更ください。 --%>
-    <form id="GBM00005" runat="server">
+    <form id="GBM00025" runat="server">
         <%--ヘッダーボックス --%>
         <div id="divContainer">
             <div id="divTitlebox">
@@ -174,8 +175,6 @@
                         <div id="extractItem">
                             <asp:Label ID="lblOperationEx" runat="server" Text="操作" ></asp:Label>
                             <asp:TextBox ID="txtOperationEx" runat="server" ></asp:TextBox>
-                            <asp:Label ID="lblNamesEx" runat="server" Text="業者名称（短）"></asp:Label>
-                            <asp:TextBox ID="txtNamesEx" runat="server" ></asp:TextBox>
                         </div>
                         <div id="buttonBox">
                             <input id="btnExtract" type="button" value="絞り込み"  runat="server"  />
@@ -220,33 +219,17 @@
                             </a>
 
                             <%-- 会社コード --%>
-                            <a id="stCompCode" style="display:none">
+                            <span id="stCompCode" style="display:none">
                                 <asp:Label ID="lblCompCode" runat="server" Text="会社コード" CssClass="textLeft requiredMark" ></asp:Label>
                                 <asp:TextBox ID="txtCompCode" runat="server" CssClass="textCss"></asp:TextBox>
                                 <asp:Label ID="lblCompCodeText" runat="server" CssClass="textLeftLabel"></asp:Label>
-                            </a>
+                            </span>
                         </div>
                         <div class="detailInputRow">
-                            <%-- 国コード --%>
-                            <a id="stCountryCode">
-                                <asp:Label ID="lblCountryCode" runat="server" Text="国コード" CssClass="textLeft requiredMark"></asp:Label>
-                                <asp:TextBox ID="txtCountryCode" runat="server" CssClass="textCss"></asp:TextBox>
-                                <asp:Label ID="lblCountryCodeText" runat="server" CssClass="textLeftLabel"></asp:Label>
-                            </a>
-
-                            <%-- 業者コード --%>
-                            <a id="stCarrierCode">
-                                <asp:Label ID="lblCarrierCode" runat="server" Text="業者コード" CssClass="textLeft"></asp:Label>
-                                <asp:TextBox ID="txtCarrierCode" runat="server" CssClass="textCss"></asp:TextBox>
-                                <asp:Label ID="lblCarrierCodeText" runat="server" CssClass="textLeftLabel"></asp:Label>
-                            </a>
-                        </div>
-                        <div class="detailInputRow">
-                            <%-- 分類 --%>
-                            <a id="stClass">
-                                <asp:Label ID="lblClass" runat="server" Text="分類" CssClass="textLeft requiredMark" ></asp:Label>
-                                <asp:TextBox ID="txtClass" runat="server" CssClass="textCss"></asp:TextBox>
-                                <asp:Label ID="lblClassText" runat="server" CssClass="textLeftLabel"></asp:Label>
+                            <%-- JOT銀行コード --%>
+                            <a id="stJotBankCode">
+                                <asp:Label ID="lblJotBankCode" runat="server" Text="JOT銀行コード" CssClass="textLeft requiredMark" ></asp:Label>
+                                <asp:TextBox ID="txtJotBankCode" runat="server" CssClass="textCss"></asp:TextBox>
                             </a>
 
                             <%-- 削除フラグ --%>
@@ -259,7 +242,7 @@
 
                         <%-- Dタブ --%>
                         <a id="stDtabTrader" onclick="masterDtabChange('0')">
-                            <asp:Label ID="lblDtabTrader" runat="server" Text="業者情報" ></asp:Label>
+                            <asp:Label ID="lblDtabTrader" runat="server" Text="取引先情報" ></asp:Label>
                         </a>
 
                     </div>
@@ -421,10 +404,9 @@
                     <%-- 一覧情報保存先のファイル名 --%> 
                     <asp:HiddenField id="hdnXMLsaveFile" runat="server" Value="" />
                     <%-- 前画面選択条件 --%>
-                    <asp:HiddenField ID="hdnSelectedCountryCode" runat="server" Value="" />
                     <asp:HiddenField ID="hdnSelectedStYMD" runat="server" Value="" />
                     <asp:HiddenField ID="hdnSelectedEndYMD" runat="server" Value="" />
-                    <asp:HiddenField ID="hdnSelectedClass" runat="server" Value="" />
+                    <asp:HiddenField ID="hdnSelectedJotBankCode" runat="server" Value="" />
                     <asp:HiddenField ID="hdnViewId" runat="server" Value="" />
                     <asp:HiddenField ID="hdnSelectedApplyID" runat="server" Value="" />
                     <%-- ドラッグアンドドロップ(メッセージ 英語/日本語切替対応用) --%>
@@ -438,8 +420,6 @@
                     <asp:HiddenField ID="hdnIsHideDetailBox" Value="0" runat="server" />
                     <%-- MAPVARIANT保持用 --%>
                     <asp:HiddenField ID="hdnThisMapVariant" Value="" runat="server" Visible="false" />
-                     <%-- 新規レコード仮連番 --%>
-                    <asp:HiddenField ID="hdnNewRecordSeq" runat="server" Value="" />
                 </div>
             </div>
             <%-- 左ボックス --%>
@@ -462,60 +442,12 @@
                             <asp:ListBox ID="lbCompCode" runat="server" CssClass="leftViewContents"></asp:ListBox>
                         </div>
                     </asp:View> <%-- END 会社コード VIEW --%>
-                    <%--  国コード --%>
-                    <asp:View id="vLeftCountryCode" runat="server" >
-                        <div class="leftViewContents">
-                            <asp:ListBox ID="lbCountryCode" runat="server" CssClass="leftViewContents"></asp:ListBox>
-                        </div>
-                    </asp:View> <%-- END 国コード VIEW --%>
-                    <%--  分類 --%>
-                    <asp:View id="vLeftClass" runat="server" >
-                        <div class="leftViewContents">
-                            <asp:ListBox ID="lbClass" runat="server" CssClass="leftViewContents"></asp:ListBox>
-                        </div>
-                    </asp:View> <%-- END 分類 VIEW --%>
                     <%--  削除フラグ --%>
                     <asp:View id="vLeftDelFlg" runat="server" >
                         <div class="leftViewContents">
                             <asp:ListBox ID="lbDelFlg" runat="server" CssClass="leftViewContents"></asp:ListBox>
                         </div>
                     </asp:View> <%-- END 削除フラグ VIEW --%>
-                     <%--  国コード --%>
-                    <asp:View id="View1" runat="server" >
-                        <div class="leftViewContents">
-                            <asp:ListBox ID="ListBox1" runat="server" CssClass="leftViewContents"></asp:ListBox>
-                        </div>
-                    </asp:View> <%-- END 国コード VIEW --%>
-                    <%--  経理円貨外貨区分コード --%>
-                    <asp:View id="vLeftAccCurrencySegment" runat="server" >
-                        <div class="leftViewContents">
-                            <asp:ListBox ID="lbAccCurrencySegment" runat="server" CssClass="leftViewContents"></asp:ListBox>
-                        </div>
-                    </asp:View> <%-- END 経理円貨外貨区分コード VIEW --%>
-                    <%--  両建区分コード --%>
-                    <asp:View id="vLeftBothClass" runat="server" >
-                        <div class="leftViewContents">
-                            <asp:ListBox ID="lbBothClass" runat="server" CssClass="leftViewContents"></asp:ListBox>
-                        </div>
-                    </asp:View> <%-- END 両建区分コード VIEW --%>
-                    <%--  取引先コード --%>
-                    <asp:View id="vLeftToriCode" runat="server" >
-                        <div class="leftViewContents">
-                            <asp:ListBox ID="lbToriCode" runat="server" CssClass="leftViewContents"></asp:ListBox>
-                        </div>
-                    </asp:View> <%-- END 取引先コード VIEW --%>
-                    <%--  期日 --%>
-                    <asp:View id="vLeftPayDay" runat="server" >
-                        <div class="leftViewContents">
-                            <asp:ListBox ID="lbPayDay" runat="server" CssClass="leftViewContents"></asp:ListBox>
-                        </div>
-                    </asp:View> <%-- END 期日 VIEW --%>
-                    <%--  休日フラグ --%>
-                    <asp:View id="vLeftHolidayFlg" runat="server" >
-                        <div class="leftViewContents">
-                            <asp:ListBox ID="lbHolidayFlg" runat="server" CssClass="leftViewContents"></asp:ListBox>
-                        </div>
-                    </asp:View> <%-- END 休日フラグ VIEW --%>
                     <%--  　カレンダー　 --%>
                     <asp:View id="vLeftCal" runat="server" >
                         <div class="leftViewContents">
