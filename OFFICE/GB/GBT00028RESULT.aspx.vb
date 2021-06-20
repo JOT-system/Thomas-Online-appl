@@ -1194,6 +1194,8 @@ Public Class GBT00028RESULT
             sqlStat.AppendFormat("                      SELECT * FROM {0} ITW", CONST_TBL_INVOICETANK)
             sqlStat.AppendLine("                        WHERE ITW.ORDERNO = OV.ORDERNO ")
             sqlStat.AppendLine("                        AND   ITW.TANKNO  = OV.TANKNO ")
+            '当月分のリースタンク請求明細が存在しないタンクを対象
+            sqlStat.AppendLine("                        AND   SUBSTRING(ITW.INVOICENO,CHARINDEX('-',ITW.INVOICENO)+1,4) = SUBSTRING(@INVOICEMONTH,3,2) + SUBSTRING(@INVOICEMONTH,6,2)")
             sqlStat.AppendLine("                        AND   ITW.DELFLG <> @DELFLG ")
             sqlStat.AppendLine("                    ) ")
             sqlStat.AppendFormat("     GROUP BY MTORI.TORICODE,MTORI.{0} ", textCustomerTblField).AppendLine()
