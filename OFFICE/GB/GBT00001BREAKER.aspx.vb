@@ -1164,6 +1164,14 @@ Public Class GBT00001BREAKER
         Dim costDt As DataTable = CollectDisplayCostInfo()
         '費用項目の禁則文字置換
         ChangeInvalidChar(costDt, New List(Of String) From {"COSTCODE", "COSTNAME", "CONTRACTOR", "CURRENCYCODE"})
+        If Me.txtCarrier1.Text = "" Then
+            'CostのOceanFreightの業者をCARRIER1として設定する
+            Dim carrierDt = From cost In costDt.AsEnumerable Where cost.Item("DTLPOLPOD").Equals("POL1") And cost.Item("COSTCODE").Equals("T0103-01") And cost.Item("CONTRACTOR").ToString <> ""
+            If carrierDt.Any Then
+                orgDt.Rows(0).Item("CARRIER1") = carrierDt.First.Item("CONTRACTOR").ToString
+                Me.txtCarrier1.Text = carrierDt.First.Item("CONTRACTOR").ToString
+            End If
+        End If
         '各種データテーブルをデータセットに格納
         ds.Tables.AddRange({orgDt, costDt})
         '入力チェック
