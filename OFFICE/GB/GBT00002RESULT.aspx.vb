@@ -1947,7 +1947,7 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("      ,ISNULL(PD.HAZARDCLASS,'') AS HAZARDCLASS")
         sqlStat.AppendLine("      ,BS.ORIGINALCOPYBRID AS ORIGINALCOPYBRID")
         sqlStat.AppendLine("      ,BS.INITUSER AS INITUSER")
-        sqlStat.AppendLine("      ,BS.CARRIER1 AS CARRIER1")
+        sqlStat.AppendFormat("      ,ISNULL(CR.{0},'') AS CARRIER1", textTraderTblField).AppendLine()
         sqlStat.AppendLine("  FROM GBT0002_BR_BASE BS ")
         sqlStat.AppendLine("  LEFT JOIN GBT0001_BR_INFO BIL1") 'ブレーカー(関連付け)
         sqlStat.AppendLine("    ON  BIL1.BRID         = BS.BRID")
@@ -2090,6 +2090,15 @@ Public Class GBT00002RESULT
         sqlStat.AppendLine("   AND  PT2.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  PT2.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
         sqlStat.AppendLine("   AND  PT2.DELFLG      <> @DELFLG")
+        sqlStat.AppendLine("  LEFT JOIN GBM0005_TRADER CR") 'CARRIER名称用JOIN
+        sqlStat.AppendLine("    ON  CR.COMPCODE     = @COMPCODE")
+        sqlStat.AppendLine("   AND  CR.COUNTRYCODE  = BS.LOADCOUNTRY1")
+        sqlStat.AppendLine("   AND  CR.CARRIERCODE  = BS.CARRIER1")
+        sqlStat.AppendLine("   AND  CR.STYMD       <= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  CR.ENDYMD      >= (CASE BS.VALIDITYTO WHEN '1900/01/01' THEN getdate() ELSE BS.VALIDITYTO END)")
+        sqlStat.AppendLine("   AND  CR.DELFLG      <> @DELFLG")
+        sqlStat.AppendLine("   AND  CR.CLASS        = '" & C_TRADER.CLASS.CARRIER & "'")
+
         sqlStat.AppendLine("  LEFT JOIN ") '紐付ORDER数取得用JOIN
         sqlStat.AppendLine("  (SELECT COUNT(*) AS COUNT,BRID FROM GBT0004_ODR_BASE")
         sqlStat.AppendLine("  WHERE DELFLG = '" & CONST_FLAG_NO & "'")
