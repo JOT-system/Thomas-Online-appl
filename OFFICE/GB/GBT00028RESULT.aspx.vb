@@ -6,7 +6,6 @@ Imports BASEDLL
 Public Class GBT00028RESULT
     Inherits GbPageCommon
     Private Const CONST_MAPID As String = "GBT00028R" '自身のMAPID
-    Private Const CONST_BASEID As String = "GBT00028L" '次画面一覧のMAPID
     Private Const CONST_DSPROWCOUNT = 44                '指定数＋１が表示対象
     Private Const CONST_SCROLLROWCOUNT = 8              'マウススクロール時の増分
     Private Const CONST_INITDATE As String = "1900/01/01" 'DB日付初期値
@@ -14,6 +13,7 @@ Public Class GBT00028RESULT
     Private Const CONST_TBL_INVOICEINFO As String = "GBT0016_INVOICE_INFO"
     Private Const CONST_TBL_INVOICETANK As String = "GBT0017_INVOICE_TANKINFO"
     Private Const CONST_TBL_USER As String = "COS0005_USER"
+    Private Const CONST_TBL_FV As String = "COS0017_FIXVALUE"
     Private Const CONST_TBL_CUSTOMER As String = "GBM0004_CUSTOMER"
     Private Const CONST_TBL_TORI As String = "GBM0025_TORI"
     Private Const CONST_TBL_APPLY As String = "COS0022_APPROVAL"
@@ -33,6 +33,13 @@ Public Class GBT00028RESULT
     Private Const CONST_REPTYPE_FVCLASS As String = "INV_REPORTCONF_MNG"
     Private Const CONST_REPTYPE_MNG As String = "InvoiceManagement"
 
+    '請求書タイプ
+    Private Const CONST_INVOICETYPE_NORMAL As String = ""
+    Private Const CONST_INVOICETYPE_LEASE As String = "L"
+    Private Const CONST_INVOICETYPE_NOTDONE As String = "S"
+    Private Const CONST_INVOICETYPE_OTHER As String = "O"
+
+    Private SavedDt As DataTable = Nothing
     ''' <summary>
     ''' ログ出力(クラススコープ ロード時にNewします)
     ''' </summary>
@@ -91,7 +98,14 @@ Public Class GBT00028RESULT
                 '****************************************
                 'テンプレート情報取得
                 '****************************************
-                Dim item As New List(Of String) From {"BreakerTotal", "Lease"}
+                Dim item As New List(Of String)
+                If Me.hdnThisMapVariant.Value <> "Management" Then
+                    item.Add("BreakerTotal")
+                    item.Add("Lease")
+                Else
+                    item.Add("Other(JPY)")
+                    item.Add("Other(USD)")
+                End If
                 Me.repInvoiceNew.DataSource = item
                 Me.repInvoiceNew.DataBind()
                 '****************************************
@@ -115,6 +129,7 @@ Public Class GBT00028RESULT
                             Return
                         End If
                     End With
+                    Me.SavedDt = dt
 
                     '■■■ 一覧表示データ編集（性能対策） ■■■
                     Dim listVari As String = Me.GBT00028SValues.ViewId
@@ -135,6 +150,32 @@ Public Class GBT00028RESULT
                         .USERSORTOPT = 0
                     End With
                     COA0013TableObject.COA0013SetTableObject()
+
+                    If listData IsNot Nothing AndAlso listData.Rows.Count > 0 Then
+                        Dim displayLineCnt As List(Of Integer) = (From dr As DataRow In listData
+                                                                  Select Convert.ToInt32(dr.Item("LINECNT"))).ToList
+
+                        'For Each targetCheckBoxId As String In {"DELCHK", "CHECK_AP", "CHECK_S", "CHECK_AC"}
+
+                        '    '申請チェックボックスの加工
+                        '    Dim targetCheckBoxLineCnt = (From dr As DataRow In listData
+                        '                                 Where Convert.ToString(dr.Item(targetCheckBoxId)) <> ""
+                        '                                 Select Convert.ToInt32(dr.Item("LINECNT")))
+                        '    For Each lineCnt As Integer In targetCheckBoxLineCnt
+                        '        Dim chkObjId As String = "chk" & Me.WF_LISTAREA.ID & targetCheckBoxId & lineCnt.ToString
+                        '        Dim tmpObj As Control = Me.WF_LISTAREA.FindControl(chkObjId)
+                        '        If tmpObj IsNot Nothing Then
+                        '            Dim chkObj As CheckBox = DirectCast(tmpObj, CheckBox)
+                        '            chkObj.Checked = True
+                        '        End If
+                        '    Next
+
+                        'Next
+
+                        ViewState("DISPLAY_LINECNT_LIST") = displayLineCnt
+                    Else
+                        ViewState("DISPLAY_LINECNT_LIST") = Nothing
+                    End If
 
                 End Using 'DataTable
                 '****************************************
@@ -198,7 +239,7 @@ Public Class GBT00028RESULT
                 '**********************
                 If Me.hdnListDBclick.Value <> "" Then
                     ListRowDbClick()
-                    Me.hdnListDBclick.Value = ""
+                    'Me.hdnListDBclick.Value = ""
                     'Return '単票ページにリダイレクトするため念のため処理は終わらせる
                 End If
                 '**********************
@@ -256,9 +297,22 @@ Public Class GBT00028RESULT
 
     End Sub
     ''' <summary>
-    ''' 戻るボタン押下時処理
+    ''' 戻るボタン押下時
     ''' </summary>
     Public Sub btnBack_Click()
+        Dim notSavedData = GetModifiedDataTable()
+        If Not (notSavedData Is Nothing OrElse notSavedData.Rows.Count = 0) Then
+            CommonFunctions.ShowConfirmMessage(C_MESSAGENO.CONFIRMCLOSE, pageObject:=Me, submitButtonId:="btnBackOk")
+            Return
+        End If
+        '確認メッセージを表示しない場合は終了
+        btnBackOk_Click()
+
+    End Sub
+    ''' <summary>
+    ''' 戻る確定時処理(btnBack_Click時に更新データが無い場合も通る)
+    ''' </summary>
+    Public Sub btnBackOk_Click()
         Dim COA0011ReturnUrl As New BASEDLL.COA0011ReturnUrl
 
         '■■■ 画面戻先URL取得 ■■■
@@ -326,7 +380,7 @@ Public Class GBT00028RESULT
         Dim dvTBLview As DataView
         Dim dtTmp As DataTable
         dvTBLview = New DataView(dt)
-        dvTBLview.RowFilter = "INVOICENO NOT LIKE '999999999%' AND ORIGINALOUTPUT > 0 "
+        dvTBLview.RowFilter = "INVOICETYPE <> '" & CONST_INVOICETYPE_NOTDONE & "' AND ORIGINALOUTPUT > 0 "
         dtTmp = dvTBLview.ToTable()
         PrintCnt = (CType(System.Math.Ceiling(dtTmp.Rows.Count / RepMainCnt), Integer))
 
@@ -409,9 +463,15 @@ Public Class GBT00028RESULT
         Me.ThisScreenValues.ToriCode = ""
         Select Case invoiceName
             Case "BreakerTotal"
-                Me.ThisScreenValues.InvoiceType = ""
+                Me.ThisScreenValues.InvoiceType = CONST_INVOICETYPE_NORMAL
             Case "Lease"
-                Me.ThisScreenValues.InvoiceType = "L"
+                Me.ThisScreenValues.InvoiceType = CONST_INVOICETYPE_LEASE
+            Case "Other(JPY)"
+                AddOhterInvoice("JPY")
+                Exit Sub
+            Case "Other(USD)"
+                AddOhterInvoice("USD")
+                Exit Sub
         End Select
 
         Dim COA0012DoUrl As BASEDLL.COA0012DoUrl
@@ -433,143 +493,717 @@ Public Class GBT00028RESULT
     End Sub
 
     ''' <summary>
-    ''' 保存ボタン押下時
+    ''' THOMAS外請求書行追加
     ''' </summary>
-    Public Sub btnSave_Click()
+    Public Sub AddOhterInvoice(ByVal invoiceCurrency As String)
 
         Dim COA0021ListTable As New COA0021ListTable
-        Dim COA0032Apploval As New BASEDLL.COA0032Apploval
-        Dim dt As DataTable = CreateDataTable()
-        Dim tran As SqlTransaction = Nothing
-
-        COA0021ListTable.FILEdir = hdnXMLsaveFile.Value
+        '一覧表示データ復元
+        Dim dt As DataTable = Nothing
+        dt = CreateDataTable()
+        COA0021ListTable.FILEdir = Me.hdnXMLsaveFile.Value
         COA0021ListTable.TBLDATA = dt
         COA0021ListTable.COA0021recoverListTable()
         If COA0021ListTable.ERR = C_MESSAGENO.NORMAL Then
             dt = COA0021ListTable.OUTTBL
         Else
             CommonFunctions.ShowMessage(C_MESSAGENO.SYSTEMADM, Me.lblFooterMessage, pageObject:=Me,
-                                        messageParams:=New List(Of String) From {"CODE:" & COA0021ListTable.ERR & ""})
+                                    messageParams:=New List(Of String) From {"CODE:" & COA0021ListTable.ERR & ""})
             Return
         End If
 
         Dim procDateTime As DateTime = DateTime.Now
-        'CHECKチェックボックスが変更済みの全データを取得
-        Dim q = (From item In dt
-                 Where Convert.ToString(item("CHECK_AP_DATE")) <> Convert.ToString(item("CHECK_AP_PRVDATE")) _
-                    Or Convert.ToString(item("CHECK_S_DATE")) <> Convert.ToString(item("CHECK_S_PRVDATE")) _
-                    Or Convert.ToString(item("CHECK_AC")) <> Convert.ToString(item("CHECK_AC_PRV")))
-        Dim deleteDt As DataTable = Nothing
-        If q.Any = True Then
-            deleteDt = q.CopyToDataTable
-        Else
-            CommonFunctions.ShowMessage(C_MESSAGENO.NOENTRYDATA, Me.lblFooterMessage, pageObject:=Me)
+
+        Dim addLineCnt As Integer = 1
+        '追加した行以降をずらす
+        For Each row As DataRow In dt.AsEnumerable
+            Dim lineCnt As Integer = Convert.ToInt32(row.Item("LINECNT"))
+            If Convert.ToString(row.Item("INVOICETYPE")) = CONST_INVOICETYPE_NOTDONE Then
+                If addLineCnt = 1 Then
+                    addLineCnt = lineCnt
+                End If
+                lineCnt += 1
+                row.Item("LINECNT") = lineCnt.ToString
+            End If
+        Next
+
+        Dim newRow = dt.NewRow()
+        newRow("LINECNT") = addLineCnt.ToString
+        newRow("OPERATION") = ""
+        newRow("SELECT") = "1"
+        newRow("HIDDEN") = "0"
+        newRow("ACTION") = "NEW"
+        newRow("CUSTOMERCODE") = ""
+        newRow("INVOICEMONTH") = Me.GBT00028SValues.InvoiceMonth
+        newRow("INVOICENOSUB") = 0
+        newRow("STYMD") = procDateTime
+        newRow("ENDYMD") = "2099/12/31"
+        newRow("INVOICENO") = ""
+        newRow("INCTORICODE") = "9999999999"
+        newRow("REMARK") = ""
+        newRow("OUTLANGUAGE") = ""
+        newRow("INVOICEDATE") = "1900/01/01"
+        newRow("DRAFTOUTPUT") = "0"
+        newRow("ORIGINALOUTPUT") = "1"
+        newRow("ACCCURRENCYSEGMENT") = invoiceCurrency
+        newRow("AMOUNT") = 0
+        newRow("INVOICEAMOUNT") = 0
+        newRow("TAXAMT") = 0
+        newRow("NONTAXAMT") = 0
+        newRow("TANK") = 0
+        newRow("CREATEUSER") = COA0019Session.USERID
+        newRow("CREATEUSERNAME") = COA0019Session.USERNAME
+        newRow("CREATEDATE") = "1900/01/01"
+        newRow("APPROVEDATE") = "1900/01/01"
+        newRow("CHECK_AP") = "0"
+        newRow("CHECK_AP_DISP") = "1"
+        newRow("CHECK_AP_PRV") = "0"
+        newRow("CHECK_AP_DATE") = "1900/01/01"
+        newRow("CHECK_AP_PRVDATE") = "1900/01/01"
+        newRow("SENDDATE") = "1900/01/01"
+        newRow("CHECK_S") = "0"
+        newRow("CHECK_S_DISP") = "1"
+        newRow("CHECK_S_PRV") = "0"
+        newRow("CHECK_S_DATE") = "1900/01/01"
+        newRow("CHECK_S_PRVDATE") = "1900/01/01"
+        newRow("ACCDATE") = "1900/01/01"
+        newRow("CHECK_AC") = "0"
+        newRow("CHECK_AC_DISP") = "1"
+        newRow("CHECK_AC_PRV") = "0"
+        newRow("CHECK_AC_DATE") = "1900/01/01"
+        newRow("CHECK_AC_PRVDATE") = "1900/01/01"
+        newRow("DELCHK") = "0"
+        newRow("DELCHK_DISP") = "1"
+        newRow("DELCHK_DATE") = "1900/01/01"
+        newRow("DELCHK_PRV") = ""
+        newRow("DELCHK_PRVDATE") = "1900/01/01"
+        newRow("DELFLG") = CONST_FLAG_NO
+        newRow("DRAFTDISP") = ""
+        'newRow("ORIGINALDISP") = "済"
+        newRow("APPROVALTYPE") = "0"
+
+        newRow("INVOICETYPE") = CONST_INVOICETYPE_OTHER
+        newRow("INVOICENO_PRV") = ""
+        newRow("CUSTOMERNAME_PRV") = ""
+        newRow("REMARK_PRV") = ""
+        newRow("INVOICEAMOUNT_PRV") = -1 '新規時は必ず変更発生
+        newRow("TAXAMT_PRV") = 0
+        newRow("NONTAXAMT_PRV") = 0
+        dt.Rows.Add(newRow)
+
+        Me.SavedDt = dt
+        COA0021ListTable.TBLDATA = dt
+        COA0021ListTable.COA0021saveListTable()
+        If COA0021ListTable.ERR <> C_MESSAGENO.NORMAL Then
             Return
         End If
 
+    End Sub
+
+    ''' <summary>
+    ''' 保存ボタン押下時
+    ''' </summary>
+    Public Sub btnSave_Click()
+
+        Dim COA0032Apploval As New BASEDLL.COA0032Apploval
+
+        Dim dt As DataTable = Nothing
+        Dim messageNo As String
+        If Me.SavedDt Is Nothing Then
+            dt = CreateDataTable()
+            Dim COA0021ListTable As COA0021ListTable = New COA0021ListTable
+            COA0021ListTable.FILEdir = hdnXMLsaveFile.Value
+            COA0021ListTable.TBLDATA = dt
+            COA0021ListTable.COA0021recoverListTable()
+            If COA0021ListTable.ERR = C_MESSAGENO.NORMAL Then
+                dt = COA0021ListTable.OUTTBL
+            Else
+                CommonFunctions.ShowMessage(COA0021ListTable.ERR, Me.lblFooterMessage, pageObject:=Me)
+                Return
+            End If
+        Else
+            dt = Me.SavedDt
+        End If
+
+        'データテーブルの禁則文字置換
+        ChangeInvalidChar(dt, New List(Of String) From
+                          {"INVOICENO", "CUSTOMERNAME", "REMARK", "INVOICEAMOUNT", "TAXAMT", "NONTAXAMT"})
+
+
+        Dim targetData = GetModifiedDataTable()
+        '登録対象データが0件の場合は処理終了
+        If targetData Is Nothing OrElse targetData.Rows.Count = 0 Then
+            messageNo = C_MESSAGENO.NOENTRYDATA
+            CommonFunctions.ShowMessage(messageNo, Me.lblFooterMessage, pageObject:=Me)
+            Return
+        End If
+
+        Dim checkDt As DataTable = Nothing
+        '削除は単項目チェック対象外とする
+        Dim q = (From item In targetData
+                 Where Convert.ToString(item("DELCHK")) <> "1")
+        If q.Any Then
+            checkDt = q.CopyToDataTable
+        End If
+        '単項目チェック
+        Dim fieldList As New List(Of String)
+        fieldList.AddRange({"INVOICENO", "CUSTOMERNAME", "REMARK", "INVOICEAMOUNT", "TAXAMT", "NONTAXAMT"})
+        Dim keyFields As New List(Of String) From {"LINECNT"}
+        Dim errMessage As String = ""
+
+        If checkDt.Rows.Count > 0 Then
+            messageNo = CheckSingle(CONST_MAPID, checkDt, fieldList, errMessage, keyFields:=keyFields)
+            If messageNo <> C_MESSAGENO.NORMAL Then
+                CommonFunctions.ShowMessage(messageNo, Me.lblFooterMessage, pageObject:=Me)
+
+                '左ボックスにエラーメッセージ表示
+                Me.txtRightErrorMessage.Text = errMessage
+                Return
+            End If
+
+            '請求金額チェック
+            Dim retMsg As New StringBuilder
+            For Each row As DataRow In checkDt.Rows
+                Dim tmpAmount = DecimalStringToDecimal(row.Item("INVOICEAMOUNT").ToString)
+                Dim tmpTaxAmt = DecimalStringToDecimal(row.Item("TAXAMT").ToString)
+                Dim tmpNonTaxAmt = DecimalStringToDecimal(row.Item("NONTAXAMT").ToString)
+                If tmpAmount <> (Convert.ToDecimal(tmpTaxAmt * 1.1) + tmpNonTaxAmt) Then
+                    retMsg.AppendFormat("・{0}[{2}]：{1}", "LINECNT", "Totals don't match.", row("LINECNT")).AppendLine()
+                    retMsg.AppendFormat("--> {0} = {1}", padRight("INVOICEAMOUNT", 20), tmpAmount).AppendLine()
+                    messageNo = C_MESSAGENO.RIGHTBIXOUT
+                End If
+            Next
+            If messageNo <> C_MESSAGENO.NORMAL Then
+                CommonFunctions.ShowMessage(messageNo, Me.lblFooterMessage, pageObject:=Me)
+
+                '右ボックスにエラーメッセージ表示
+                Me.txtRightErrorMessage.Text = retMsg.ToString
+                Return
+            End If
+        End If
+
+        Dim procDateTime As DateTime = DateTime.Now
         Try
+            Using sqlCon = New SqlConnection(COA0019Session.DBcon)
+                sqlCon.Open()
+                Using sqlTran = sqlCon.BeginTransaction
+                    For Each dr As DataRow In targetData.Rows
+                        If dr.Item("ACTION").Equals("NEW") Then
+                            Dim invoiceNoSub = GetNewInvoice(sqlCon, sqlTran, dr.Item("INCTORICODE").ToString, Me.GBT00028SValues.InvoiceMonth)
+                            dr.Item("INVOICENOSUB") = invoiceNoSub
+                            InsertInvoice(dr, sqlCon, sqlTran, procDateTime)
+                        Else
+                            UpdateInvoiceInfo(dr, sqlCon, sqlTran, procDateTime)
+                        End If
+                    Next
+                    sqlTran.Commit()
+                End Using
+            End Using
+
+        Catch ex As Exception
+            Throw
+        Finally
+        End Try
+
+        'メッセージ出力
+        'hdnMsgId.Value = C_MESSAGENO.APPLYSUCCESS
+
+        Dim thisPageUrl As String = Request.Url.ToString
+        Server.Transfer(Request.Url.LocalPath)
+
+    End Sub
+
+    ''' <summary>
+    ''' 禁則文字置換
+    ''' </summary>
+    ''' <param name="targetObjects">対象オブジェクト（テキストボックスリスト or データテーブル)</param>
+    ''' <param name="columnList">置換対象カラム一覧(データテーブル時のみ指定)</param>
+    Private Sub ChangeInvalidChar(targetObjects As Object, Optional columnList As List(Of String) = Nothing)
+        Dim COA0008InvalidChar As New BASEDLL.COA0008InvalidChar              '例外文字排除 String Get
+        'テキストボックスの全置換
+        If TypeOf targetObjects Is List(Of TextBox) Then
+            Dim targetTextboxList As List(Of TextBox) = DirectCast(targetObjects, List(Of TextBox))
+            For Each targetTextbox In targetTextboxList
+                With COA0008InvalidChar
+                    .CHARin = targetTextbox.Text
+                    .COA0008RemoveInvalidChar()
+                    If .CHARin <> .CHARout Then
+                        targetTextbox.Text = .CHARout
+                    End If
+                End With
+            Next
+        End If
+        'データテーブルの格納値置換
+        If TypeOf targetObjects Is DataTable Then
+            If columnList Is Nothing OrElse columnList.Count = 0 Then
+                '引数置換対象のカラムがない場合はそのまま終了
+                Return
+            End If
+            Dim dt As DataTable = DirectCast(targetObjects, DataTable)
+            'データテーブルがないまたはレコードがない場合はそのまま終了
+            If dt Is Nothing OrElse dt.Rows.Count = 0 Then
+                Return
+            End If
+            '引数カラムリストのうち引数データテーブルに存在するカラムに限定
+            Dim changeValueColumnList As New List(Of String)
+            For Each columnName As String In columnList
+                If dt.Columns.Contains(columnName) Then
+                    changeValueColumnList.Add(columnName)
+                End If
+            Next
+            'データテーブルとのカラム名マッチングの結果,
+            '置換対象のカラムが存在しない場合はそのまま終了
+            If changeValueColumnList.Count = 0 Then
+                Return
+            End If
+            'データ行のループ
+            For Each dr As DataRow In dt.Rows
+                'カラム名のループ
+                For Each columnName As String In changeValueColumnList
+                    With COA0008InvalidChar
+                        .CHARin = Convert.ToString(dr.Item(columnName))
+                        .COA0008RemoveInvalidChar()
+                        If .CHARin <> .CHARout Then
+                            dr.Item(columnName) = .CHARout
+                        End If
+                    End With
+                Next 'カラム名のループEND
+            Next 'データ行のループEND
+
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 変更検知処理
+    ''' </summary>
+    ''' <returns>変更対象のデータテーブルを生成</returns>
+    ''' <remarks>当処理の戻り値データテーブルが更新・追加・論理削除対象のデータとなる</remarks>
+    Private Function GetModifiedDataTable() As DataTable
+        Dim COA0021ListTable As New COA0021ListTable
+        Dim retDt As DataTable = CreateDataTable()
+        Dim currentDt As DataTable
+        '**************************************************
+        'データテーブル復元
+        '**************************************************
+        '画面編集しているデータテーブル取得
+        If Me.SavedDt Is Nothing Then
+            currentDt = CreateDataTable()
+            COA0021ListTable.FILEdir = Me.hdnXMLsaveFile.Value
+            COA0021ListTable.TBLDATA = currentDt
+            COA0021ListTable.COA0021recoverListTable()
+            If COA0021ListTable.ERR = C_MESSAGENO.NORMAL Then
+                currentDt = COA0021ListTable.OUTTBL
+            Else
+                CommonFunctions.ShowMessage(COA0021ListTable.ERR, Me.lblFooterMessage)
+                Return Nothing
+            End If
+
+        Else
+            currentDt = Me.SavedDt
+        End If
+
+        'CHECKチェックボックスが変更済みの全データを取得
+        'Otherの変更データを取得
+        Dim q = (From item In currentDt
+                 Where Convert.ToString(item("INVOICETYPE")) <> CONST_INVOICETYPE_NOTDONE _
+                  And (Convert.ToString(item("CHECK_AP_DATE")) <> Convert.ToString(item("CHECK_AP_PRVDATE")) _
+                    Or Convert.ToString(item("CHECK_S_DATE")) <> Convert.ToString(item("CHECK_S_PRVDATE")) _
+                    Or Convert.ToString(item("CHECK_AC")) <> Convert.ToString(item("CHECK_AC_PRV")) _
+                    Or Convert.ToString(item("INVOICENO")) <> Convert.ToString(item("INVOICENO_PRV")) _
+                    Or Convert.ToString(item("CUSTOMERNAME")) <> Convert.ToString(item("CUSTOMERNAME_PRV")) _
+                    Or Convert.ToString(item("REMARK")) <> Convert.ToString(item("REMARK_PRV")) _
+                    Or Convert.ToString(item("INVOICEAMOUNT")) <> Convert.ToString(item("INVOICEAMOUNT_PRV")) _
+                    Or Convert.ToString(item("TAXAMT")) <> Convert.ToString(item("TAXAMT_PRV")) _
+                    Or Convert.ToString(item("NONTAXAMT")) <> Convert.ToString(item("NONTAXAMT_PRV"))
+                    ))
+        If q.Any Then
+            retDt = q.CopyToDataTable
+        End If
+
+        Return retDt
+    End Function
+
+    ''' <summary>
+    ''' 単項目チェック処理
+    ''' </summary>
+    ''' <param name="mapId">IN:チェック条件のMAPID</param>
+    ''' <param name="dt">IN:チェック対象のデータテーブル</param>
+    ''' <param name="checkFileds">IN:チェックフィールド一覧</param>
+    ''' <param name="errMessage">OUT：エラーメッセージ</param>
+    ''' <param name="keyFields">IN(省略可):エラーメッセージ表示時に示すキーフィールドリスト、ここを指定した場合は「エラー内容」＋「当引数のフィールドと値」をメッセージに付与します
+    ''' 省略時は付与しません</param>
+    ''' <param name="keyValuePadLen">IN(省略可 省略時20):「--> [項目名] = [値]」を表示する際の項目名から=までにスペースを埋めるバイト数</param>
+    ''' <returns>メッセージ番号:すべて正常時はC_MESSAGENO.NORMAL(00000) チェック異常時はC_MESSAGENO.RIGHTBIXOUT(10008)を返却</returns>
+    Private Function CheckSingle(ByVal mapId As String, ByVal dt As DataTable, ByVal checkFileds As List(Of String), ByRef errMessage As String, Optional keyFields As List(Of String) = Nothing, Optional keyValuePadLen As Integer = 20) As String
+        Dim checkMapId As String = mapId
+        Dim retMessageNo As String = C_MESSAGENO.NORMAL
+        Dim hasError As Boolean = False
+        Dim dummyLabelObj As New Label '画面描画しないダミーのラベルオブジェクト
+        Dim retMessage As New StringBuilder
+        'エラーメッセージ取得すら失敗した場合
+        Dim getMessageErrorString As String = "エラーメッセージ({0})の取得に失敗しました。"
+        If BASEDLL.COA0019Session.LANGDISP <> C_LANG.JA Then
+            getMessageErrorString = "Failed To Get Error message ({0})."
+        End If
+        '******************************
+        '引数チェック
+        '******************************
+        '検査対象のデータテーブルレコードが存在しない、チェックフィールドが存在しない場合はそのまま終了
+        If dt Is Nothing OrElse dt.Rows.Count = 0 OrElse checkFileds.Count = 0 Then
+            Return retMessageNo
+        End If
+        'DataTableに本当に存在するフィールを取得
+        Dim targetCheckFields As New List(Of String)
+        For Each checkField As String In checkFileds
+            If dt.Columns.Contains(checkField) Then
+                targetCheckFields.Add(checkField)
+            End If
+        Next
+        '検査すべきフィールドがない場合はそのまま終了
+        If targetCheckFields.Count = 0 Then
+            Return retMessageNo
+        End If
+        'DataTableに本当に存在するキーフィールドを取得
+        Dim targetKeyFields As List(Of String) = Nothing
+        If keyFields IsNot Nothing Then
+            targetKeyFields = New List(Of String)
+            For Each keyField As String In keyFields
+                If dt.Columns.Contains(keyField) Then
+                    targetKeyFields.Add(keyField)
+                End If
+            Next
+            If targetKeyFields.Count = 0 Then
+                targetKeyFields = Nothing
+            End If
+        End If
+
+        Dim COA0026FieldCheck As New BASEDLL.COA0026FieldCheck              '項目チェック
+
+        'チェックごとに変わらないパラメータ設定
+        COA0026FieldCheck.COMPCODE = GBC_COMPCODE_D
+        COA0026FieldCheck.MAPID = checkMapId
+
+        '******************************
+        'フィールド名ディクショナリ取得
+        '******************************
+        Dim fieldDic As New Dictionary(Of String, String)
+        COA0026FieldCheck.FIELDDIC = fieldDic
+        COA0026FieldCheck.COA0026getFieldList()
+        fieldDic = COA0026FieldCheck.FIELDDIC
+        '******************************
+        '単項目チェック開始
+        '******************************
+
+        'データテーブルの行ループ開始
+        For Each dr As DataRow In dt.Rows
+
+
+            'チェックフィールドのループ開始
+            For Each checkField In targetCheckFields
+                COA0026FieldCheck.FIELD = checkField
+                COA0026FieldCheck.VALUE = Convert.ToString(dr.Item(checkField))
+                COA0026FieldCheck.COA0026FieldCheck()
+                If COA0026FieldCheck.ERR <> C_MESSAGENO.NORMAL Then
+                    retMessageNo = C_MESSAGENO.RIGHTBIXOUT
+                    CommonFunctions.ShowMessage(COA0026FieldCheck.ERR, dummyLabelObj)
+                    retMessage.AppendFormat("・{0}：{1}", fieldDic(checkField), dummyLabelObj.Text).AppendLine()
+
+                    If targetKeyFields IsNot Nothing Then
+                        For Each keyField In targetKeyFields
+                            retMessage.AppendFormat("--> {0} = {1}", padRight(fieldDic(keyField), keyValuePadLen), Convert.ToString(dr.Item(keyField))).AppendLine()
+                        Next
+                    End If 'END targetKeyFields IsNot Nothing 
+
+                End If 'END  COA0026FieldCheck.ERR <> C_MESSAGENO.NORMAL
+            Next
+            Dim stringKeyInfo As String = ""
+
+
+        Next 'END For Each dr As DataRow In dt.Rows
+        errMessage = retMessage.ToString
+        Return retMessageNo
+    End Function
+    ''' <summary>
+    ''' 単項目チェック
+    ''' </summary>
+    ''' <param name="inColName"></param>
+    ''' <param name="inText"></param>
+    Protected Function CheckSingle(ByVal inColName As String, ByVal inText As String) As String
+
+        Dim COA0026FieldCheck As New BASEDLL.COA0026FieldCheck      '項目チェック
+
+        '〇単項目チェック
+        COA0026FieldCheck.COMPCODE = GBC_COMPCODE_D
+        COA0026FieldCheck.MAPID = CONST_MAPID
+        COA0026FieldCheck.FIELD = inColName
+        COA0026FieldCheck.VALUE = inText
+        COA0026FieldCheck.COA0026FieldCheck()
+        If COA0026FieldCheck.ERR = C_MESSAGENO.NORMAL Then
+            Return C_MESSAGENO.NORMAL
+        Else
+            CommonFunctions.ShowMessage(COA0026FieldCheck.ERR, Me.lblFooterMessage, naeiw:=C_NAEIW.ERROR, pageObject:=Me)
+            Return COA0026FieldCheck.ERR
+        End If
+
+    End Function
+    ''' <summary>
+    ''' 文字左スペース埋め
+    ''' </summary>
+    ''' <param name="st"></param>
+    ''' <param name="len"></param>
+    ''' <returns></returns>
+    ''' <remarks>エラー一覧で項目名称が日本語英語まちまちなので調整</remarks>
+    Function padRight(ByVal st As String, ByVal len As Integer) As String
+        Dim padLength As Integer = len - (System.Text.Encoding.GetEncoding("Shift_JIS").GetByteCount(st) - st.Length)
+        '埋められない場合はそのまま返却
+        If padLength <= 0 Then
+            Return st
+        End If
+        Return st.PadRight(len, " "c)
+    End Function
+
+    ''' <summary>
+    ''' 請求書テーブル追加
+    ''' </summary>
+    ''' <param name="dr"></param>
+    Private Sub InsertInvoice(dr As DataRow, Optional sqlCon As SqlConnection = Nothing, Optional tran As SqlTransaction = Nothing, Optional procDate As Date = #1900/01/01#)
+
+        Dim canCloseConnect As Boolean = False
+
+        If procDate.ToString("yyyy/MM/dd") = "1900/01/01" Then
+            procDate = Now
+        End If
+        Try
+            If sqlCon Is Nothing Then
+                sqlCon = New SqlConnection(COA0019Session.DBcon)
+                canCloseConnect = True
+            End If
 
             Dim sqlStat As New StringBuilder
-            Using sqlCon = New SqlConnection(COA0019Session.DBcon),
-                sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon)
-                sqlCon.Open()
-                tran = sqlCon.BeginTransaction() 'トランザクション開始
+            sqlStat.AppendFormat("INSERT INTO {0} ", CONST_TBL_INVOICEINFO).AppendLine()
+            sqlStat.AppendLine("  (")
+            sqlStat.AppendLine("   CUSTOMERCODE")
+            sqlStat.AppendLine("  ,INVOICEMONTH")
+            sqlStat.AppendLine("  ,INVOICENOSUB")
+            sqlStat.AppendLine("  ,STYMD")
+            sqlStat.AppendLine("  ,INVOICENO")
+            sqlStat.AppendLine("  ,INCTORICODE")
+            sqlStat.AppendLine("  ,REMARK")
+            sqlStat.AppendLine("  ,OUTLANGUAGE")
+            sqlStat.AppendLine("  ,INVOICEDATE")
+            sqlStat.AppendLine("  ,DRAFTOUTPUT")
+            sqlStat.AppendLine("  ,ORIGINALOUTPUT")
+            sqlStat.AppendLine("  ,ACCCURRENCYSEGMENT")
+            sqlStat.AppendLine("  ,AMOUNT")
+            sqlStat.AppendLine("  ,INVOICEAMOUNT")
+            sqlStat.AppendLine("  ,TANK")
+            sqlStat.AppendLine("  ,CREATEUSER")
+            sqlStat.AppendLine("  ,CREATEDATE")
+            sqlStat.AppendLine("  ,INVOICETYPE")
+            sqlStat.AppendLine("  ,CUSTOMERNAME")
+            'sqlStat.AppendLine("  ,WORK_C3")
+            sqlStat.AppendLine("  ,TAXAMT")
+            sqlStat.AppendLine("  ,NONTAXAMT")
+            'sqlStat.AppendLine("  ,WORK_F3")
+            sqlStat.AppendLine("  ,DELFLG")
+            sqlStat.AppendLine("  ,INITYMD")
+            sqlStat.AppendLine("  ,UPDYMD")
+            sqlStat.AppendLine("  ,UPDUSER")
+            sqlStat.AppendLine("  ,UPDTERMID")
+            sqlStat.AppendLine("  ,RECEIVEYMD")
+            sqlStat.AppendLine("  ) VALUES (")
+            sqlStat.AppendLine("   @CUSTOMERCODE")
+            sqlStat.AppendLine("  ,@INVOICEMONTH")
+            sqlStat.AppendLine("  ,@INVOICENOSUB")
+            sqlStat.AppendLine("  ,@STYMD")
+            sqlStat.AppendLine("  ,@INVOICENO")
+            sqlStat.AppendLine("  ,@INCTORICODE")
+            sqlStat.AppendLine("  ,@REMARK")
+            sqlStat.AppendLine("  ,@OUTLANGUAGE")
+            sqlStat.AppendLine("  ,@INVOICEDATE")
+            sqlStat.AppendLine("  ,@DRAFTOUTPUT")
+            sqlStat.AppendLine("  ,@ORIGINALOUTPUT")
+            sqlStat.AppendLine("  ,@ACCCURRENCYSEGMENT")
+            sqlStat.AppendLine("  ,@AMOUNT")
+            sqlStat.AppendLine("  ,@INVOICEAMOUNT")
+            sqlStat.AppendLine("  ,@TANK")
+            sqlStat.AppendLine("  ,@UPDUSER")
+            sqlStat.AppendLine("  ,@INITYMD")
+            sqlStat.AppendLine("  ,@INVOICETYPE")
+            sqlStat.AppendLine("  ,@CUSTOMERNAME")
+            'sqlStat.AppendLine("  ,@WORK_C3")
+            sqlStat.AppendLine("  ,@TAXAMT")
+            sqlStat.AppendLine("  ,@NONTAXAMT")
+            'sqlStat.AppendLine("  ,@WORK_F3")
+            sqlStat.AppendLine("  ,@DELFLG")
+            sqlStat.AppendLine("  ,@INITYMD")
+            sqlStat.AppendLine("  ,@UPDYMD")
+            sqlStat.AppendLine("  ,@UPDUSER")
+            sqlStat.AppendLine("  ,@UPDTERMID")
+            sqlStat.AppendLine("  ,@RECEIVEYMD")
+            sqlStat.AppendLine("  )")
 
-                sqlStat.AppendFormat("INSERT INTO {0} ", CONST_TBL_INVOICEINFO).AppendLine()
-                sqlStat.AppendLine(" (")
-                sqlStat.AppendLine("           INCTORICODE")
-                sqlStat.AppendLine("          ,INVOICEMONTH")
-                sqlStat.AppendLine("          ,INVOICENOSUB")
-                sqlStat.AppendLine("          ,STYMD")
-                sqlStat.AppendLine("          ,ENDYMD")
-                sqlStat.AppendLine("          ,INVOICENO")
-                sqlStat.AppendLine("          ,CUSTOMERCODE")
-                sqlStat.AppendLine("          ,REMARK")
-                sqlStat.AppendLine("          ,OUTLANGUAGE")
-                sqlStat.AppendLine("          ,INVOICEDATE")
-                sqlStat.AppendLine("          ,DRAFTOUTPUT")
-                sqlStat.AppendLine("          ,ORIGINALOUTPUT")
-                sqlStat.AppendLine("          ,ACCCURRENCYSEGMENT")
-                sqlStat.AppendLine("          ,AMOUNT")
-                sqlStat.AppendLine("          ,INVOICEAMOUNT")
-                sqlStat.AppendLine("          ,TANK")
-                sqlStat.AppendLine("          ,CREATEUSER")
-                sqlStat.AppendLine("          ,CREATEDATE")
-                sqlStat.AppendLine("          ,APPROVEUSER")
-                sqlStat.AppendLine("          ,APPROVEDATE")
-                sqlStat.AppendLine("          ,SENDUSER")
-                sqlStat.AppendLine("          ,SENDDATE")
-                sqlStat.AppendLine("          ,ACCUSER")
-                sqlStat.AppendLine("          ,ACCDATE")
-                sqlStat.AppendLine("          ,WORK_C1")
-                sqlStat.AppendLine("          ,WORK_C2")
-                sqlStat.AppendLine("          ,WORK_C3")
-                sqlStat.AppendLine("          ,WORK_F1")
-                sqlStat.AppendLine("          ,WORK_F2")
-                sqlStat.AppendLine("          ,WORK_F3")
-                sqlStat.AppendLine("          ,DELFLG")
-                sqlStat.AppendLine("          ,INITYMD")
-                sqlStat.AppendLine("          ,UPDYMD")
-                sqlStat.AppendLine("          ,UPDUSER")
-                sqlStat.AppendLine("          ,UPDTERMID")
-                sqlStat.AppendLine("          ,RECEIVEYMD")
-                sqlStat.AppendLine(" )   SELECT ")
-                sqlStat.AppendLine("           INCTORICODE")
-                sqlStat.AppendLine("          ,INVOICEMONTH")
-                sqlStat.AppendLine("          ,INVOICENOSUB")
-                sqlStat.AppendLine("          ,STYMD")
-                sqlStat.AppendLine("          ,ENDYMD")
-                sqlStat.AppendLine("          ,INVOICENO")
-                sqlStat.AppendLine("          ,CUSTOMERCODE")
-                sqlStat.AppendLine("          ,REMARK")
-                sqlStat.AppendLine("          ,OUTLANGUAGE")
-                sqlStat.AppendLine("          ,INVOICEDATE")
-                sqlStat.AppendLine("          ,DRAFTOUTPUT")
-                sqlStat.AppendLine("          ,ORIGINALOUTPUT")
-                sqlStat.AppendLine("          ,ACCCURRENCYSEGMENT")
-                sqlStat.AppendLine("          ,AMOUNT")
-                sqlStat.AppendLine("          ,INVOICEAMOUNT")
-                sqlStat.AppendLine("          ,TANK")
-                sqlStat.AppendLine("          ,CREATEUSER")
-                sqlStat.AppendLine("          ,CREATEDATE")
-                sqlStat.AppendLine("          ,@APPROVEUSER")
-                sqlStat.AppendLine("          ,@APPROVEDATE")
-                sqlStat.AppendLine("          ,@SENDUSER")
-                sqlStat.AppendLine("          ,@SENDDATE")
-                sqlStat.AppendLine("          ,@ACCUSER")
-                sqlStat.AppendLine("          ,@ACCDATE")
-                sqlStat.AppendLine("          ,WORK_C1")
-                sqlStat.AppendLine("          ,WORK_C2")
-                sqlStat.AppendLine("          ,WORK_C3")
-                sqlStat.AppendLine("          ,WORK_F1")
-                sqlStat.AppendLine("          ,WORK_F2")
-                sqlStat.AppendLine("          ,WORK_F3")
-                sqlStat.AppendLine("          ,DELFLG")
-                sqlStat.AppendLine("          ,INITYMD")
-                sqlStat.AppendLine("          ,@UPDYMD")
-                sqlStat.AppendLine("          ,@UPDUSER")
-                sqlStat.AppendLine("          ,@UPDTERMID")
-                sqlStat.AppendLine("          ,@RECEIVEYMD")
-                sqlStat.AppendFormat("     FROM {0}", CONST_TBL_INVOICEINFO)
-                sqlStat.AppendLine("      WHERE INCTORICODE  = @INCTORICODE")
-                sqlStat.AppendLine("        AND INVOICEMONTH = @INVOICEMONTH")
-                sqlStat.AppendLine("        AND INVOICENOSUB = @INVOICENOSUB")
-                sqlStat.AppendLine("        AND DELFLG       = @DELFLG")
-                sqlStat.AppendLine(";")
+            Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon, tran)
+                With sqlCmd.Parameters
+                    .Add("@CUSTOMERCODE", SqlDbType.NVarChar).Value = dr.Item("CUSTOMERCODE")
+                    .Add("@INVOICEMONTH", SqlDbType.NVarChar).Value = dr.Item("INVOICEMONTH")
+                    .Add("@INVOICENOSUB", SqlDbType.Int).Value = dr.Item("INVOICENOSUB")
+                    .Add("@STYMD", SqlDbType.Date).Value = procDate
+                    .Add("@INVOICENO", SqlDbType.NVarChar).Value = dr.Item("INVOICENO")
+                    .Add("@INCTORICODE", SqlDbType.NVarChar).Value = dr.Item("INCTORICODE")
+                    .Add("@REMARK", SqlDbType.NVarChar).Value = dr.Item("REMARK")
+                    .Add("@OUTLANGUAGE", SqlDbType.NVarChar).Value = dr.Item("OUTLANGUAGE")
+                    .Add("@INVOICEDATE", SqlDbType.NVarChar).Value = procDate.ToString("yyyy/MM/dd")
+                    .Add("@DRAFTOUTPUT", SqlDbType.Int).Value = DecimalStringToDecimal(Convert.ToString(dr.Item("DRAFTOUTPUT")))
+                    .Add("@ORIGINALOUTPUT", SqlDbType.Int).Value = DecimalStringToDecimal(Convert.ToString(dr.Item("ORIGINALOUTPUT")))
+                    .Add("@ACCCURRENCYSEGMENT", SqlDbType.NVarChar).Value = dr.Item("ACCCURRENCYSEGMENT")
+                    .Add("@AMOUNT", SqlDbType.Float).Value = DecimalStringToDecimal(Convert.ToString(dr.Item("AMOUNT")))
+                    .Add("@INVOICEAMOUNT", SqlDbType.Float).Value = DecimalStringToDecimal(Convert.ToString(dr.Item("INVOICEAMOUNT")))
+                    .Add("@TANK", SqlDbType.Int).Value = 0
+                    .Add("@INVOICETYPE", SqlDbType.NVarChar).Value = dr.Item("INVOICETYPE")
+                    .Add("@CUSTOMERNAME", SqlDbType.NVarChar).Value = dr.Item("CUSTOMERNAME")
+                    '.Add("@WORK_C3", SqlDbType.NVarChar).Value = dr.Item("WORK_C3")
+                    .Add("@TAXAMT", SqlDbType.Float).Value = DecimalStringToDecimal(Convert.ToString(dr.Item("TAXAMT")))
+                    .Add("@NONTAXAMT", SqlDbType.Float).Value = DecimalStringToDecimal(Convert.ToString(dr.Item("NONTAXAMT")))
+                    '.Add("@WORK_F3", SqlDbType.Float).Value = DecimalStringToDecimal(Convert.ToString(dr.Item("WORK_F3")))
+                    .Add("@DELFLG", SqlDbType.NVarChar).Value = CONST_FLAG_NO
+                    .Add("@INITYMD", SqlDbType.DateTime).Value = procDate.ToString("yyyy/MM/dd HH:mm:ss.FFF")
+                    .Add("@UPDYMD", SqlDbType.DateTime).Value = procDate.ToString("yyyy/MM/dd HH:mm:ss.FFF")
+                    .Add("@UPDUSER", SqlDbType.NVarChar).Value = COA0019Session.USERID
+                    .Add("@UPDTERMID", SqlDbType.NVarChar).Value = HttpContext.Current.Session("APSRVname")
+                    .Add("@RECEIVEYMD", SqlDbType.DateTime).Value = CONST_DEFAULT_RECEIVEYMD
 
-                sqlStat.AppendFormat("UPDATE {0} ", CONST_TBL_INVOICEINFO).AppendLine()
-                sqlStat.AppendLine("  SET")
-                sqlStat.AppendLine("   DELFLG            = @DELFLG_Y")
-                sqlStat.AppendLine("  ,UPDYMD            = @UPDYMD")
-                sqlStat.AppendLine("  ,UPDUSER           = @UPDUSER")
-                sqlStat.AppendLine("  ,UPDTERMID         = @UPDTERMID")
-                sqlStat.AppendLine("  ,RECEIVEYMD        = @RECEIVEYMD")
-                sqlStat.AppendLine("  WHERE INCTORICODE  = @INCTORICODE")
-                sqlStat.AppendLine("    AND INVOICEMONTH = @INVOICEMONTH")
-                sqlStat.AppendLine("    AND INVOICENOSUB = @INVOICENOSUB")
-                sqlStat.AppendLine("    AND UPDYMD      <> @UPDYMD")
-                sqlStat.AppendLine("    AND DELFLG       = @DELFLG")
-                sqlStat.AppendLine(";")
+                End With
+                sqlCmd.ExecuteNonQuery()
+            End Using
+        Catch ex As Exception
+            Throw
+        Finally
+            If canCloseConnect = True Then
+                If sqlCon IsNot Nothing Then
+                    sqlCon.Close()
+                    sqlCon.Dispose()
+                End If
+            End If
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' 請求書テーブル更新
+    ''' </summary>
+    ''' <param name="dr"></param>
+    Private Sub UpdateInvoiceInfo(dr As DataRow, Optional sqlCon As SqlConnection = Nothing, Optional tran As SqlTransaction = Nothing, Optional procDate As Date = #1900/01/01#, Optional totalInvoice As Double = 0.0)
+
+        Dim canCloseConnect As Boolean = False
+
+        If procDate.ToString("yyyy/MM/dd") = "1900/01/01" Then
+            procDate = Now
+        End If
+
+        Try
+            If sqlCon Is Nothing Then
+                sqlCon = New SqlConnection(COA0019Session.DBcon)
+                canCloseConnect = True
+            End If
+            Dim sqlStat As New StringBuilder
+            sqlStat.AppendFormat("INSERT INTO {0} ", CONST_TBL_INVOICEINFO).AppendLine()
+            sqlStat.AppendLine(" (")
+            sqlStat.AppendLine("           INCTORICODE")
+            sqlStat.AppendLine("          ,INVOICEMONTH")
+            sqlStat.AppendLine("          ,INVOICENOSUB")
+            sqlStat.AppendLine("          ,STYMD")
+            sqlStat.AppendLine("          ,ENDYMD")
+            sqlStat.AppendLine("          ,INVOICENO")
+            sqlStat.AppendLine("          ,CUSTOMERCODE")
+            sqlStat.AppendLine("          ,REMARK")
+            sqlStat.AppendLine("          ,OUTLANGUAGE")
+            sqlStat.AppendLine("          ,INVOICEDATE")
+            sqlStat.AppendLine("          ,DRAFTOUTPUT")
+            sqlStat.AppendLine("          ,ORIGINALOUTPUT")
+            sqlStat.AppendLine("          ,ACCCURRENCYSEGMENT")
+            sqlStat.AppendLine("          ,AMOUNT")
+            sqlStat.AppendLine("          ,INVOICEAMOUNT")
+            sqlStat.AppendLine("          ,TANK")
+            sqlStat.AppendLine("          ,CREATEUSER")
+            sqlStat.AppendLine("          ,CREATEDATE")
+            sqlStat.AppendLine("          ,APPROVEUSER")
+            sqlStat.AppendLine("          ,APPROVEDATE")
+            sqlStat.AppendLine("          ,SENDUSER")
+            sqlStat.AppendLine("          ,SENDDATE")
+            sqlStat.AppendLine("          ,ACCUSER")
+            sqlStat.AppendLine("          ,ACCDATE")
+            sqlStat.AppendLine("          ,INVOICETYPE")
+            sqlStat.AppendLine("          ,CUSTOMERNAME")
+            sqlStat.AppendLine("          ,WORK_C3")
+            sqlStat.AppendLine("          ,TAXAMT")
+            sqlStat.AppendLine("          ,NONTAXAMT")
+            sqlStat.AppendLine("          ,WORK_F3")
+            sqlStat.AppendLine("          ,DELFLG")
+            sqlStat.AppendLine("          ,INITYMD")
+            sqlStat.AppendLine("          ,UPDYMD")
+            sqlStat.AppendLine("          ,UPDUSER")
+            sqlStat.AppendLine("          ,UPDTERMID")
+            sqlStat.AppendLine("          ,RECEIVEYMD")
+            sqlStat.AppendLine(" )   SELECT ")
+            sqlStat.AppendLine("           INCTORICODE")
+            sqlStat.AppendLine("          ,INVOICEMONTH")
+            sqlStat.AppendLine("          ,INVOICENOSUB")
+            sqlStat.AppendLine("          ,STYMD")
+            sqlStat.AppendLine("          ,ENDYMD")
+            sqlStat.AppendLine("          ,@INVOICENO")
+            sqlStat.AppendLine("          ,CUSTOMERCODE")
+            sqlStat.AppendLine("          ,@REMARK")
+            sqlStat.AppendLine("          ,OUTLANGUAGE")
+            sqlStat.AppendLine("          ,INVOICEDATE")
+            sqlStat.AppendLine("          ,DRAFTOUTPUT")
+            sqlStat.AppendLine("          ,ORIGINALOUTPUT")
+            sqlStat.AppendLine("          ,ACCCURRENCYSEGMENT")
+            sqlStat.AppendLine("          ,AMOUNT")
+            sqlStat.AppendLine("          ,@INVOICEAMOUNT")
+            sqlStat.AppendLine("          ,TANK")
+            sqlStat.AppendLine("          ,CREATEUSER")
+            sqlStat.AppendLine("          ,CREATEDATE")
+            sqlStat.AppendLine("          ,@APPROVEUSER")
+            sqlStat.AppendLine("          ,@APPROVEDATE")
+            sqlStat.AppendLine("          ,@SENDUSER")
+            sqlStat.AppendLine("          ,@SENDDATE")
+            sqlStat.AppendLine("          ,@ACCUSER")
+            sqlStat.AppendLine("          ,@ACCDATE")
+            sqlStat.AppendLine("          ,INVOICETYPE")
+            sqlStat.AppendLine("          ,@CUSTOMERNAME")
+            sqlStat.AppendLine("          ,WORK_C3")
+            sqlStat.AppendLine("          ,@TAXAMT")
+            sqlStat.AppendLine("          ,@NONTAXAMT")
+            sqlStat.AppendLine("          ,WORK_F3")
+            sqlStat.AppendLine("          ,DELFLG")
+            sqlStat.AppendLine("          ,INITYMD")
+            sqlStat.AppendLine("          ,@UPDYMD")
+            sqlStat.AppendLine("          ,@UPDUSER")
+            sqlStat.AppendLine("          ,@UPDTERMID")
+            sqlStat.AppendLine("          ,@RECEIVEYMD")
+            sqlStat.AppendFormat("     FROM {0}", CONST_TBL_INVOICEINFO)
+            sqlStat.AppendLine("      WHERE INCTORICODE  = @INCTORICODE")
+            sqlStat.AppendLine("        AND INVOICEMONTH = @INVOICEMONTH")
+            sqlStat.AppendLine("        AND INVOICENOSUB = @INVOICENOSUB")
+            sqlStat.AppendLine("        AND DELFLG       = @DELFLG")
+            sqlStat.AppendLine(";")
+
+            sqlStat.AppendFormat("UPDATE {0} ", CONST_TBL_INVOICEINFO).AppendLine()
+            sqlStat.AppendLine("  SET")
+            sqlStat.AppendLine("   DELFLG            = @DELFLG_Y")
+            sqlStat.AppendLine("  ,UPDYMD            = @UPDYMD")
+            sqlStat.AppendLine("  ,UPDUSER           = @UPDUSER")
+            sqlStat.AppendLine("  ,UPDTERMID         = @UPDTERMID")
+            sqlStat.AppendLine("  ,RECEIVEYMD        = @RECEIVEYMD")
+            sqlStat.AppendLine("  WHERE INCTORICODE  = @INCTORICODE")
+            sqlStat.AppendLine("    AND INVOICEMONTH = @INVOICEMONTH")
+            sqlStat.AppendLine("    AND INVOICENOSUB = @INVOICENOSUB")
+            sqlStat.AppendLine("    AND UPDYMD      <> @UPDYMD")
+            sqlStat.AppendLine("    AND DELFLG       = @DELFLG")
+            sqlStat.AppendLine(";")
+
+            Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon, tran)
 
                 '動的パラメータのみ変数化
                 'Dim paramCustomer = sqlCmd.Parameters.Add("@CUSTOMERCODE", SqlDbType.NVarChar)
@@ -582,84 +1216,109 @@ Public Class GBT00028RESULT
                 Dim paramSendD = sqlCmd.Parameters.Add("@SENDDATE", SqlDbType.DateTime)
                 Dim paramAccU = sqlCmd.Parameters.Add("@ACCUSER", SqlDbType.NVarChar)
                 Dim paramAccD = sqlCmd.Parameters.Add("@ACCDATE", SqlDbType.DateTime)
+                Dim paramInvoiceNo = sqlCmd.Parameters.Add("@INVOICENO", SqlDbType.NVarChar)
+                Dim paramCustomerName = sqlCmd.Parameters.Add("@CUSTOMERNAME", SqlDbType.NVarChar)
+                Dim paramRemark = sqlCmd.Parameters.Add("@REMARK", SqlDbType.NVarChar)
+                Dim paramInvoiceAmount = sqlCmd.Parameters.Add("@INVOICEAMOUNT", SqlDbType.NVarChar)
+                Dim paramTaxAmt = sqlCmd.Parameters.Add("@TAXAMT", SqlDbType.NVarChar)
+                Dim paramNonTaxAmt = sqlCmd.Parameters.Add("@NONTAXAMT", SqlDbType.NVarChar)
 
                 'SQLパラメータ設定
                 With sqlCmd.Parameters
                     .Add("@DELFLG_Y", SqlDbType.NVarChar, 1).Value = CONST_FLAG_YES
                     .Add("@DELFLG", SqlDbType.NVarChar).Value = CONST_FLAG_NO
-                    .Add("@UPDYMD", SqlDbType.DateTime).Value = procDateTime
+                    .Add("@UPDYMD", SqlDbType.DateTime).Value = procDate
                     .Add("@UPDUSER", SqlDbType.NVarChar, 20).Value = COA0019Session.USERID
                     .Add("@UPDTERMID", SqlDbType.NVarChar, 20).Value = COA0019Session.APSRVname
                     .Add("@RECEIVEYMD", SqlDbType.DateTime).Value = CONST_DEFAULT_RECEIVEYMD
                 End With
 
-                sqlCmd.Transaction = tran
-                For Each drDelete As DataRow In deleteDt.Rows
+                'paramCustomer.Value = Convert.ToString(dr.Item("CUSTOMERCODE"))
+                paramToriCode.Value = Convert.ToString(dr.Item("INCTORICODE"))
+                paramInvoiceMonth.Value = Convert.ToString(dr.Item("INVOICEMONTH"))
+                paramInvoiceMonthSub.Value = Convert.ToInt32(dr.Item("INVOICENOSUB"))
 
-                    'paramCustomer.Value = Convert.ToString(drDelete.Item("CUSTOMERCODE"))
-                    paramToriCode.Value = Convert.ToString(drDelete.Item("INCTORICODE"))
-                    paramInvoiceMonth.Value = Convert.ToString(drDelete.Item("INVOICEMONTH"))
-                    paramInvoiceMonthSub.Value = Convert.ToInt32(drDelete.Item("INVOICENOSUB"))
-
-                    If Convert.ToString(drDelete.Item("CHECK_AP_DATE")) <> Convert.ToString(drDelete.Item("CHECK_AP_PRVDATE")) Then
-                        If Convert.ToString(drDelete.Item("CHECK_AP")) = CONST_CHECK_ON Then
-                            paramApproveU.Value = COA0019Session.USERID
-                            paramApproveD.Value = procDateTime
-                        Else
-                            paramApproveU.Value = ""
-                            paramApproveD.Value = CONST_INITDATE
-                        End If
+                If Convert.ToString(dr.Item("CHECK_AP_DATE")) <> Convert.ToString(dr.Item("CHECK_AP_PRVDATE")) Then
+                    If Convert.ToString(dr.Item("CHECK_AP")) = CONST_CHECK_ON Then
+                        paramApproveU.Value = COA0019Session.USERID
+                        paramApproveD.Value = procDate
                     Else
-                        paramApproveU.Value = drDelete.Item("APPROVEUSER")
-                        paramApproveD.Value = drDelete.Item("CHECK_AP_PRVDATE")
+                        paramApproveU.Value = ""
+                        paramApproveD.Value = CONST_INITDATE
                     End If
-                    If Convert.ToString(drDelete.Item("CHECK_S_DATE")) <> Convert.ToString(drDelete.Item("CHECK_S_PRVDATE")) Then
-                        If Convert.ToString(drDelete.Item("CHECK_S")) = CONST_CHECK_ON Then
-                            paramSendU.Value = COA0019Session.USERID
-                            paramSendD.Value = procDateTime
-                        Else
-                            paramSendU.Value = ""
-                            paramSendD.Value = CONST_INITDATE
-                        End If
+                Else
+                    paramApproveU.Value = dr.Item("APPROVEUSER")
+                    paramApproveD.Value = dr.Item("CHECK_AP_PRVDATE")
+                End If
+                If Convert.ToString(dr.Item("CHECK_S_DATE")) <> Convert.ToString(dr.Item("CHECK_S_PRVDATE")) Then
+                    If Convert.ToString(dr.Item("CHECK_S")) = CONST_CHECK_ON Then
+                        paramSendU.Value = COA0019Session.USERID
+                        paramSendD.Value = procDate
                     Else
-                        paramSendU.Value = drDelete.Item("SENDUSER")
-                        paramSendD.Value = drDelete.Item("CHECK_S_PRVDATE")
+                        paramSendU.Value = ""
+                        paramSendD.Value = CONST_INITDATE
                     End If
-                    If Convert.ToString(drDelete.Item("CHECK_AC_DATE")) <> Convert.ToString(drDelete.Item("CHECK_AC_PRVDATE")) Then
-                        If Convert.ToString(drDelete.Item("CHECK_AC")) = CONST_CHECK_ON Then
-                            paramAccU.Value = COA0019Session.USERID
-                            paramAccD.Value = procDateTime
-                        Else
-                            paramAccU.Value = ""
-                            paramAccD.Value = CONST_INITDATE
-                        End If
+                Else
+                    paramSendU.Value = dr.Item("SENDUSER")
+                    paramSendD.Value = dr.Item("CHECK_S_PRVDATE")
+                End If
+                If Convert.ToString(dr.Item("CHECK_AC_DATE")) <> Convert.ToString(dr.Item("CHECK_AC_PRVDATE")) Then
+                    If Convert.ToString(dr.Item("CHECK_AC")) = CONST_CHECK_ON Then
+                        paramAccU.Value = COA0019Session.USERID
+                        paramAccD.Value = procDate
                     Else
-                        paramAccU.Value = drDelete.Item("ACCUSER")
-                        paramAccD.Value = drDelete.Item("CHECK_AC_PRVDATE")
+                        paramAccU.Value = ""
+                        paramAccD.Value = CONST_INITDATE
                     End If
+                Else
+                    paramAccU.Value = dr.Item("ACCUSER")
+                    paramAccD.Value = dr.Item("CHECK_AC_PRVDATE")
+                End If
 
-                    sqlCmd.CommandText = sqlStat.ToString
-                    sqlCmd.ExecuteNonQuery()
+                If Convert.ToString(dr.Item("INVOICENO")) <> Convert.ToString(dr.Item("INVOICENO_PRV")) Then
+                    paramInvoiceNo.Value = Convert.ToString(dr.Item("INVOICENO"))
+                Else
+                    paramInvoiceNo.Value = Convert.ToString(dr.Item("INVOICENO_PRV"))
+                End If
+                If Convert.ToString(dr.Item("CUSTOMERNAME")) <> Convert.ToString(dr.Item("CUSTOMERNAME_PRV")) Then
+                    paramCustomerName.Value = Convert.ToString(dr.Item("CUSTOMERNAME"))
+                Else
+                    paramCustomerName.Value = Convert.ToString(dr.Item("CUSTOMERNAME_PRV"))
+                End If
+                If Convert.ToString(dr.Item("REMARK")) <> Convert.ToString(dr.Item("REMARK_PRV")) Then
+                    paramRemark.Value = Convert.ToString(dr.Item("REMARK"))
+                Else
+                    paramRemark.Value = Convert.ToString(dr.Item("REMARK_PRV"))
+                End If
+                If Convert.ToString(dr.Item("INVOICEAMOUNT")) <> Convert.ToString(dr.Item("INVOICEAMOUNT_PRV")) Then
+                    paramInvoiceAmount.Value = Convert.ToDouble(dr.Item("INVOICEAMOUNT"))
+                Else
+                    paramInvoiceAmount.Value = Convert.ToDouble(dr.Item("INVOICEAMOUNT_PRV"))
+                End If
+                If Convert.ToString(dr.Item("TAXAMT")) <> Convert.ToString(dr.Item("TAXAMT_PRV")) Then
+                    paramTaxAmt.Value = Convert.ToDouble(dr.Item("TAXAMT"))
+                Else
+                    paramTaxAmt.Value = Convert.ToDouble(dr.Item("TAXAMT_PRV"))
+                End If
+                If Convert.ToString(dr.Item("NONTAXAMT")) <> Convert.ToString(dr.Item("NONTAXAMT_PRV")) Then
+                    paramNonTaxAmt.Value = Convert.ToDouble(dr.Item("NONTAXAMT"))
+                Else
+                    paramNonTaxAmt.Value = Convert.ToDouble(dr.Item("NONTAXAMT_PRV"))
+                End If
 
-                Next
-
-                tran.Commit()
+                sqlCmd.ExecuteNonQuery()
 
             End Using
-
         Catch ex As Exception
             Throw
         Finally
-            If tran IsNot Nothing Then
-                tran.Dispose()
+            If canCloseConnect = True Then
+                If sqlCon IsNot Nothing Then
+                    sqlCon.Close()
+                    sqlCon.Dispose()
+                End If
             End If
         End Try
-
-        'メッセージ出力
-        'hdnMsgId.Value = C_MESSAGENO.APPLYSUCCESS
-
-        Dim thisPageUrl As String = Request.Url.ToString
-        Server.Transfer(Request.Url.LocalPath)
 
     End Sub
 
@@ -768,20 +1427,27 @@ Public Class GBT00028RESULT
     ''' 画面グリッドのデータを取得しファイルに保存する。
     ''' </summary>
     Private Function FileSaveDisplayInput() As String
-
+        'そもそも画面表示データがない状態の場合はそのまま終了
+        If ViewState("DISPLAY_LINECNT_LIST") Is Nothing Then
+            Return C_MESSAGENO.NORMAL
+        End If
+        Dim displayLineCnt = DirectCast(ViewState("DISPLAY_LINECNT_LIST"), List(Of Integer))
         Dim COA0021ListTable As New COA0021ListTable
-        Dim procDate As Date = Now
-
         '一覧表示データ復元
         Dim dt As DataTable = Nothing
-        dt = CreateDataTable()
-        COA0021ListTable.FILEdir = Me.hdnXMLsaveFile.Value
-        COA0021ListTable.TBLDATA = dt
-        COA0021ListTable.COA0021recoverListTable()
-        If COA0021ListTable.ERR = C_MESSAGENO.NORMAL Then
-            dt = COA0021ListTable.OUTTBL
+        If Me.SavedDt Is Nothing Then
+            dt = CreateDataTable()
+            COA0021ListTable.FILEdir = Me.hdnXMLsaveFile.Value
+            COA0021ListTable.TBLDATA = dt
+            COA0021ListTable.COA0021recoverListTable()
+            If COA0021ListTable.ERR = C_MESSAGENO.NORMAL Then
+                dt = COA0021ListTable.OUTTBL
+            Else
+                Return COA0021ListTable.ERR
+
+            End If
         Else
-            Return COA0021ListTable.ERR
+            dt = Me.SavedDt
         End If
 
         'この段階でありえないがデータテーブルがない場合は終了
@@ -789,30 +1455,46 @@ Public Class GBT00028RESULT
             Return C_MESSAGENO.NORMAL
         End If
         'サフィックス抜き（LISTID)抜きのオブジェクト名リスト
+        Dim objTxtPrifix As String = "txt" & Me.WF_LISTAREA.ID
         Dim objChkPrifix As String = "chk" & Me.WF_LISTAREA.ID
         Dim fieldIdList As New Dictionary(Of String, String)
+        Dim txtFieldIdList As New Dictionary(Of String, String)
         '入力値保持用のフィールド名設定
         fieldIdList.Add("DELCHK", objChkPrifix)
         fieldIdList.Add("CHECK_AP", objChkPrifix)
         fieldIdList.Add("CHECK_S", objChkPrifix)
         fieldIdList.Add("CHECK_AC", objChkPrifix)
+        If Me.hdnThisMapVariant.Value = "Management" Then
+            txtFieldIdList.Add("INVOICENO", objTxtPrifix)
+            txtFieldIdList.Add("CUSTOMERNAME", objTxtPrifix)
+            txtFieldIdList.Add("REMARK", objTxtPrifix)
+            txtFieldIdList.Add("INVOICEAMOUNT", objTxtPrifix)
+            txtFieldIdList.Add("TAXAMT", objTxtPrifix)
+            txtFieldIdList.Add("NONTAXAMT", objTxtPrifix)
+        End If
+        Dim procDate As Date = Now
 
         ' とりあえず右データエリアを対象
-        For i = 1 To dt.Rows.Count
+        For Each i In displayLineCnt
+            Dim targetRow = (From rowItem In dt Where Convert.ToString(rowItem("LINECNT")) = i.ToString)
+            'Dim dr As DataRow = dt.Rows(i - 1)
+            '対象行の通貨取得
+            Dim currency As String = targetRow(0).Item("ACCCURRENCYSEGMENT").ToString
+            Dim ci As System.Globalization.CultureInfo
+            If currency = "USD" Then
+                ci = New System.Globalization.CultureInfo("en-US")
+            Else
+                ci = New System.Globalization.CultureInfo("ja-JP")
+            End If
+
             For Each fieldId As KeyValuePair(Of String, String) In fieldIdList
                 Dim dispObjId As String = fieldId.Value & fieldId.Key & i
                 Dim displayValue As String = ""
                 Dim linePos As String = i.ToString
                 If Request.Form.AllKeys.Contains(dispObjId) Then
                     displayValue = Request.Form(dispObjId)
-                    '                    formToPost.Remove(dispObjId)
                 End If
 
-                'If displayValue <> "" Then
-                '    Dim targetRow = (From rowItem In dt Where Convert.ToString(rowItem("LINECNT")) = displayValue)
-                '    targetRow(0).Item(fieldId.Key) = CONST_CHECK_ON
-                'End If
-                Dim targetRow = (From rowItem In dt Where Convert.ToString(rowItem("LINECNT")) = linePos)
                 If Convert.ToString(targetRow(0).Item(fieldId.Key & "_DISP")) = CONST_CHECK_ON Then
                     If (displayValue <> "" AndAlso Convert.ToString(targetRow(0).Item(fieldId.Key)) <> CONST_CHECK_ON) _
                     OrElse (displayValue = "" AndAlso Convert.ToString(targetRow(0).Item(fieldId.Key)) = CONST_CHECK_ON) Then
@@ -829,15 +1511,45 @@ Public Class GBT00028RESULT
                     End If
 
                 End If
+
+                'targetRow(0).Item(fieldId.Key) = displayValue
+            Next
+            For Each fieldId As KeyValuePair(Of String, String) In txtFieldIdList
+                Dim dispObjId As String = fieldId.Value & fieldId.Key & i
+                Dim displayValue As String = ""
+                Dim linePos As String = i.ToString
+                If Request.Form.AllKeys.Contains(dispObjId) Then
+                    displayValue = Request.Form(dispObjId)
+                End If
+
+                If {"INVOICEAMOUNT", "TAXAMT", "NONTAXAMT"}.Contains(fieldId.Key) Then
+                    Dim val As String = displayValue
+                    val = StrConv(val.Trim, VbStrConv.Narrow)
+                    Dim tmpVal As Decimal
+                    If val <> "" Then
+                        'スタイルとカルチャを変更して変換する
+                        If Decimal.TryParse(val, System.Globalization.NumberStyles.Any, ci, tmpVal) = True Then
+                            val = tmpVal.ToString
+                        Else
+                            val = "0"
+                        End If
+                    Else
+                        val = "0"
+                    End If
+                    displayValue = val
+                End If
+
+                targetRow(0).Item(fieldId.Key) = displayValue
             Next
         Next
 
         COA0021ListTable.TBLDATA = dt
         COA0021ListTable.COA0021saveListTable()
-
         If COA0021ListTable.ERR <> C_MESSAGENO.NORMAL Then
             Return COA0021ListTable.ERR
         End If
+        Me.SavedDt = dt
+
         Return C_MESSAGENO.NORMAL
     End Function
 
@@ -888,6 +1600,8 @@ Public Class GBT00028RESULT
         sqlStat.AppendLine("      ,II.ACCCURRENCYSEGMENT ")
         sqlStat.AppendLine("      ,II.AMOUNT ")
         sqlStat.AppendLine("      ,II.INVOICEAMOUNT ")
+        sqlStat.AppendLine("      ,II.TAXAMT ")
+        sqlStat.AppendLine("      ,II.NONTAXAMT ")
         sqlStat.AppendLine("      ,II.TANK ")
         sqlStat.AppendLine("      ,CASE WHEN II.ACCCURRENCYSEGMENT = 'JPY' THEN FORMAT( round(II.INVOICEAMOUNT,0), 'C', 'ja-JP') ")
         sqlStat.AppendLine("            ELSE FORMAT( II.INVOICEAMOUNT, 'C', 'en-US') ")
@@ -927,7 +1641,7 @@ Public Class GBT00028RESULT
         sqlStat.AppendLine("      ,CASE WHEN II.DRAFTOUTPUT > 0 THEN '済' ELSE '' END AS DRAFTDISP ")
         sqlStat.AppendLine("      ,CASE WHEN II.ORIGINALOUTPUT > 0 THEN '済' ELSE '' END AS ORIGINALDISP ")
         'sqlStat.AppendFormat("      ,MC.{0} AS 'CUSTOMERNAME'", textCustomerTblField).AppendLine()
-        sqlStat.AppendFormat("      ,MTORI.{0} AS 'CUSTOMERNAME'", textCustomerTblField).AppendLine()
+        sqlStat.AppendFormat("      ,ISNULL(MTORI.{0},II.CUSTOMERNAME) AS 'CUSTOMERNAME'", textCustomerTblField).AppendLine()
         'sqlStat.AppendLine("      ,0 AS AMOUNT ")
         sqlStat.AppendLine("      ,'' AS DELCHK ")
         sqlStat.AppendLine("      ,'1' AS DELCHK_DISP ")
@@ -935,9 +1649,15 @@ Public Class GBT00028RESULT
         sqlStat.AppendLine("      ,'' as 'DELCHK_PRV'")
         sqlStat.AppendLine("      ,II.UPDYMD as 'DELCHK_PRVDATE'")
         sqlStat.AppendLine("      ,ISNULL(APPLY.APPROVALTYPE,'0') as 'APPROVALTYPE'")
-        sqlStat.AppendLine("      ,II.WORK_C1 as 'INVOICETYPE'")
+        sqlStat.AppendLine("      ,II.INVOICETYPE as 'INVOICETYPE'")
+        sqlStat.AppendLine("      ,II.INVOICENO as 'INVOICENO_PRV' ")
+        sqlStat.AppendFormat("      ,ISNULL(MTORI.{0},II.CUSTOMERNAME) AS 'CUSTOMERNAME_PRV'", textCustomerTblField).AppendLine()
+        sqlStat.AppendLine("      ,II.REMARK as 'REMARK_PRV' ")
+        sqlStat.AppendLine("      ,II.INVOICEAMOUNT as 'INVOICEAMOUNT_PRV' ")
+        sqlStat.AppendLine("      ,II.TAXAMT as 'TAXAMT_PRV' ")
+        sqlStat.AppendLine("      ,II.NONTAXAMT as 'NONTAXAMT_PRV' ")
         sqlStat.AppendFormat("  FROM {0} II", CONST_TBL_INVOICEINFO).AppendLine()
-        sqlStat.AppendFormat("    INNER JOIN {0} MTORI", CONST_TBL_TORI).AppendLine()
+        sqlStat.AppendFormat("    LEFT JOIN {0} MTORI", CONST_TBL_TORI).AppendLine()
         sqlStat.AppendLine("      ON    MTORI.COMPCODE       = @COMPCODE")
         sqlStat.AppendLine("      AND   MTORI.TORIKBN        = 'I'")
         sqlStat.AppendLine("      AND   MTORI.TORICODE       = II.INCTORICODE")
@@ -978,6 +1698,8 @@ Public Class GBT00028RESULT
         If Me.hdnThisMapVariant.Value <> "Management" Then
             'sqlStat.AppendLine("   AND II.CUSTOMERCODE = @CUSTOMERCODE")
             sqlStat.AppendLine("   AND II.INCTORICODE = @CUSTOMERCODE")
+            'THOMAS外は対象外
+            sqlStat.AppendFormat("   AND II.INVOICETYPE <> '{0}'", CONST_INVOICETYPE_OTHER).AppendLine()
         Else
             '管理画面はオリジナルを出力したもののみ
             'sqlStat.AppendLine("   AND II.ORIGINALOUTPUT > 0 ")
@@ -995,7 +1717,7 @@ Public Class GBT00028RESULT
             sqlStat.AppendLine("      ,''                        AS ENDYMD ")
             sqlStat.AppendLine("      ,'999999999-' + MTORI.TORICODE　   AS INVOICENO ")
             sqlStat.AppendLine("      ,MTORI.TORICODE            AS INCTORICODE ")
-            sqlStat.AppendLine("      ,'－－未選択明細数(SHIP済)－－'    AS REMARK ")
+            sqlStat.AppendLine("      ,'－－未選択明細数(SHIP済)－－   ' + CONVERT(varchar,COUNT(*))    AS REMARK ")
             sqlStat.AppendLine("      ,''                        AS OUTLANGUAGE ")
             sqlStat.AppendLine("      ,''                        AS INVOICEDATE ")
             sqlStat.AppendLine("      ,0                         AS DRAFTOUTPUT ")
@@ -1003,6 +1725,8 @@ Public Class GBT00028RESULT
             sqlStat.AppendLine("      ,''               AS ACCCURRENCYSEGMENT ")
             sqlStat.AppendLine("      ,0                AS AMOUNT ")
             sqlStat.AppendLine("      ,0                AS INVOICEAMOUNT ")
+            sqlStat.AppendLine("      ,0                AS TAXAMT ")
+            sqlStat.AppendLine("      ,0                AS NONTAXAMT ")
             sqlStat.AppendLine("      ,COUNT(*)         AS TANK ")
             sqlStat.AppendLine("      ,''               AS DISPAMOUNT ")
             sqlStat.AppendLine("      ,''               AS CREATEUSER ")
@@ -1046,7 +1770,13 @@ Public Class GBT00028RESULT
             sqlStat.AppendLine("      ,''               AS DELCHK_PRV")
             sqlStat.AppendLine("      ,''               AS 'DELCHK_PRVDATE'")
             sqlStat.AppendLine("      ,''               AS 'APPROVALTYPE'")
-            sqlStat.AppendLine("      ,''               AS 'INVOICETYPE'")
+            sqlStat.AppendFormat("      ,'{0}'            AS 'INVOICETYPE'", CONST_INVOICETYPE_NOTDONE).AppendLine()
+            sqlStat.AppendLine("      ,''               AS INVOICENO_PRV ")
+            sqlStat.AppendLine("      ,''               AS CUSTOMERNAME_PRV")
+            sqlStat.AppendLine("      ,''               AS REMARK_PRV ")
+            sqlStat.AppendLine("      ,0                AS INVOICEAMOUNT_PRV ")
+            sqlStat.AppendLine("      ,0                AS TAXAMT_PRV ")
+            sqlStat.AppendLine("      ,0                AS NONTAXAMT_PRV ")
 
             sqlStat.AppendFormat("  FROM {0} OV", CONST_TBL_OV)
             sqlStat.AppendFormat("  INNER JOIN {0} OB", CONST_TBL_OB)
@@ -1101,7 +1831,7 @@ Public Class GBT00028RESULT
             sqlStat.AppendLine("      ,''                        AS ENDYMD ")
             sqlStat.AppendLine("      ,'999999999-' + MTORI.TORICODE   AS INVOICENO ")
             sqlStat.AppendLine("      ,MTORI.TORICODE            AS INCTORICODE ")
-            sqlStat.AppendLine("      ,'－－未選択明細数(LEASE)－－'    AS REMARK ")
+            sqlStat.AppendLine("      ,'－－未選択明細数(LEASE)－－   ' + CONVERT(varchar,COUNT(*))    AS REMARK ")
             sqlStat.AppendLine("      ,''                        AS OUTLANGUAGE ")
             sqlStat.AppendLine("      ,''                        AS INVOICEDATE ")
             sqlStat.AppendLine("      ,0                         AS DRAFTOUTPUT ")
@@ -1109,6 +1839,8 @@ Public Class GBT00028RESULT
             sqlStat.AppendLine("      ,''               AS ACCCURRENCYSEGMENT ")
             sqlStat.AppendLine("      ,0                AS AMOUNT ")
             sqlStat.AppendLine("      ,0                AS INVOICEAMOUNT ")
+            sqlStat.AppendLine("      ,0                AS TAXAMT ")
+            sqlStat.AppendLine("      ,0                AS NONTAXAMT ")
             sqlStat.AppendLine("      ,COUNT(*)         AS TANK ")
             sqlStat.AppendLine("      ,''               AS DISPAMOUNT ")
             sqlStat.AppendLine("      ,''               AS CREATEUSER ")
@@ -1152,7 +1884,13 @@ Public Class GBT00028RESULT
             sqlStat.AppendLine("      ,''               AS DELCHK_PRV")
             sqlStat.AppendLine("      ,''               AS 'DELCHK_PRVDATE'")
             sqlStat.AppendLine("      ,''               AS 'APPROVALTYPE'")
-            sqlStat.AppendFormat("    ,'{0}'              AS 'INVOICETYPE'", "L").AppendLine()
+            sqlStat.AppendFormat("      ,'{0}'              AS 'INVOICETYPE'", CONST_INVOICETYPE_NOTDONE).AppendLine()
+            sqlStat.AppendLine("      ,''               AS INVOICENO_PRV ")
+            sqlStat.AppendLine("      ,''               AS CUSTOMERNAME_PRV")
+            sqlStat.AppendLine("      ,''               AS REMARK_PRV ")
+            sqlStat.AppendLine("      ,0                AS INVOICEAMOUNT_PRV ")
+            sqlStat.AppendLine("      ,0                AS TAXAMT_PRV ")
+            sqlStat.AppendLine("      ,0                AS NONTAXAMT_PRV ")
 
             sqlStat.AppendFormat("  FROM {0} OV", CONST_TBL_OV)
             sqlStat.AppendFormat("  INNER JOIN {0} OB", CONST_TBL_OB)
@@ -1326,8 +2064,22 @@ Public Class GBT00028RESULT
     ''' <summary>
     ''' リスト行ダブルクリック時イベント
     ''' </summary>
-    Private Sub ListRowDbClick()
+    Public Sub ListRowDbClick()
+        Dim notSavedData = GetModifiedDataTable()
+        If Not (notSavedData Is Nothing OrElse notSavedData.Rows.Count = 0) Then
+            CommonFunctions.ShowConfirmMessage(C_MESSAGENO.CONFIRMCLOSE, pageObject:=Me, submitButtonId:="btnShowDetailsOk")
+            Return
+        End If
+        '確認メッセージを表示しない場合は終了
+        btnShowDetailsOk_Click()
+
+    End Sub
+    ''' <summary>
+    ''' リスト行ダブルクリック時イベント後OK
+    ''' </summary>
+    Public Sub btnShowDetailsOk_Click()
         Dim rowIdString As String = Me.hdnListDBclick.Value
+        Me.hdnListDBclick.Value = ""
         Dim rowId As Integer = 0
         If Integer.TryParse(rowIdString, rowId) = True Then
             rowId = rowId - 1
@@ -1350,9 +2102,12 @@ Public Class GBT00028RESULT
             Return
         End If
         Dim selectedRow As DataRow = dt.Rows(rowId)
-        If Left(Convert.ToString(selectedRow.Item("INVOICENO")), 9) <> "999999999" Then
+        If Convert.ToString(selectedRow.Item("INVOICETYPE")) <> CONST_INVOICETYPE_NOTDONE AndAlso
+            Convert.ToString(selectedRow.Item("INVOICETYPE")) <> CONST_INVOICETYPE_OTHER Then
 
-            '未選択明細行　以外　詳細画面に遷移
+            '未選択明細行　又は　THOMAS外明細
+            '以外詳細画面に遷移
+
             Me.ThisScreenValues = GetDispValue()
             Me.ThisScreenValues.NewInvoiceCreate = False
             Me.ThisScreenValues.InvoiceNo = Convert.ToString(selectedRow.Item("INVOICENO"))
@@ -1386,22 +2141,25 @@ Public Class GBT00028RESULT
         'If hdnMouseWheel.Value = "" Then
         '    Return
         'End If
-        Dim COA0021ListTable As New BASEDLL.COA0021ListTable            '内部テーブル
-
         '表示データ件数取得
         Dim DataCnt As Integer = 0                  '(絞り込み後)有効Data数
-
         '一覧表示データ復元
-        Dim dt As DataTable = CreateDataTable()
-
-        COA0021ListTable.FILEdir = hdnXMLsaveFile.Value
-        COA0021ListTable.TBLDATA = dt
-        COA0021ListTable.COA0021recoverListTable()
-        If COA0021ListTable.ERR = C_MESSAGENO.NORMAL Then
-            dt = COA0021ListTable.OUTTBL
+        Dim dt As DataTable = Nothing
+        If Me.SavedDt Is Nothing Then
+            Dim COA0021ListTable As New BASEDLL.COA0021ListTable            '内部テーブル
+            dt = CreateDataTable()
+            COA0021ListTable.FILEdir = hdnXMLsaveFile.Value
+            COA0021ListTable.TBLDATA = dt
+            COA0021ListTable.COA0021recoverListTable()
+            If COA0021ListTable.ERR = C_MESSAGENO.NORMAL Then
+                dt = COA0021ListTable.OUTTBL
+            Else
+                CommonFunctions.ShowMessage(COA0021ListTable.ERR, Me.lblFooterMessage)
+                Return
+            End If
+            Me.SavedDt = dt
         Else
-            CommonFunctions.ShowMessage(COA0021ListTable.ERR, Me.lblFooterMessage)
-            Return
+            dt = Me.SavedDt
         End If
 
         '表示対象行カウント(絞り込み対象)
@@ -1457,6 +2215,31 @@ Public Class GBT00028RESULT
         COA0013TableObject.COA0013SetTableObject()
         hdnMouseWheel.Value = ""
 
+        If listData IsNot Nothing AndAlso listData.Rows.Count > 0 Then
+            Dim displayLineCnt As List(Of Integer) = (From dr As DataRow In listData
+                                                      Select Convert.ToInt32(dr.Item("LINECNT"))).ToList
+
+            'For Each targetCheckBoxId As String In {"DELCHK", "CHECK_AP", "CHECK_S", "CHECK_AC"}
+
+            '    '申請チェックボックスの加工
+            '    Dim targetCheckBoxLineCnt = (From dr As DataRow In listData
+            '                                 Where Convert.ToString(dr.Item(targetCheckBoxId)) <> ""
+            '                                 Select Convert.ToInt32(dr.Item("LINECNT")))
+            '    For Each lineCnt As Integer In targetCheckBoxLineCnt
+            '        Dim chkObjId As String = "chk" & Me.WF_LISTAREA.ID & targetCheckBoxId & lineCnt.ToString
+            '        Dim tmpObj As Control = Me.WF_LISTAREA.FindControl(chkObjId)
+            '        If tmpObj IsNot Nothing Then
+            '            Dim chkObj As CheckBox = DirectCast(tmpObj, CheckBox)
+            '            chkObj.Checked = True
+            '        End If
+            '    Next
+
+            'Next
+
+            ViewState("DISPLAY_LINECNT_LIST") = displayLineCnt
+        Else
+            ViewState("DISPLAY_LINECNT_LIST") = Nothing
+        End If
     End Sub
 
     ''' <summary>
@@ -1495,7 +2278,8 @@ Public Class GBT00028RESULT
         ' 後で移動
         If Me.GBT00028SValues.CustomerCode = "" Then
             'Me.btnInvoiceNew.Visible = False
-            Me.lblInvoiceNew.Visible = False
+            'Me.lblInvoiceNew.Visible = False
+            Me.lblInvoiceNew.Visible = True
         Else
             'Me.btnInvoiceNew.Visible = True
             Me.lblInvoiceNew.Visible = True
@@ -1510,6 +2294,136 @@ Public Class GBT00028RESULT
     ''' 画面表示のテーブルを制御する
     ''' </summary>
     Private Sub DisplayListObjEdit()
+        Dim targetPanel As Panel = Me.WF_LISTAREA
+        Dim dicDisplayRows As New Dictionary(Of Integer, DataRow)
+        Dim dispLineCnt As New List(Of Integer)
+        If ViewState("DISPLAY_LINECNT_LIST") IsNot Nothing Then
+            dispLineCnt = DirectCast(ViewState("DISPLAY_LINECNT_LIST"), List(Of Integer))
+            dicDisplayRows = (From itemRow In Me.SavedDt Where dispLineCnt.Contains(CInt(itemRow("LINECNT"))) Select New KeyValuePair(Of Integer, DataRow)(CInt(itemRow("LINECNT")), itemRow)).ToDictionary(Function(x) x.Key, Function(x) x.Value)
+        End If
+
+        Dim rightDataDiv As Panel = DirectCast(targetPanel.FindControl(targetPanel.ID & "_DR"), Panel)
+        If rightDataDiv.HasControls = False _
+           OrElse Not (TypeOf rightDataDiv.Controls(0) Is Table) _
+           OrElse DirectCast(rightDataDiv.Controls(0), Table).Rows.Count = 0 Then
+            Return
+        End If
+        Dim rightHeaderDiv As Panel = DirectCast(targetPanel.FindControl(targetPanel.ID & "_HR"), Panel)
+        Dim rightHeaderTable As Table = DirectCast(rightHeaderDiv.Controls(0), Table)
+        Dim dicColumnNameToNo As New Dictionary(Of String, String) From {{"DELCHK", ""}, {"INVOICENO", ""},
+                                                                         {"CUSTOMERNAME", ""}, {"REMARK", ""}, {"ACCCURRENCYSEGMENT", ""},
+                                                                         {"INVOICEAMOUNT", ""}, {"TAXAMT", ""}, {"NONTAXAMT", ""}}
+        With Nothing '右ヘッダーの列名より対象の列番号を取得
+            Dim headerTableRow = rightHeaderTable.Rows(0)
+            If headerTableRow.Cells.Count = 0 Then
+                Return 'ヘッダー列に列が存在しない場合は終了
+            End If
+            'セル名称より列番号を取得
+            Dim maxCellIndex = headerTableRow.Cells.Count - 1
+            For cellIndex = 0 To maxCellIndex
+                Dim targetCell As TableCell = headerTableRow.Cells(cellIndex)
+                If targetCell.Attributes("cellfiedlname") IsNot Nothing AndAlso
+                    dicColumnNameToNo.ContainsKey(targetCell.Attributes("cellfiedlname")) Then
+                    dicColumnNameToNo(targetCell.Attributes("cellfiedlname")) = cellIndex.ToString
+                End If
+            Next
+        End With '列番号取得完了
+
+        Dim leftHeaderDiv As Panel = DirectCast(targetPanel.FindControl(targetPanel.ID & "_HL"), Panel)
+        Dim leftHeaderTable As Table = DirectCast(leftHeaderDiv.Controls(0), Table)
+        Dim dicLeftColumnNameToNo As New Dictionary(Of String, String) From {{"ACTION", ""}}
+
+        With Nothing '右ヘッダーの列名より対象の列番号を取得
+            Dim headerTableRow = leftHeaderTable.Rows(0)
+            If headerTableRow.Cells.Count = 0 Then
+                Return 'ヘッダー列に列が存在しない場合は終了
+            End If
+            'セル名称より列番号を取得
+            Dim maxCellIndex = headerTableRow.Cells.Count - 1
+            For cellIndex = 0 To maxCellIndex
+                Dim targetCell As TableCell = headerTableRow.Cells(cellIndex)
+                If targetCell.Attributes("cellfiedlname") IsNot Nothing AndAlso
+               dicLeftColumnNameToNo.ContainsKey(targetCell.Attributes("cellfiedlname")) Then
+                    dicLeftColumnNameToNo(targetCell.Attributes("cellfiedlname")) = cellIndex.ToString
+                End If
+            Next
+        End With '列番号取得完了
+
+        Dim rightDataTable As Table = DirectCast(rightDataDiv.Controls(0), Table)
+        Dim leftDataDiv As Panel = DirectCast(targetPanel.FindControl(targetPanel.ID & "_DL"), Panel)
+        Dim leftDataTable As Table = DirectCast(leftDataDiv.Controls(0), Table) '1列目LINECNT 、3列目のSHOW DELETEカラム取得用
+
+        '******************************
+        'レンダリング行のループ
+        '******************************
+        Dim disableRow As Boolean = False
+        Dim rowCnt As Integer = rightDataTable.Rows.Count - 1
+        Dim displayRow As DataRow = Nothing
+        For i = 0 To rowCnt
+            disableRow = False
+            Dim tbrRight As TableRow = rightDataTable.Rows(i)
+
+            Dim tbrLeft As TableRow = leftDataTable.Rows(i)
+            Dim lineCnt As String = tbrLeft.Cells(0).Text
+            displayRow = Nothing
+            If dicDisplayRows.ContainsKey(CInt(lineCnt)) Then
+                displayRow = dicDisplayRows(CInt(lineCnt))
+            End If
+            If Me.hdnThisMapVariant.Value = "Management" Then
+                If Convert.ToString(displayRow.Item("INVOICETYPE")).Equals(CONST_INVOICETYPE_NOTDONE) Then
+
+                    For Each fieldName As String In {"INVOICENO", "CUSTOMERNAME", "REMARK", "INVOICEAMOUNT", "TAXAMT", "NONTAXAMT"}
+                        If dicColumnNameToNo(fieldName) <> "" Then
+                            With tbrRight.Cells(Integer.Parse(dicColumnNameToNo(fieldName)))
+                                If Not .Text.Contains("readonly=") Then
+                                    .Text = .Text.Replace(">", " readonly=""readonly"" />")
+                                End If
+                            End With
+                        End If
+                    Next
+                    tbrRight.CssClass = "InvoiceNotDone"
+                ElseIf Convert.ToString(displayRow.Item("INVOICETYPE")).Equals(CONST_INVOICETYPE_OTHER) Then
+                    'For Each fieldName As String In {"INVOICENO", "CUSTOMERNAME", "REMARK", "INVOICEAMOUNT", "TAXAMT", "NONTAXAMT"}
+                    '    If dicColumnNameToNo(fieldName) <> "" Then
+                    '        With tbrRight.Cells(Integer.Parse(dicColumnNameToNo(fieldName)))
+                    '            If Not .Text.Contains("readonly=") Then
+                    '                .Text = .Text.Replace(">", " readonly=""readonly"" class=""aspNetDisabled"" />")
+                    '                .Style.Add("pointer-events", "none")
+                    '            End If
+                    '        End With
+                    '    End If
+                    'Next
+                    tbrRight.CssClass = "InvoiceOther"
+                Else
+                    For Each fieldName As String In {"INVOICENO", "CUSTOMERNAME", "REMARK"}
+                        If dicColumnNameToNo(fieldName) <> "" Then
+                            With tbrRight.Cells(Integer.Parse(dicColumnNameToNo(fieldName)))
+                                If Not .Text.Contains("readonly=") Then
+                                    .Text = .Text.Replace(">", " readonly=""readonly"" />")
+                                End If
+                            End With
+                        End If
+                    Next
+                    tbrRight.CssClass = "InvoiceNormal"
+                End If
+
+                '承認済の時は無効（但し、既に入力不可でない場合）
+                If Date.Parse(Convert.ToString(displayRow.Item("APPROVEDATE"))).ToString("yyyy/MM/dd") <> "1900/01/01" Then
+                    For Each fieldName As String In {"INVOICENO", "CUSTOMERNAME", "REMARK", "INVOICEAMOUNT", "TAXAMT", "NONTAXAMT"}
+                        If dicColumnNameToNo(fieldName) <> "" Then
+                            With tbrRight.Cells(Integer.Parse(dicColumnNameToNo(fieldName)))
+                                If Not .Text.Contains("readonly=") Then
+                                    .Text = .Text.Replace(">", " readonly=""readonly"" class=""aspNetDisabled"" />")
+                                    .Style.Add("pointer-events", "none")
+                                End If
+                            End With
+                        End If
+                    Next
+                End If
+            Else
+
+            End If
+        Next
 
         If Me.hdnThisMapVariant.Value = "Management" Then
 
@@ -1527,32 +2441,21 @@ Public Class GBT00028RESULT
             Me.txtCustomerName.Text = ""
 
             'ボタン
-            Me.btnDel.Visible = False
+            'Me.btnDel.Visible = False
+            Me.btnDel.Visible = True
             'Me.btnInvoiceNew.Visible = False
-            Me.lblInvoiceNew.Visible = False
+            'Me.lblInvoiceNew.Visible = False
+            Me.lblInvoiceNew.Visible = True
 
             ' チェックボックス制御
             Dim COA0021ListTable As New COA0021ListTable
-            Dim dt As DataTable = CreateDataTable()
-            Dim tran As SqlTransaction = Nothing
-
-            COA0021ListTable.FILEdir = hdnXMLsaveFile.Value
-            COA0021ListTable.TBLDATA = dt
-            COA0021ListTable.COA0021recoverListTable()
-            If COA0021ListTable.ERR = C_MESSAGENO.NORMAL Then
-                dt = COA0021ListTable.OUTTBL
-            Else
-                CommonFunctions.ShowMessage(C_MESSAGENO.SYSTEMADM, Me.lblFooterMessage, pageObject:=Me,
-                                            messageParams:=New List(Of String) From {"CODE:" & COA0021ListTable.ERR & ""})
-                Return
-            End If
+            Dim dt As DataTable = Me.SavedDt
 
             Dim divDrCont As Control = WF_LISTAREA.FindControl("WF_LISTAREA_DR")
             Dim tblCont As Table = DirectCast(divDrCont.Controls(0), Table)
-            'For i As Integer = 0 To dt.Rows.Count
             For Each dr As DataRow In dt.Rows
 
-                If Left(Convert.ToString(dr.Item("INVOICENO")), 9) = "999999999" _
+                If Convert.ToString(dr.Item("INVOICETYPE")) = CONST_INVOICETYPE_NOTDONE _
                     OrElse Convert.ToInt32(dr.Item("ORIGINALOUTPUT")) = 0 Then
                     ' 未選択明細数 行
                     ' 非表示
@@ -1598,11 +2501,20 @@ Public Class GBT00028RESULT
 
                 End If
 
+                If Convert.ToString(dr.Item("INVOICETYPE")) <> CONST_INVOICETYPE_OTHER Then
+                    'THOMAS外 以外 
+                    ' 削除は非表示
+                    Dim chkId As String = "chkWF_LISTAREADELCHK" & Convert.ToString(dr.Item("LINECNT"))
+                    Dim chk As CheckBox = DirectCast(tblCont.FindControl(chkId), CheckBox)
+                    chk.Visible = False
+                    dr.Item("DELCHK_DISP") = "0"
+                End If
             Next
 
+            COA0021ListTable.FILEdir = Me.hdnXMLsaveFile.Value
             COA0021ListTable.TBLDATA = dt
             COA0021ListTable.COA0021saveListTable()
-
+            Me.SavedDt = dt
         Else
 
             'ボタン
@@ -1611,7 +2523,23 @@ Public Class GBT00028RESULT
 
         End If
 
+
+
     End Sub
+
+    ''' <summary>
+    ''' Decimal文字列を数字に変換
+    ''' </summary>
+    ''' <param name="dblString"></param>
+    ''' <returns></returns>
+    Private Function DecimalStringToDecimal(dblString As String) As Decimal
+        Dim tmpDouble As Decimal = 0
+        If Decimal.TryParse(dblString, tmpDouble) Then
+            Return tmpDouble
+        Else
+            Return 0
+        End If
+    End Function
 
     ''' <summary>
     ''' 当画面の情報を引き渡し用クラスに格納
@@ -1656,5 +2584,61 @@ Public Class GBT00028RESULT
         ''' <returns></returns>
         Public Property InvoiceType As String = ""
     End Class
+    ''' <summary>
+    ''' 請求書No取得
+    ''' </summary>
+    ''' <returns></returns>
+    Private Function GetNewInvoice(Optional sqlCon As SqlConnection = Nothing, Optional tran As SqlTransaction = Nothing,
+                                            Optional toriCode As String = "", Optional invoiceMonth As String = "") As String
+        Dim canCloseConnect As Boolean = False
+        Dim invoiceNo As String = ""
+        Try
+            If sqlCon Is Nothing Then
+                sqlCon = New SqlConnection(COA0019Session.DBcon)
+                canCloseConnect = True
+            End If
+
+            Dim sqlStat As New Text.StringBuilder
+            sqlStat.AppendLine("SELECT ISNULL(MAX(II.INVOICENOSUB), 0) + 1 AS INVOICENOSUB ")
+            sqlStat.AppendFormat("FROM {0} II ", CONST_TBL_INVOICEINFO).AppendLine()
+            sqlStat.AppendLine("WHERE II.INCTORICODE   = @INCTORICODE")
+            sqlStat.AppendLine("AND   II.INVOICEMONTH  = @INVOICEMONTH")
+            'sqlStat.AppendLine("AND   II.STYMD         <= @NOWDATE")
+            'sqlStat.AppendLine("AND   II.ENDYMD        >= @NOWDATE")
+            sqlStat.AppendLine("AND   II.DELFLG        <> @DELFLG")
+
+            Using sqlCmd As New SqlCommand(sqlStat.ToString, sqlCon, tran)
+                'SQLパラメータ設定
+                With sqlCmd.Parameters
+                    '.Add("@COMPCODE", SqlDbType.NVarChar).Value = GBC_COMPCODE
+                    '.Add("@NOWDATE", SqlDbType.Date).Value = Now
+                    .Add("@DELFLG", SqlDbType.NVarChar).Value = CONST_FLAG_YES
+
+                    .Add("@INCTORICODE", SqlDbType.NVarChar).Value = toriCode
+                    .Add("@INVOICEMONTH", SqlDbType.NVarChar).Value = invoiceMonth
+                End With
+
+                Using sqlDa As New SqlDataAdapter(sqlCmd)
+                    Dim dt As New DataTable
+                    sqlDa.Fill(dt)
+                    If dt Is Nothing OrElse dt.Rows.Count = 0 Then
+                        Throw New Exception("Get GetNewInvoiceNo error")
+                    End If
+
+                    invoiceNo = Convert.ToString(dt.Rows(0).Item(0))
+                End Using
+            End Using
+            Return invoiceNo
+        Catch ex As Exception
+            Throw
+        Finally
+            If canCloseConnect = True Then
+                If sqlCon IsNot Nothing Then
+                    sqlCon.Close()
+                    sqlCon.Dispose()
+                End If
+            End If
+        End Try
+    End Function
 
 End Class

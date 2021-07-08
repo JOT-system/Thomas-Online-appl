@@ -9,10 +9,10 @@ function f_ExcelPrint() {
     printUrlObj.value = '';
 }
 // ○一覧用処理
-function ListDbClick(obj, OrderNo) {
+function ListDbClick(obj, LineCnt) {
     if (document.getElementById('hdnSubmit').value === 'FALSE') {
         document.getElementById('hdnSubmit').value = 'TRUE';
-        document.getElementById('hdnListDBclick').value = OrderNo;
+        document.getElementById('hdnListDBclick').value = LineCnt;
         commonDispWait();
         document.forms[0].submit();                             //aspx起動
     }
@@ -81,5 +81,49 @@ function resetHideInvoiceNewBtnTimer() {
     if (setTimeToHideID) {
         window.clearTimeout(setTimeToHideID);
         setTimeToHideID = 0;
+    }
+}
+/* 金額項目の通貨編集（ロード時） */
+function formatAmount() {
+    var cColumnObj = getTargetColumnNoTable('ACCCURRENCYSEGMENT', 'WF_LISTAREA');
+    var aColumnObj = getTargetColumnNoTable('INVOICEAMOUNT', 'WF_LISTAREA');
+    var tColumnObj = getTargetColumnNoTable('TAXAMT', 'WF_LISTAREA');
+    var nColumnObj = getTargetColumnNoTable('NONTAXAMT', 'WF_LISTAREA');
+    //対象のカラムが存在していない場合は実行不可能
+    if (cColumnObj !== null && aColumnObj !== null && tColumnObj !== null && nColumnObj !== null) {
+        let cColumnNo = cColumnObj.ColumnNo;
+        let cTable = cColumnObj.TargetTable;
+        let aColumnNo = aColumnObj.ColumnNo;
+        let tColumnNo = tColumnObj.ColumnNo;
+        let nColumnNo = nColumnObj.ColumnNo;
+        let aTable = aColumnObj.TargetTable;
+        if (cTable.rows.length !== 0) {
+            for (let i = 0; i < cTable.rows.length; i++) {
+                let cValueObj = cTable.rows[i].cells[cColumnNo];
+                var cValue = cValueObj.textContent;
+                let aValueObj = aTable.rows[i].cells[aColumnNo].querySelectorAll('input[type=text]')[0];
+                let aValue = aValueObj.value;
+                let tValueObj = aTable.rows[i].cells[tColumnNo].querySelectorAll('input[type=text]')[0];
+                let tValue = tValueObj.value;
+                let nValueObj = aTable.rows[i].cells[nColumnNo].querySelectorAll('input[type=text]')[0];
+                let nValue = nValueObj.value;
+
+                aValueObj.value = changeCurrency(cValue, aValue)
+                tValueObj.value = changeCurrency(cValue, tValue)
+                nValueObj.value = changeCurrency(cValue, nValue)
+            }
+        }
+    }
+}
+function changeCurrency(currency, num) {
+    var num = Number(num.replace(/[^0-9.-]+/g, ""));
+
+    if (currency == 'JPY') {
+        return Number(num).toLocaleString('ja-JP', { style: 'currency', currency: 'JPY' });
+    } else if (currency == 'USD') {
+        return Number(num).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    } else {
+        num = ''
+        return num
     }
 }

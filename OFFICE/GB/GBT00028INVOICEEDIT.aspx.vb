@@ -969,7 +969,7 @@ Public Class GBT00028INVOICEEDIT
             .Add("AMOUNT", GetType(String)).DefaultValue = ""
             .Add("HOLIDAYFLG", GetType(String)).DefaultValue = ""
             '.Add("FIXFLG", GetType(String)).DefaultValue = ""
-            .Add("WORK_C1", GetType(String)).DefaultValue = ""
+            .Add("INVOICETYPE", GetType(String)).DefaultValue = ""
         End With
         Return retDt
     End Function
@@ -1110,7 +1110,7 @@ Public Class GBT00028INVOICEEDIT
             If Not IsNothing(objSearch) Then
                 objSearch.Visible = False
             End If
-            drCustomer.Item("WORK_C1") = "L"
+            drCustomer.Item("INVOICETYPE") = "L"
         End If
 
         '帳票種類
@@ -1269,7 +1269,7 @@ Public Class GBT00028INVOICEEDIT
             sqlStat.AppendLine("  ,TANK")
             sqlStat.AppendLine("  ,CREATEUSER")
             sqlStat.AppendLine("  ,CREATEDATE")
-            sqlStat.AppendLine("  ,WORK_C1")
+            sqlStat.AppendLine("  ,INVOICETYPE")
             'sqlStat.AppendLine("  ,WORK_C2")
             'sqlStat.AppendLine("  ,WORK_C3")
             'sqlStat.AppendLine("  ,WORK_F1")
@@ -1298,7 +1298,7 @@ Public Class GBT00028INVOICEEDIT
             sqlStat.AppendLine("  ,@TANK")
             sqlStat.AppendLine("  ,@UPDUSER")
             sqlStat.AppendLine("  ,@INITYMD")
-            sqlStat.AppendLine("  ,@WORK_C1")
+            sqlStat.AppendLine("  ,@INVOICETYPE")
             'sqlStat.AppendLine("  ,@WORK_C2")
             'sqlStat.AppendLine("  ,@WORK_C3")
             'sqlStat.AppendLine("  ,@WORK_F1")
@@ -1328,7 +1328,7 @@ Public Class GBT00028INVOICEEDIT
                     .Add("@ACCCURRENCYSEGMENT", SqlDbType.NVarChar).Value = dr.Item("ACCCURRENCYSEGMENT")
                     .Add("@AMOUNT", SqlDbType.Float).Value = DecimalStringToDecimal(Convert.ToString(dr.Item("AMOUNT")))
                     .Add("@TANK", SqlDbType.Int).Value = tankCount
-                    .Add("@WORK_C1", SqlDbType.NVarChar).Value = dr.Item("WORK_C1")
+                    .Add("@INVOICETYPE", SqlDbType.NVarChar).Value = dr.Item("INVOICETYPE")
                     '.Add("@WORK_C2", SqlDbType.NVarChar).Value = dr.Item("WORK_C2")
                     '.Add("@WORK_C3", SqlDbType.NVarChar).Value = dr.Item("WORK_C3")
                     '.Add("@WORK_F1", SqlDbType.NVarChar).Value = DecimalStringToDecimal(Convert.ToString(dr.Item("WORK_F1")))
@@ -1394,11 +1394,11 @@ Public Class GBT00028INVOICEEDIT
             sqlStat.AppendLine("          ,TANK")
             sqlStat.AppendLine("          ,CREATEUSER")
             sqlStat.AppendLine("          ,CREATEDATE")
-            sqlStat.AppendLine("          ,WORK_C1")
-            sqlStat.AppendLine("          ,WORK_C2")
+            sqlStat.AppendLine("          ,INVOICETYPE")
+            sqlStat.AppendLine("          ,CUSTOMERNAME")
             sqlStat.AppendLine("          ,WORK_C3")
-            sqlStat.AppendLine("          ,WORK_F1")
-            sqlStat.AppendLine("          ,WORK_F2")
+            sqlStat.AppendLine("          ,TAXAMT")
+            sqlStat.AppendLine("          ,NONTAXAMT")
             sqlStat.AppendLine("          ,WORK_F3")
             sqlStat.AppendLine("          ,DELFLG")
             sqlStat.AppendLine("          ,INITYMD")
@@ -1429,11 +1429,11 @@ Public Class GBT00028INVOICEEDIT
             sqlStat.AppendLine("          ,TANK")
             sqlStat.AppendLine("          ,CREATEUSER")
             sqlStat.AppendLine("          ,CREATEDATE")
-            sqlStat.AppendLine("          ,WORK_C1")
-            sqlStat.AppendLine("          ,WORK_C2")
+            sqlStat.AppendLine("          ,INVOICETYPE")
+            sqlStat.AppendLine("          ,CUSTOMERNAME")
             sqlStat.AppendLine("          ,WORK_C3")
-            sqlStat.AppendLine("          ,WORK_F1")
-            sqlStat.AppendLine("          ,WORK_F2")
+            sqlStat.AppendLine("          ,TAXAMT")
+            sqlStat.AppendLine("          ,NONTAXAMT")
             sqlStat.AppendLine("          ,WORK_F3")
             sqlStat.AppendLine("          ,DELFLG")
             sqlStat.AppendLine("          ,INITYMD")
@@ -1534,7 +1534,7 @@ Public Class GBT00028INVOICEEDIT
             sqlStatInsert.AppendLine("  ,AMOUNT")
             sqlStatInsert.AppendLine("  ,EXRATE")
             sqlStatInsert.AppendLine("  ,EXSHIPRATE")
-            'sqlStatInsert.AppendLine("  ,WORK_C1")
+            'sqlStatInsert.AppendLine("  ,INVOICETYPE")
             'sqlStatInsert.AppendLine("  ,WORK_C2")
             'sqlStatInsert.AppendLine("  ,WORK_C3")
             'sqlStatInsert.AppendLine("  ,WORK_F1")
@@ -1555,7 +1555,7 @@ Public Class GBT00028INVOICEEDIT
             sqlStatInsert.AppendLine("     ,@AMOUNT")
             sqlStatInsert.AppendLine("     ,@EXRATE")
             sqlStatInsert.AppendLine("     ,@EXSHIPRATE")
-            'sqlStatInsert.AppendLine("     ,@WORK_C1")
+            'sqlStatInsert.AppendLine("     ,@INVOICETYPE")
             'sqlStatInsert.AppendLine("     ,@WORK_C2")
             'sqlStatInsert.AppendLine("     ,@WORK_C3")
             'sqlStatInsert.AppendLine("     ,@WORK_F1")
@@ -1600,8 +1600,8 @@ Public Class GBT00028INVOICEEDIT
                     paramOrderNo.Value = drTankInfo.Item("ORDERNO")
                     paramTankNo.Value = drTankInfo.Item("TANKNO")
                     paramAmount.Value = drTankInfo.Item("AMOUNT")
-                    paramExRAte.Value = drTankInfo.Item("EXRATE")
-                    paramEXSHIPRATE.Value = drTankInfo.Item("EXSHIPRATE")
+                    paramExRate.Value = drTankInfo.Item("EXRATE")
+                    paramExShipRate.Value = drTankInfo.Item("EXSHIPRATE")
 
                     sqlCmd.CommandText = sqlStatInsert.ToString
                     sqlCmd.ExecuteNonQuery()
@@ -1662,7 +1662,7 @@ Public Class GBT00028INVOICEEDIT
         sqlStat.AppendLine("      ,MB.CURRENCYCODE as 'CURRENCY'")
         sqlStat.AppendLine("      ,ISNULL(II.OUTLANGUAGE,'') as 'OUTLANGUAGE', ISNULL(convert(char(10),II.INVOICEDATE,111),'') as 'INVOICEDATE',ISNULL(II.REMARK,'') as 'REMARK'")
         sqlStat.AppendLine("      ,ISNULL(II.DRAFTOUTPUT, '0') as 'DRAFTOUTPUT', ISNULL(II.ORIGINALOUTPUT, '0') as 'ORIGINALOUTPUT', ISNULL(II.AMOUNT, '0') as 'AMOUNT'")
-        sqlStat.AppendLine("      ,ISNULL(II.WORK_C1,'') as 'WORK_C1'")
+        sqlStat.AppendLine("      ,ISNULL(II.INVOICETYPE,'') as 'INVOICETYPE'")
         sqlStat.AppendFormat("FROM {0} MC", CONST_TBL_CUSTOMER).AppendLine()
         sqlStat.AppendFormat("  INNER JOIN {0} MT", CONST_TBL_TORI).AppendLine()
         sqlStat.AppendLine("    ON  MT.DELFLG     <> @DELFLG")

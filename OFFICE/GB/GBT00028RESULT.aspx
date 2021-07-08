@@ -1,5 +1,4 @@
 ﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="GBT00028RESULT.aspx.vb" Inherits="OFFICE.GBT00028RESULT" %>
-
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -14,6 +13,10 @@
     <%--個別のスタイルは以下に記載 OR 外部ファイルに逃す --%>
     <link href="~/GB/css/GBT00028RESULT.css" rel="stylesheet" />
     <style>
+        /* サーバータグが使えるページ内に内報グリッドボタンのボタン名 */
+        #WF_LISTAREA_DL td:nth-child(4) button:after{
+            content:"<%= Me.hdnListDeleteName.Value %>";
+        }
     </style>
 <%--    <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162522994-1"></script>
@@ -29,15 +32,16 @@
     <%-- 左ボックスカレンダー使用の場合のスクリプト --%>
     <script type="text/javascript" src='<%= ResolveUrl("~/script/calendar.js") %>'  charset="utf-8"></script>
     <%--個別のスクリプトは以下に記載 --%>
-    <script type="text/javascript" src='<%= ResolveUrl("~/GB/script/GBT00028RESULT.js") %>'  charset="utf-8"></script>
+    <script type="text/javascript" src='<%= ResolveUrl("~/GB/script/GBT00028RESULT.js?dtm=20190422A") %>'  charset="utf-8"></script>
     <script type="text/javascript">
         // ○画面ロード時処理(すべてのレンダリングが終了後実行されます。)
         window.addEventListener('DOMContentLoaded', function () {
             screenLock();
             /* ボタンクリックイベントのバインド(適宜追加) */
             var targetButtonObjects = ['<%= Me.btnBack.ClientId  %>',
-                                       '<%= Me.btnExcelDownload.ClientID %>',
                                        '<%= Me.btnSave.ClientID %>',
+                                       '<%= Me.btnExcelDownload.ClientID %>',
+                                       '<%= Me.btnLeftBoxButtonSel.ClientId  %>', '<%= Me.btnLeftBoxButtonCan.ClientId  %>',
                                        '<%= Me.btnDel.ClientID %>'];
             var invoiceNewButtons = document.getElementsByName('btnInvoiceItem');
             if (invoiceNewButtons !== null) {
@@ -48,10 +52,14 @@
             }
             bindButtonClickEvent(targetButtonObjects);
 
+            /* 左ボックス表示ダブルクリックイベントのバインド */
+            var dblClickObjects = [];
+            bindLeftBoxShowEvent(dblClickObjects);
             /* 左ボックス表示/非表示制御(hdnIsLeftBoxOpenが'Open'の場合表示) */
             displayLeftBox();
 
             /* 左ボックス表示ダブルクリックイベントのバインド */
+            bindLeftListBoxDblClickEvent();
             /* 手入力変更時のイベント */
 
             /* 左ボックスのリストボックスダブルクリックイベントバインド */
@@ -72,6 +80,10 @@
 
             /* カレンダー描画処理 */
 
+            /* 費用入力項目の同行の金額と比較し色を付ける*/
+            //setCompareNumBackGroundColor('AMOUNTBR','AMOUNTFIX','S'); // OriginalとEstimated差異
+            /* 金額項目の通貨書式編集 */
+            formatAmount()
             ///* グリッドのクリックイベント紐づけ */
 
             /* 共通一覧のスクロールイベント紐づけ */
@@ -81,21 +93,6 @@
             screenUnlock();
         });
 
-        // ○一覧用処理
-        function ListDbClick(obj, LineCnt) {
-            var objSubmit = document.getElementById("hdnSubmit");
-            var objListDBclick = document.getElementById("hdnListDBclick");
-            if (objSubmit === null || objListDBclick === null) {
-                return;
-            }
-
-            if (objSubmit.value === "FALSE") {
-                objSubmit.value = "TRUE";
-                objListDBclick.value = LineCnt;
-                commonDispWait();
-                document.forms[0].submit();                             //aspx起動
-            }
-        }
     </script>
 </head>
 <%-- 基本的にタグ内でのクライアントサイドのJavaScriptのイベント記述はせず、
@@ -158,7 +155,6 @@
                             </FooterTemplate>
                         </asp:Repeater>                        
                     </div>
-<%--                    <input id="btnInvoiceNew" type="button" value="請求書作成"  runat="server"  />--%>
                     <input id="btnDel" type="button" value="削除"  runat="server"  />
                     <input id="btnSave" type="button" value="保存"  runat="server"  />
                     <input id="btnExcelDownload" type="button" value="台帳出力" runat="server" />
@@ -195,6 +191,10 @@
                     <asp:HiddenField ID="hdnHelpChange" runat="server" Value="" />
                     <asp:HiddenField ID="hdnCanHelpOpen" runat="server" Value="" />
                     <%-- 一覧表制御用 --%>
+                    <asp:HiddenField ID="hdnCurrentUnieuqIndex" value="" runat="server" />
+                    <%-- 一覧表文言用 --%>
+                    <asp:HiddenField ID="hdnListDeleteName" runat="server" Value="DELETE" />
+                    <%-- 一覧表制御用 --%>
                     <asp:HiddenField ID="hdnXMLsaveFile" runat="server" Value="" Visible="False" />  <%--  退避した一覧データのファイル保存先 --%>
                     <asp:HiddenField ID="hdnMouseWheel" runat="server" Value="" />   <%--  マウスホイールのUPorDownを記憶 --%>
                     <asp:HiddenField ID="hdnListPosition" runat="server" Value="" /> <%--  縦スクロールポジション --%>
@@ -214,6 +214,18 @@
                 </div>
                 <%--  　マルチビュー　 --%>
                 <asp:MultiView ID="mvLeft" runat="server">
+                    <%-- ノンブレーカー費用追加用 VIEW　 --%>
+                    <asp:View ID="vLeftAddNbCost" runat="server">
+                        <div class="leftViewContents">
+                            <asp:ListBox ID="lbAddNbCost" runat="server"></asp:ListBox>
+                        </div>
+                    </asp:View> <%-- END ノンブレーカー費用 VIEW　 --%>
+                    <%-- CURRENCYCODE VIEW　 --%>
+                    <asp:View ID="vLeftCurrencyCode" runat="server">
+                        <div class="leftViewContents">
+                            <asp:ListBox ID="lbCurrencyCode" runat="server"></asp:ListBox>
+                        </div>
+                    </asp:View> <%-- END CURRENCYCODE VIEW　 --%>
                 </asp:MultiView>
             </div> <%-- END 左ボックス --%>
             <%-- 右ボックス --%>
@@ -239,9 +251,9 @@
                         
                         <%-- エラー詳細のみ表示の場合はrbShowErrorの文言のみ表示 --%>
                         <%= IIf(Me.divMessageChooseArea.Visible = False And
-                                                        Me.divMessageTypeName.Visible = False,
-                                                        Me.rbShowError.Text,
-                                                        "") %>
+                                                                    Me.divMessageTypeName.Visible = False,
+                                                                    Me.rbShowError.Text,
+                                                                    "") %>
                     </div>
                 <%-- ****************************
                      右マルチラインテキストボックス
