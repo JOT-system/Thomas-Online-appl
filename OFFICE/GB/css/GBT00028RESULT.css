@@ -76,3 +76,15 @@
             width: 100%;
             margin-bottom: 2px;
         }
+
+/* テキストボックススタイル */
+#WF_LISTAREA_DR .InvoiceNotDone input[type="text"],
+#WF_LISTAREA_DR .InvoiceNormal input[type="text"][id^="txtWF_LISTAREAINVOICENO"],
+#WF_LISTAREA_DR .InvoiceNormal input[type="text"][id^="txtWF_LISTAREACUSTOMERNAME"],
+#WF_LISTAREA_DR .InvoiceNormal input[type="text"][id^="txtWF_LISTAREAREMARK"] {
+    pointer-events: none;
+    text-overflow: ellipsis;
+    background-color: transparent;
+    border-width: 0px;
+    border-style: solid;
+}

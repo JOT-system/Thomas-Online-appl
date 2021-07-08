@@ -284,6 +284,24 @@ Partial Public Class GBT00028RESULT
     Protected WithEvents hdnCanHelpOpen As Global.System.Web.UI.WebControls.HiddenField
     
     '''<summary>
+    '''hdnCurrentUnieuqIndex コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnCurrentUnieuqIndex As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
+    '''hdnListDeleteName コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents hdnListDeleteName As Global.System.Web.UI.WebControls.HiddenField
+    
+    '''<summary>
     '''hdnXMLsaveFile コントロール。
     '''</summary>
     '''<remarks>
@@ -372,6 +390,42 @@ Partial Public Class GBT00028RESULT
     '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
     '''</remarks>
     Protected WithEvents mvLeft As Global.System.Web.UI.WebControls.MultiView
+    
+    '''<summary>
+    '''vLeftAddNbCost コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents vLeftAddNbCost As Global.System.Web.UI.WebControls.View
+    
+    '''<summary>
+    '''lbAddNbCost コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lbAddNbCost As Global.System.Web.UI.WebControls.ListBox
+    
+    '''<summary>
+    '''vLeftCurrencyCode コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents vLeftCurrencyCode As Global.System.Web.UI.WebControls.View
+    
+    '''<summary>
+    '''lbCurrencyCode コントロール。
+    '''</summary>
+    '''<remarks>
+    '''自動生成されたフィールド。
+    '''変更するには、フィールドの宣言をデザイナー ファイルから分離コード ファイルに移動します。
+    '''</remarks>
+    Protected WithEvents lbCurrencyCode As Global.System.Web.UI.WebControls.ListBox
     
     '''<summary>
     '''divMessageType コントロール。
